@@ -1,0 +1,7 @@
+.build
+build
+.vagrant
+Packages
+*.pkg
+Kitura-WebSocket.xcodeproj
+*.DS_Store
