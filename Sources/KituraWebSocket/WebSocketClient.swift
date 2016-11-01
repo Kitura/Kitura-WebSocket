@@ -72,7 +72,7 @@ public class WebSocketClient {
         buffer.length = 0
         WSFrame.createFrameHeader(finalFrame: true, opCode: withOpCode, payloadLength: payload.length, buffer: buffer)
         
-        if WebSocketClient.bufferSize <= buffer.length + payload.length {
+        if WebSocketClient.bufferSize >= buffer.length + payload.length {
             buffer.append(payload.bytes, length: payload.length)
             processor.write(from: buffer)
         }
