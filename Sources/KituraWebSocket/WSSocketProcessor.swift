@@ -29,6 +29,16 @@ class WSSocketProcessor: IncomingSocketProcessor {
     /// A flag to indicate that the socket has a request in progress
     public var inProgress = true
     
+    private var parser = WSFrameParser()
+    
+    private var byteIndex = 0
+    
+    private let client: WebSocketClient
+    
+    init(client: WebSocketClient) {
+        self.client = client
+    }
+    
     /// Process data read from the socket.
     ///
     /// - Parameter buffer: An NSData object containing the data that was read in
@@ -36,7 +46,30 @@ class WSSocketProcessor: IncomingSocketProcessor {
     ///
     /// - Returns: true if the data was processed, false if it needs to be processed later.
     public func process(_ buffer: NSData) -> Bool {
-        return true
+        let (completed, error, bytesConsumed) = parser.parse(buffer, from: 0)
+        
+        guard error == nil else {
+            // What should be done if there is an error?
+            print("WSSocketProcessor: process: Error parsing frame. \(error!)")
+            return true
+        }
+        
+        byteIndex += bytesConsumed
+        
+        if completed {
+            client.received(frame: parser.frame)
+            parser.reset()
+        }
+        
+        let finishedBuffer: Bool
+        if byteIndex >= buffer.length {
+            finishedBuffer = true
+            byteIndex = 0
+        }
+        else {
+            finishedBuffer = false
+        }
+        return finishedBuffer
     }
     
     /// Write data to the socket

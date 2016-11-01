@@ -45,18 +45,29 @@ public class WSConnectionUpgradeFactory: ConnectionUpgradeFactory {
     ///        needs to add special headers to the response.
     public func upgrade(handler: IncomingSocketHandler, request: ServerRequest, response: ServerResponse) -> (IncomingSocketProcessor?, String?) {
 
-        var processor: IncomingSocketProcessor?
-        
-        if let securityKey = request.headers["Sec-WebSocket-Key"] {
-            let sha1 = Digest(using: .sha1)
-            let sha1Bytes = sha1.update(string: securityKey[0] + wsGUID)!.final()
-            let sha1Data = NSData(bytes: sha1Bytes, length: sha1Bytes.count)
-            response.headers["Sec-WebSocket-Accept"] =
-                           [sha1Data.base64EncodedString(options: .lineLength64Characters)]
-            response.headers["Sec-WebSocket-Protocol"] = request.headers["Sec-WebSocket-Protocol"]
-            
-            processor = WSSocketProcessor()
+        guard let protocolVersion = request.headers["Sec-WebSocket-Version"] else {
+            return (nil, "Sec-WebSocket-Version header missing in the upgrade request")
         }
+        
+        guard protocolVersion[0] == "13" else {
+            response.headers["Sec-WebSocket-Version"] = ["13"]
+            return (nil, "Only WebSocket protocol version 13 is supported")
+        }
+        
+        guard let securityKey = request.headers["Sec-WebSocket-Key"] else {
+            return (nil, "Sec-WebSocket-Key header missing in the upgrade request")
+        }
+        
+        let sha1 = Digest(using: .sha1)
+        let sha1Bytes = sha1.update(string: securityKey[0] + wsGUID)!.final()
+        let sha1Data = NSData(bytes: sha1Bytes, length: sha1Bytes.count)
+        response.headers["Sec-WebSocket-Accept"] =
+                           [sha1Data.base64EncodedString(options: .lineLength64Characters)]
+        response.headers["Sec-WebSocket-Protocol"] = request.headers["Sec-WebSocket-Protocol"]
+        
+        let client = WebSocketClient()
+        let processor = WSSocketProcessor(client: client)
+        client.processor = processor
         
         return (processor, nil)
     }

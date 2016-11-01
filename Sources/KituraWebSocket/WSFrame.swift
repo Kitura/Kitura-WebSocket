@@ -16,17 +16,13 @@
 
 import Foundation
 
-public class WebSocketClient {
-    weak var processor: WSSocketProcessor?
+struct WSFrame {
+    var finalFrame = false
     
-    func received(frame: WSFrame) {
-        
-        print("WebSocketClient: Received a \(frame.finalFrame ? "final " : "")\(frame.opCode) frame")
-        print("WebSocketClient: payload is \(frame.payload.length) bytes long")
-        
-        var zero: CChar = 0
-        frame.payload.append(&zero, length: 1)
-        print("WebSocketClient: payload=\(String(cString: frame.payload.bytes.assumingMemoryBound(to: CChar.self), encoding: .utf8))")
-        frame.payload.length -= 1
+    enum FrameOpcode: Int {
+        case continuation = 0, text = 1, binary = 2, close = 8, ping = 9, pong = 10, unknown = -1
     }
+    var opCode = FrameOpcode.unknown
+    
+    let payload = NSMutableData()
 }
