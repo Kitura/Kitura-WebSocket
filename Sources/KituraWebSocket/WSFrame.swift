@@ -25,4 +25,20 @@ struct WSFrame {
     var opCode = FrameOpcode.unknown
     
     let payload = NSMutableData()
+    
+    static func createFrameHeader(finalFrame: Bool, opCode: FrameOpcode, payloadLength: Int, buffer: NSMutableData) {
+        
+        var bytes: [UInt8] = [(finalFrame ? 0x80 : 0x00) | UInt8(opCode.rawValue), 0, 0,0,0,0,0,0,0,0]
+        var length = 1
+        
+        if payloadLength < 126 {
+            bytes[1] = UInt8(payloadLength)
+            length += 1
+        } else if payloadLength < Int(UInt16.max) {
+            
+        } else {
+            
+        }
+        buffer.append(bytes, length: length)
+    }
 }
