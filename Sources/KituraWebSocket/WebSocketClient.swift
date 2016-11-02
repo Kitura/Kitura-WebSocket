@@ -25,6 +25,14 @@ public class WebSocketClient {
     
     private var writeLock = DispatchSemaphore(value: 1)
     
+    private let message = NSMutableData()
+    
+    enum MessageStates {
+        case binary, text, unknown
+    }
+    
+    private var messageState: MessageStates = .unknown
+    
     init() {
         buffer = NSMutableData(capacity: WebSocketClient.bufferSize) ?? NSMutableData()
     }
@@ -41,13 +49,38 @@ public class WebSocketClient {
         
         switch frame.opCode {
         case .binary:
-            break
+            guard messageState == .unknown else {
+                // Need error handling: send close
+                return
+            }
+            
+            if frame.finalFrame {
+                sendMessage(withOpCode: .binary, payload: frame.payload)
+            }
+            else {
+                messageState = .binary
+                message.length = 0
+                message.append(frame.payload.bytes, length: frame.payload.length)
+            }
             
         case .close:
             break
             
         case .continuation:
-            break
+            guard messageState != .unknown else {
+                // Need error handling: send close
+                return
+            }
+            
+            message.append(frame.payload.bytes, length: frame.payload.length)
+            
+            if frame.finalFrame {
+                if messageState == .binary {
+                    sendMessage(withOpCode: .binary, payload: message)
+                } else {
+                    sendMessage(withOpCode: .text, payload: message)
+                }
+            }
             
         case .ping:
             sendMessage(withOpCode: .pong, payload: frame.payload)
@@ -56,7 +89,19 @@ public class WebSocketClient {
             break
             
         case .text:
-            break
+            guard messageState == .unknown else {
+                // Need error handling: send close 
+                return
+            }
+            
+            if frame.finalFrame {
+                sendMessage(withOpCode: .text, payload: frame.payload)
+            }
+            else {
+                messageState = .text
+                message.length = 0
+                message.append(frame.payload.bytes, length: frame.payload.length)
+            }
             
         case .unknown:
             break
