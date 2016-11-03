@@ -48,7 +48,8 @@ struct WSFrameParser {
         let bytes = buffer.bytes.assumingMemoryBound(to: UInt8.self)
         
         let length = buffer.length
-        while byteIndex < length {
+        
+        while byteIndex < length && payloadLength != frame.payload.length {
             switch(state) {
             case .initial:
                 let (error, bytesConsumed) = parseOpCode(bytes: bytes, from: byteIndex)
@@ -104,10 +105,10 @@ struct WSFrameParser {
         switch lengthByte {
         case 126:
             if length - from >= 3 {
-                let networkOrderedUInt16 = UnsafeRawPointer(bytes+1).assumingMemoryBound(to: UInt16.self)[0]
+                let networkOrderedUInt16 = UnsafeRawPointer(bytes+from+1).assumingMemoryBound(to: UInt16.self)[0]
                 
                 #if os(Linux)
-                    return Glibc.ntohs(networkOrderedUInt16)
+                    payloadLength = Int(Glibc.ntohs(networkOrderedUInt16))
                 #else
                     payloadLength = Int(CFSwapInt16BigToHost(networkOrderedUInt16))
                 #endif
@@ -115,10 +116,10 @@ struct WSFrameParser {
             }
         case 127:
             if length - from >= 9 {
-                let networkOrderedUInt64 = UnsafeRawPointer(bytes+1).assumingMemoryBound(to: UInt64.self)[0]
+                let networkOrderedUInt64 = UnsafeRawPointer(bytes+from+1).assumingMemoryBound(to: UInt64.self)[0]
                 
                 #if os(Linux)
-                    return Glibc.be64toh(networkOrderedUInt16)
+                    payloadLength = Int(Glibc.be64toh(networkOrderedUInt64))
                 #else
                     payloadLength = Int(CFSwapInt64BigToHost(networkOrderedUInt64))
                 #endif
@@ -139,6 +140,7 @@ struct WSFrameParser {
                 bytesConsumed = 0
             }
         }
+
         return (nil, bytesConsumed)
     }
     
@@ -162,7 +164,6 @@ struct WSFrameParser {
             }
             frame.payload.append(unmaskedBytes, length: bytesToUnMaskInLoop)
         }
-        
         return bytesConsumed
     }
 }
