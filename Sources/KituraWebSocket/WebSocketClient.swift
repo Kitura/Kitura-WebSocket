@@ -42,10 +42,12 @@ public class WebSocketClient {
         print("WebSocketClient: Received a \(frame.finalFrame ? "final " : "")\(frame.opCode) frame")
         print("WebSocketClient: payload is \(frame.payload.length) bytes long")
         
-        var zero: CChar = 0
-        frame.payload.append(&zero, length: 1)
-        print("WebSocketClient: payload=\(String(cString: frame.payload.bytes.assumingMemoryBound(to: CChar.self), encoding: .utf8))")
-        frame.payload.length -= 1
+        if (frame.payload.length < 127) {
+            var zero: CChar = 0
+            frame.payload.append(&zero, length: 1)
+            print("WebSocketClient: payload=\(String(cString: frame.payload.bytes.assumingMemoryBound(to: CChar.self), encoding: .utf8))")
+            frame.payload.length -= 1
+        }
         
         switch frame.opCode {
         case .binary:
@@ -80,6 +82,7 @@ public class WebSocketClient {
                 } else {
                     sendMessage(withOpCode: .text, payload: message)
                 }
+                messageState = .unknown
             }
             
         case .ping:
