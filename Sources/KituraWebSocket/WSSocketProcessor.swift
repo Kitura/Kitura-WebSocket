@@ -46,23 +46,31 @@ class WSSocketProcessor: IncomingSocketProcessor {
     ///
     /// - Returns: true if the data was processed, false if it needs to be processed later.
     public func process(_ buffer: NSData) -> Bool {
-        let (completed, error, bytesConsumed) = parser.parse(buffer, from: 0)
+        let length = buffer.length
         
-        guard error == nil else {
-            // What should be done if there is an error?
-            print("WSSocketProcessor: process: Error parsing frame. \(error!)")
-            return true
-        }
+        while byteIndex < length {
+            let (completed, error, bytesConsumed) = parser.parse(buffer, from: byteIndex)
         
-        byteIndex += bytesConsumed
+            guard error == nil else {
+                // What should be done if there is an error?
+                print("WSSocketProcessor: process: Error parsing frame. \(error!)")
+                return true
+            }
+            
+            if bytesConsumed == 0 {
+                break
+            }
         
-        if completed {
-            client.received(frame: parser.frame)
-            parser.reset()
+            byteIndex += bytesConsumed
+        
+            if completed {
+                client.received(frame: parser.frame)
+                parser.reset()
+            }
         }
         
         let finishedBuffer: Bool
-        if byteIndex >= buffer.length {
+        if byteIndex >= length {
             finishedBuffer = true
             byteIndex = 0
         }
