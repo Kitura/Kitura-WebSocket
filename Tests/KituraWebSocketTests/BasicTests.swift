@@ -57,8 +57,16 @@ class BasicTests: XCTestCase {
             print("Connected")
         }
         
-        public func disconnected(client: WebSocketClient){
+        public func disconnected(client: WebSocketClient) {
             print("disconnected")
+        }
+        
+        public func received(message: Data, from: WebSocketClient) {
+            print("Received a binary message of length \(message.count)")
+        }
+        
+        public func received(message: String, from: WebSocketClient) {
+            print("Received a String message of length \(message.characters.count)")
         }
     }
     
