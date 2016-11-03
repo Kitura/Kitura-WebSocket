@@ -116,12 +116,12 @@ struct WSFrameParser {
             }
         case 127:
             if length - from >= 9 {
-                let networkOrderedUInt64 = UnsafeRawPointer(bytes+from+1).assumingMemoryBound(to: UInt64.self)[0]
+                let networkOrderedUInt32 = UnsafeRawPointer(bytes+from+5).assumingMemoryBound(to: UInt32.self)[0]
                 
                 #if os(Linux)
-                    payloadLength = Int(Glibc.be64toh(networkOrderedUInt64))
+                    payloadLength = Int(Glibc.ntohl(networkOrderedUInt32))
                 #else
-                    payloadLength = Int(CFSwapInt64BigToHost(networkOrderedUInt64))
+                    payloadLength = Int(CFSwapInt32BigToHost(networkOrderedUInt32))
                 #endif
                 bytesConsumed += 9
             }
