@@ -35,9 +35,29 @@ struct WSFrame {
             bytes[1] = UInt8(payloadLength)
             length += 1
         } else if payloadLength < Int(UInt16.max) {
-            
+            bytes[1] = 126
+            let tempPayloadLengh = UInt16(payloadLength)
+            var payloadLengthUInt16: UInt16
+            #if os(Linux)
+                payloadLengthUInt16 = Glibc.htons(tempPayloadLengh)
+            #else
+                payloadLengthUInt16 = CFSwapInt16HostToBig(tempPayloadLengh)
+            #endif
+            let asBytes = UnsafeMutablePointer(&payloadLengthUInt16)
+            (UnsafeMutableRawPointer(mutating: bytes)+length+1).copyBytes(from: asBytes, count: 2)
+            length += 3
         } else {
-            
+            bytes[1] = 127
+            let tempPayloadLengh = UInt32(payloadLength)
+            var payloadLengthUInt32: UInt32
+            #if os(Linux)
+                payloadLengthUInt32 = Glibc.htonl(tempPayloadLengh)
+            #else
+                payloadLengthUInt32 = CFSwapInt32HostToBig(tempPayloadLengh)
+            #endif
+            let asBytes = UnsafeMutablePointer(&payloadLengthUInt32)
+            (UnsafeMutableRawPointer(mutating: bytes)+length+5).copyBytes(from: asBytes, count: 4)
+            length += 9
         }
         buffer.append(bytes, length: length)
     }
