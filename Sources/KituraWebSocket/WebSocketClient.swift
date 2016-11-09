@@ -20,6 +20,13 @@ import Foundation
 public class WebSocketClient {
     weak var processor: WSSocketProcessor?
     
+    weak var service: WebSocketService? {
+        didSet {
+            guard let service = service else { return }
+            service.connected(client: self)
+        }
+    }
+    
     private static let bufferSize = 2000
     private let buffer: NSMutableData
     

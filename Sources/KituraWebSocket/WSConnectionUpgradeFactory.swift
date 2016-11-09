@@ -58,6 +58,11 @@ public class WSConnectionUpgradeFactory: ConnectionUpgradeFactory {
             return (nil, "Sec-WebSocket-Key header missing in the upgrade request")
         }
         
+        let parsedURL = URLParser(url: request.url, isConnect: false)
+        guard let path = parsedURL.path, let service = registry[path] else {
+            return (nil, "No service has been registered for the path \(parsedURL.path ?? "(nopath)")")
+        }
+        
         let sha1 = Digest(using: .sha1)
         let sha1Bytes = sha1.update(string: securityKey[0] + wsGUID)!.final()
         let sha1Data = NSData(bytes: sha1Bytes, length: sha1Bytes.count)
@@ -68,11 +73,12 @@ public class WSConnectionUpgradeFactory: ConnectionUpgradeFactory {
         let client = WebSocketClient()
         let processor = WSSocketProcessor(client: client)
         client.processor = processor
+        client.service = service
         
         return (processor, nil)
     }
     
     func register(service: WebSocketService, onPath: String) {
-        
+        registry[onPath] = service
     }
 }
