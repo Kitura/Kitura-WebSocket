@@ -63,10 +63,12 @@ class BasicTests: XCTestCase {
         
         public func received(message: Data, from: WebSocketClient) {
             print("Received a binary message of length \(message.count)")
+            from.send(message: message)
         }
         
         public func received(message: String, from: WebSocketClient) {
             print("Received a String message of length \(message.characters.count)")
+            from.send(message: message)
         }
     }
     
