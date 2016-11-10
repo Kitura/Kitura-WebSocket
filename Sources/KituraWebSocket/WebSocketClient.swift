@@ -44,17 +44,23 @@ public class WebSocketClient {
         buffer = NSMutableData(capacity: WebSocketClient.bufferSize) ?? NSMutableData()
     }
     
-    func received(frame: WSFrame) {
-        
-        print("WebSocketClient: Received a \(frame.finalFrame ? "final " : "")\(frame.opCode) frame")
-        print("WebSocketClient: payload is \(frame.payload.length) bytes long")
-        
-        if (frame.payload.length < 127) {
-            var zero: CChar = 0
-            frame.payload.append(&zero, length: 1)
-            print("WebSocketClient: payload=\(String(cString: frame.payload.bytes.assumingMemoryBound(to: CChar.self), encoding: .utf8))")
-            frame.payload.length -= 1
+    public func send(message: Data) {
+        let dataToWrite = NSData(data: message)
+        sendMessage(withOpCode: .binary, payload: dataToWrite.bytes, payloadLength: dataToWrite.length)
+    }
+    
+    public func send(message: String) {
+        let count = message.lengthOfBytes(using: .utf8)
+        let bufferLength = count+1 // Allow space for null terminator
+        var utf8: [CChar] = Array<CChar>(repeating: 0, count: bufferLength)
+        if !message.getCString(&utf8, maxLength: bufferLength, encoding: .utf8) {
+            // throw something?
         }
+        let rawBytes = UnsafeRawPointer(UnsafePointer(utf8))
+        sendMessage(withOpCode: .text, payload: rawBytes, payloadLength: count)
+    }
+    
+    func received(frame: WSFrame) {
         
         switch frame.opCode {
         case .binary:
@@ -64,7 +70,8 @@ public class WebSocketClient {
             }
             
             if frame.finalFrame {
-                sendMessage(withOpCode: .binary, payload: frame.payload)
+                let data = Data(bytes: frame.payload.bytes, count: frame.payload.length)
+                service?.received(message: data, from: self)
             }
             else {
                 messageState = .binary
@@ -85,15 +92,16 @@ public class WebSocketClient {
             
             if frame.finalFrame {
                 if messageState == .binary {
-                    sendMessage(withOpCode: .binary, payload: message)
+                    let data = Data(bytes: message.bytes, count: message.length)
+                    service?.received(message: data, from: self)
                 } else {
-                    sendMessage(withOpCode: .text, payload: message)
+                    fireReceivedString(from: message)
                 }
                 messageState = .unknown
             }
             
         case .ping:
-            sendMessage(withOpCode: .pong, payload: frame.payload)
+            sendMessage(withOpCode: .pong, payload: frame.payload.bytes, payloadLength: frame.payload.length)
             
         case .pong:
             break
@@ -105,7 +113,7 @@ public class WebSocketClient {
             }
             
             if frame.finalFrame {
-                sendMessage(withOpCode: .text, payload: frame.payload)
+                fireReceivedString(from: frame.payload)
             }
             else {
                 messageState = .text
@@ -118,22 +126,35 @@ public class WebSocketClient {
         }
     }
     
-    private func sendMessage(withOpCode: WSFrame.FrameOpcode, payload: NSData) {
+    private func fireReceivedString(from: NSMutableData) {
+        var zero: CChar = 0
+        from.append(&zero, length: 1)
+        let bytes = from.bytes.bindMemory(to: CChar.self, capacity: 1)
+        if let text = String(cString: bytes, encoding: .utf8) {
+            service?.received(message: text, from: self)
+        }
+        else {
+            // Error converting to String
+        }
+        from.length -= 1
+    }
+    
+    private func sendMessage(withOpCode: WSFrame.FrameOpcode, payload: UnsafeRawPointer, payloadLength: Int) {
         // Need to add logging
         guard let processor = processor else { return }
         
         lockWriteLock()
         
         buffer.length = 0
-        WSFrame.createFrameHeader(finalFrame: true, opCode: withOpCode, payloadLength: payload.length, buffer: buffer)
+        WSFrame.createFrameHeader(finalFrame: true, opCode: withOpCode, payloadLength: payloadLength, buffer: buffer)
         
-        if WebSocketClient.bufferSize >= buffer.length + payload.length {
-            buffer.append(payload.bytes, length: payload.length)
+        if WebSocketClient.bufferSize >= buffer.length + payloadLength {
+            buffer.append(payload, length: payloadLength)
             processor.write(from: buffer)
         }
         else {
             processor.write(from: buffer)
-            processor.write(from: payload)
+            processor.write(from: payload, length: payloadLength)
         }
         
         unlockWriteLock()
