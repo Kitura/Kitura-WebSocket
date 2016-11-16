@@ -58,7 +58,7 @@ class BasicTests: XCTestCase {
         }
         
         public func disconnected(client: WebSocketClient) {
-            print("disconnected")
+            print("Disconnected")
         }
         
         public func received(message: Data, from: WebSocketClient) {
