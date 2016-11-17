@@ -53,11 +53,11 @@ class BasicTests: XCTestCase {
     
     class TestWebSocketService: WebSocketService {
         public func connected(client: WebSocketClient) {
-            print("Connected")
+            print("Connected - client \(client.id)")
         }
         
         public func disconnected(client: WebSocketClient) {
-            print("Disconnected")
+            print("Disconnected - client \(client.id)")
         }
         
         public func received(message: Data, from: WebSocketClient) {
@@ -68,6 +68,10 @@ class BasicTests: XCTestCase {
         public func received(message: String, from: WebSocketClient) {
             print("Received a String message of length \(message.characters.count)")
             from.send(message: message)
+            
+            if message == "ping" {
+                from.ping(withMessage: "Hello")
+            }
         }
     }
     

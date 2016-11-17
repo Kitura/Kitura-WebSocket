@@ -40,13 +40,30 @@ public class WebSocketClient {
         case binary, text, unknown
     }
     
+    public let id: String
+    
     private var messageState: MessageStates = .unknown
     
     init() {
+        id = UUID().uuidString
         buffer = NSMutableData(capacity: WebSocketClient.bufferSize) ?? NSMutableData()
     }
     
-    
+    public func ping(withMessage: String?) {
+        if let message = withMessage {
+            let count = message.lengthOfBytes(using: .utf8)
+            let bufferLength = count+1 // Allow space for null terminator
+            var utf8: [CChar] = Array<CChar>(repeating: 0, count: bufferLength)
+            if !message.getCString(&utf8, maxLength: bufferLength, encoding: .utf8) {
+                // throw something?
+            }
+            let rawBytes = UnsafeRawPointer(UnsafePointer(utf8))
+            sendMessage(withOpCode: .ping, payload: rawBytes, payloadLength: count)
+        }
+        else {
+            sendMessage(withOpCode: .ping, payload: nil, payloadLength: 0)
+        }
+    }
     
     public func send(message: Data) {
         let dataToWrite = NSData(data: message)
@@ -155,7 +172,7 @@ public class WebSocketClient {
         from.length -= 1
     }
     
-    private func sendMessage(withOpCode: WSFrame.FrameOpcode, payload: UnsafeRawPointer, payloadLength: Int) {
+    private func sendMessage(withOpCode: WSFrame.FrameOpcode, payload: UnsafeRawPointer?, payloadLength: Int) {
         // Need to add logging
         guard let processor = processor else { return }
         
@@ -164,13 +181,18 @@ public class WebSocketClient {
         buffer.length = 0
         WSFrame.createFrameHeader(finalFrame: true, opCode: withOpCode, payloadLength: payloadLength, buffer: buffer)
         
-        if WebSocketClient.bufferSize >= buffer.length + payloadLength {
-            buffer.append(payload, length: payloadLength)
-            processor.write(from: buffer)
+        if let realPayload = payload {
+            if WebSocketClient.bufferSize >= buffer.length + payloadLength {
+                buffer.append(realPayload, length: payloadLength)
+                processor.write(from: buffer)
+            }
+            else {
+                processor.write(from: buffer)
+                processor.write(from: realPayload, length: payloadLength)
+            }
         }
         else {
             processor.write(from: buffer)
-            processor.write(from: payload, length: payloadLength)
         }
         
         unlockWriteLock()
