@@ -15,7 +15,6 @@
  **/
 
 import XCTest
-import Kitura
 
 @testable import KituraNet
 
@@ -39,22 +38,29 @@ extension KituraTest {
     
     func performServerTest(_ router: ServerDelegate,
                            asyncTasks: @escaping (XCTestExpectation) -> Void...) {
-        Kitura.addHTTPServer(onPort: 8090, with: router)
-        Kitura.start()
-        sleep(1)
-        let requestQueue = DispatchQueue(label: "Request queue")
+        let server = HTTP.createServer()
+        server.delegate = router
         
-        for (index, asyncTask) in asyncTasks.enumerated() {
-            let expectation = self.expectation(index)
-            requestQueue.async() {
-                asyncTask(expectation)
+        do {
+            try server.listen(on: 8090)
+        
+            let requestQueue = DispatchQueue(label: "Request queue")
+        
+            for (index, asyncTask) in asyncTasks.enumerated() {
+                let expectation = self.expectation(index)
+                requestQueue.async() {
+                    asyncTask(expectation)
+                }
+            }
+        
+            waitExpectation(timeout: 100) { error in
+                // blocks test until request completes
+                server.stop()
+                XCTAssertNil(error)
             }
         }
-        
-        waitExpectation(timeout: 100) { error in
-            // blocks test until request completes
-            Kitura.stop()
-            XCTAssertNil(error)
+        catch {
+            XCTFail("Test failed. Error=\(error)")
         }
     }
 }
