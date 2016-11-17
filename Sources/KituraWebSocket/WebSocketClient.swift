@@ -34,6 +34,8 @@ public class WebSocketClient {
     
     private let message = NSMutableData()
     
+    private var closing = false
+    
     enum MessageStates {
         case binary, text, unknown
     }
@@ -43,6 +45,8 @@ public class WebSocketClient {
     init() {
         buffer = NSMutableData(capacity: WebSocketClient.bufferSize) ?? NSMutableData()
     }
+    
+    
     
     public func send(message: Data) {
         let dataToWrite = NSData(data: message)
@@ -58,6 +62,13 @@ public class WebSocketClient {
         }
         let rawBytes = UnsafeRawPointer(UnsafePointer(utf8))
         sendMessage(withOpCode: .text, payload: rawBytes, payloadLength: count)
+    }
+    
+    func connectionClosed() {
+        if !closing {
+            closing = true
+            service?.disconnected(client: self)
+        }
     }
     
     func received(frame: WSFrame) {
@@ -80,6 +91,11 @@ public class WebSocketClient {
             }
             
         case .close:
+            if !closing {
+                connectionClosed()
+                sendMessage(withOpCode: .close, payload:
+                            frame.payload.bytes, payloadLength: frame.payload.length)
+            }
             break
             
         case .continuation:
