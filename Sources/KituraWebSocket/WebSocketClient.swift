@@ -17,6 +17,12 @@
 import Dispatch
 import Foundation
 
+#if os(Linux)
+    import Glibc
+#else
+    import Darwin
+#endif
+
 public class WebSocketClient {
     weak var processor: WSSocketProcessor?
     
@@ -34,7 +40,7 @@ public class WebSocketClient {
     
     private let message = NSMutableData()
     
-    private var closing = false
+    private var active = true
     
     enum MessageStates {
         case binary, text, unknown
@@ -49,7 +55,17 @@ public class WebSocketClient {
         buffer = NSMutableData(capacity: WebSocketClient.bufferSize) ?? NSMutableData()
     }
     
+    public func close(reason: WebSocketCloseReasonCode?=nil, description: String?=nil) {
+        closeConnection(reason: reason, description: description, hard: false)
+    }
+    
+    public func drop(reason: WebSocketCloseReasonCode?=nil, description: String?=nil) {
+        closeConnection(reason: reason, description: description, hard: true)
+    }
+    
     public func ping(withMessage: String?) {
+        guard active else { return }
+        
         if let message = withMessage {
             let count = message.lengthOfBytes(using: .utf8)
             let bufferLength = count+1 // Allow space for null terminator
@@ -66,11 +82,15 @@ public class WebSocketClient {
     }
     
     public func send(message: Data) {
+        guard active else { return }
+        
         let dataToWrite = NSData(data: message)
         sendMessage(withOpCode: .binary, payload: dataToWrite.bytes, payloadLength: dataToWrite.length)
     }
     
     public func send(message: String) {
+        guard active else { return }
+        
         let count = message.lengthOfBytes(using: .utf8)
         let bufferLength = count+1 // Allow space for null terminator
         var utf8: [CChar] = Array<CChar>(repeating: 0, count: bufferLength)
@@ -81,10 +101,41 @@ public class WebSocketClient {
         sendMessage(withOpCode: .text, payload: rawBytes, payloadLength: count)
     }
     
-    func connectionClosed() {
-        if !closing {
-            closing = true
-            service?.disconnected(client: self)
+    func closeConnection(reason: WebSocketCloseReasonCode?, description: String?, hard: Bool) {
+        var tempReasonCodeToSend = UInt16((reason ?? .normal).code())
+        var reasonCodeToSend: UInt16
+        #if os(Linux)
+            reasonCodeToSend = Glibc.htons(tempReasonCodeToSend)
+        #else
+            reasonCodeToSend = CFSwapInt16HostToBig(tempReasonCodeToSend)
+        #endif
+        
+        let payload = NSMutableData()
+        let asBytes = UnsafeMutablePointer(&reasonCodeToSend)
+        payload.append(asBytes, length: 2)
+        
+        if let descriptionToSend = description {
+            let count = descriptionToSend.lengthOfBytes(using: .utf8)
+            let bufferLength = count+1 // Allow space for null terminator
+            var utf8: [CChar] = Array<CChar>(repeating: 0, count: bufferLength)
+            if !descriptionToSend.getCString(&utf8, maxLength: bufferLength, encoding: .utf8) {
+                // throw something?
+            }
+            payload.append(UnsafePointer(utf8), length: count)
+        }
+        
+        sendMessage(withOpCode: .close, payload: payload.bytes, payloadLength: payload.length)
+        active = false
+        
+        if hard {
+            processor?.close()
+        }
+    }
+    
+    func connectionClosed(reason: WebSocketCloseReasonCode) {
+        if active {
+            active = false
+            service?.disconnected(client: self, reason: reason)
         }
     }
     
@@ -108,10 +159,24 @@ public class WebSocketClient {
             }
             
         case .close:
-            if !closing {
-                connectionClosed()
-                sendMessage(withOpCode: .close, payload:
-                            frame.payload.bytes, payloadLength: frame.payload.length)
+            if active {
+                let reasonCode: WebSocketCloseReasonCode
+                if frame.payload.length > 2 {
+                    let networkOrderedReasonCode = UnsafeRawPointer(frame.payload.bytes).assumingMemoryBound(to: UInt16.self)[0]
+                
+                    let reasonCodeInt16: Int16
+                    #if os(Linux)
+                        reasonCodeInt16 = Int16(Glibc.ntohs(networkOrderedReasonCode))
+                    #else
+                        reasonCodeInt16 = Int16(CFSwapInt16BigToHost(networkOrderedReasonCode))
+                    #endif
+                    
+                    reasonCode = WebSocketCloseReasonCode.fromCode(reasonCodeInt16)                }
+                else {
+                    reasonCode = .noReasonCodeSent
+                }
+                
+                connectionClosed(reason: reasonCode)
             }
             break
             
