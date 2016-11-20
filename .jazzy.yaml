@@ -1,0 +1,15 @@
+module: KituraWebSocket
+author: IBM
+github_url: https://github.com/IBM-Swift/Kitura-WebSocket/
+
+theme: fullwidth
+clean: true
+exclude: [Packages]
+
+readme: README.md
+
+skip_undocumented: false
+hide_documentation_coverage: false
+
+xcodebuild_arguments: [-project, Kitura-WebSocket.xcodeproj, -target, KituraWebSocket, LIBRARY_SEARCH_PATHS=.build/debug]
+
