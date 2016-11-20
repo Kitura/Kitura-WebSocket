@@ -16,6 +16,12 @@
 
 import Foundation
 
+#if os(Linux)
+    import Glibc
+#else
+    import Darwin
+#endif
+
 struct WSFrame {
     var finalFrame = false
     
