@@ -16,9 +16,37 @@
 
 import Foundation
 
+/// The `WebSocketService` protocol is implemented by classes that which to be WebSocket server side
+/// end points. An instance of the `WebSocketService` protocol is the server side of a WebSocket connection.
+/// There can be many WebSocket connections connected to a single `WebSocketService` protocol instance.
+/// The protocol is a set of callbacks that are invokes when various events occur.
 public protocol WebSocketService: class {
+    
+    /// Called when a WebSocket client connects to the server and is connected to a specific 
+    /// `WebSocketService`.
+    ///
+    /// - Parameter client: The `WebSocketClient` object that represents the client that
+    ///                    connected to this `WebSocketService`
     func connected(client: WebSocketClient)
+    
+    /// Called when a WebSocket client disconnects from the server.
+    ///
+    /// - Parameter client: The `WebSocketClient` object that represents the client that
+    ///                    disconnected from this `WebSocketService`.
+    /// - Paramater reason: The `WebSocketCloseReasonCode` that describes why the client disconnected.
     func disconnected(client: WebSocketClient, reason: WebSocketCloseReasonCode)
+    
+    /// Called when a WebSocket client sent a binary message to the server to this `WebSocketService`.
+    ///
+    /// - Parameter message: A Data struct containing the bytes of the binary message sent by the client.
+    /// - Parameter client: The `WebSocketClient` object that represents the client that
+    ///                    sent the message to this `WebSocketService`
     func received(message: Data, from: WebSocketClient)
+    
+    /// Called when a WebSocket client sent a text message to the server to this `WebSocketService`.
+    ///
+    /// - Parameter message: A String containing the text message sent by the client.
+    /// - Parameter client: The `WebSocketClient` object that represents the client that
+    ///                    sent the message to this `WebSocketService`
     func received(message: String, from: WebSocketClient)
 }

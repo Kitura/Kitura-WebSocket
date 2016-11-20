@@ -18,6 +18,9 @@ import Foundation
 
 import KituraNet
 
+/// The implementation of the `IncomingSocketProcessor` protocol for the WebSocket protocol.
+/// Receives data from the `IncomingSocketHandler` for a specific socket and provides APIs
+/// upwards for sending data to the client over the socket.
 class WSSocketProcessor: IncomingSocketProcessor {
     /// A back reference to the `IncomingSocketHandler` processing the socket that
     /// this `IncomingDataProcessor` is processing.

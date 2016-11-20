@@ -23,6 +23,9 @@ import Foundation
     import Darwin
 #endif
 
+/// Represents the client on a specific WebSocket connection. Provides a unique
+/// identifier for the client and APIs to send messages and control commands
+/// to the client.
 public class WebSocketClient {
     weak var processor: WSSocketProcessor?
     
@@ -46,6 +49,7 @@ public class WebSocketClient {
         case binary, text, unknown
     }
     
+    /// Unique identifier for this `WebSocketClient`
     public let id: String
     
     private var messageState: MessageStates = .unknown
@@ -55,14 +59,31 @@ public class WebSocketClient {
         buffer = NSMutableData(capacity: WebSocketClient.bufferSize) ?? NSMutableData()
     }
     
+    /// Close a WebSocket connection by sending a close control command to the client optionally
+    /// with the specified reason code and description text.
+    ///
+    /// - Parameter reason: An optional reason code to send in the close control command
+    ///                    describing why the connection was closed. If nil, a reason code
+    ///                    of `WebSocketCloseReasonCode.normal` will be sent.
+    /// - Parameter description: An optional text description to be sent in the close control frame.
     public func close(reason: WebSocketCloseReasonCode?=nil, description: String?=nil) {
         closeConnection(reason: reason, description: description, hard: false)
     }
     
+    /// Forcefully close a WebSocket connection by sending a close control command to the client optionally
+    /// with the specified reason code and description text followed by closing the socket.
+    ///
+    /// - Parameter reason: An optional reason code to send in the close control command
+    ///                    describing why the connection was closed. If nil, a reason code
+    ///                    of `WebSocketCloseReasonCode.normal` will be sent.
+    /// - Parameter description: An optional text description to be sent in the close control frame.
     public func drop(reason: WebSocketCloseReasonCode?=nil, description: String?=nil) {
         closeConnection(reason: reason, description: description, hard: true)
     }
     
+    /// Send a ping control frame to the client
+    ///
+    /// - Parameter withMessage: An optional string to be included in the ping control frame.
     public func ping(withMessage: String?) {
         guard active else { return }
         
@@ -81,6 +102,10 @@ public class WebSocketClient {
         }
     }
     
+    /// Send a binary message to the client
+    ///
+    /// - Parameter message: A Data struct containing the bytes to be sent to the client as a
+    ///                     binary message.
     public func send(message: Data) {
         guard active else { return }
         
@@ -88,6 +113,10 @@ public class WebSocketClient {
         sendMessage(withOpCode: .binary, payload: dataToWrite.bytes, payloadLength: dataToWrite.length)
     }
     
+    /// Send a text message to the client
+    ///
+    /// - Parameter message: A String containing the text to be sent to the client as a
+    ///                     text message.
     public func send(message: String) {
         guard active else { return }
         
@@ -171,7 +200,7 @@ public class WebSocketClient {
                         reasonCodeInt16 = Int16(CFSwapInt16BigToHost(networkOrderedReasonCode))
                     #endif
                     
-                    reasonCode = WebSocketCloseReasonCode.fromCode(reasonCodeInt16)                }
+                    reasonCode = WebSocketCloseReasonCode.from(code: reasonCodeInt16)                }
                 else {
                     reasonCode = .noReasonCodeSent
                 }

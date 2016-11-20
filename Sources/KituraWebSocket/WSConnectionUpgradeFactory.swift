@@ -19,30 +19,30 @@ import Foundation
 import Cryptor
 import KituraNet
 
+/// The implementation of the ConnectionUpgradeFactory protocol for the WebSocket protocol.
+/// Participates in the HTTP protocol upgrade process when upgarding to the WebSocket protocol. 
 public class WSConnectionUpgradeFactory: ConnectionUpgradeFactory {
     private var registry = Dictionary<String, WebSocketService>()
     
     private let wsGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
     
-    /// The name of the protocol supported by this `ConnectionUpgradeFactory`. A case insensitive compare is made with this name.
+    /// The name of the protocol supported by this `ConnectionUpgradeFactory`.
     public let name = "websocket"
     
     init() {
         ConnectionUpgrader.register(factory: self)
     }
     
-    /// "Upgrade" a connection to the protocol supported by this `ConnectionUpgradeFactory`.
+    /// "Upgrade" a connection to the WebSocket protocol. Invoked by the KituraNet.ConnectionUpgrader when
+    /// an upgrade request is being handled.
     ///
     /// - Parameter handler: The `IncomingSocketHandler` that is handling the connection being upgraded.
     /// - Parameter request: The `ServerRequest` object of the incoming "upgrade" request.
     /// - Parameter response: The `ServerResponse` object that will be used to send the response of the "upgrade" request.
     ///
-    /// - Returns: A tuple of the created `IncomingSocketProcessor` and a message to send as the body of the response to
-    ///           the upgrade request. The `IncomingSocketProcessor` should be nil if the upgrade request wasn't successful.
+    /// - Returns: A tuple of the created `WSSocketProcessor` and a message to send as the body of the response to
+    ///           the upgrade request. The `WSSocketProcessor` will be nil if the upgrade request wasn't successful.
     ///           If the message is nil, the response will not contain a body.
-    ///
-    /// - Note: The `ConnectionUpgradeFactory` instance doesn't need to work with the `ServerResponse` unless it
-    ///        needs to add special headers to the response.
     public func upgrade(handler: IncomingSocketHandler, request: ServerRequest, response: ServerResponse) -> (IncomingSocketProcessor?, String?) {
 
         guard let protocolVersion = request.headers["Sec-WebSocket-Version"] else {

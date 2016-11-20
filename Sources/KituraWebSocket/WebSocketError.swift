@@ -18,7 +18,11 @@ import Foundation
 
 /// An error enum used when throwing errors within KituraWebSocket.
 public enum WebSocketError: Error {
+    
+    /// An invalid opcode was received in a WebSocket frame
     case invalidOpCode(UInt8)
+    
+    /// A frame was received that had an unmasked payload
     case unmaskedFrame
 }
 

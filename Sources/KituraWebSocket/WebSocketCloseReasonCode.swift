@@ -53,71 +53,38 @@ public enum WebSocketCloseReasonCode {
     /// This reson code is used to send application defined reason codes.
     case userDefined(Int16)
     
+    /// Get the sixteen bit integer code for a WebSocketCloseReasonCode instance
     public func code() -> Int16 {
         switch self {
-            
-        /// The connection was closed abnormally
         case .closedAbnormally: return 1006
-            
-        /// A required extension was missing
         case .extensionMissing: return 1010
-            
-        /// The server/client are going away
         case .goingAway: return 1001
-            
-        /// Data within a message was invalid (1007)
         case .invalidDataContents: return 1007
-            
-        /// Message was of the incorrect type (binary/text) (1003)
         case .invalidDataType: return 1003
-            
-        /// Message was too large (1009)
         case .messageTooLarge: return 1009
-            
-        /// Closed normally (1000)
         case .normal: return 1000
-            
-        /// No reason code sent with the close request (1005)
         case .noReasonCodeSent: return 1005
-            
-        /// A policy violation occurred (1008)
         case .policyViolation: return 1008
-            
-        /// A protocol error occurred (1002)
         case .protocolError: return 1002
-            
-        /// The server had an error with the request (1011)
         case .serverError: return 1011
-            
-        /// This reson code is used to send application defined reason codes.
         case .userDefined(let userCode): return userCode
         }
     }
     
-    public static func fromCode(_ reasonCode: Int16) -> WebSocketCloseReasonCode {
+    /// Convert a sixteen bit WebSocket close frame reason code to a WebSocketCloseReasonCode instance 
+    public static func from(code reasonCode: Int16) -> WebSocketCloseReasonCode {
         switch reasonCode {
-        case 1000:
-            return .normal
-        case 1001:
-            return .goingAway
-        case 1002:
-            return .protocolError
-        case 1003:
-            return .invalidDataType
-        case 1005:
-            return .noReasonCodeSent
-        case 1006:
-            return .closedAbnormally
-        case 1007:
-            return .invalidDataContents
-        case 1008:
-            return .policyViolation
-        case 1009:
-            return .messageTooLarge
-        case 1010:
-            return .extensionMissing
-        case 1011:
-            return .serverError
+        case 1000: return .normal
+        case 1001: return .goingAway
+        case 1002: return .protocolError
+        case 1003: return .invalidDataType
+        case 1005: return .noReasonCodeSent
+        case 1006: return .closedAbnormally
+        case 1007: return .invalidDataContents
+        case 1008: return .policyViolation
+        case 1009: return .messageTooLarge
+        case 1010: return .extensionMissing
+        case 1011: return .serverError
         default:
             return .userDefined(reasonCode)
         }
