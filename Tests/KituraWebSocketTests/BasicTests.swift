@@ -56,8 +56,8 @@ class BasicTests: XCTestCase {
             print("Connected - client \(client.id)")
         }
         
-        public func disconnected(client: WebSocketClient) {
-            print("Disconnected - client \(client.id)")
+        public func disconnected(client: WebSocketClient, reason: WebSocketCloseReasonCode) {
+            print("Disconnected - client \(client.id) - reason=\(reason)")
         }
         
         public func received(message: Data, from: WebSocketClient) {
@@ -69,7 +69,13 @@ class BasicTests: XCTestCase {
             print("Received a String message of length \(message.characters.count)")
             from.send(message: message)
             
-            if message == "ping" {
+            if message == "close" {
+                from.close(reason: .goingAway, description: "Going away...")
+            }
+            else if message == "drop" {
+                from.drop(reason: .policyViolation, description: "Droping...")
+            }
+            else if message == "ping" {
                 from.ping(withMessage: "Hello")
             }
         }

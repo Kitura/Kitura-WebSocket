@@ -18,7 +18,7 @@ import Foundation
 
 public protocol WebSocketService: class {
     func connected(client: WebSocketClient)
-    func disconnected(client: WebSocketClient)
+    func disconnected(client: WebSocketClient, reason: WebSocketCloseReasonCode)
     func received(message: Data, from: WebSocketClient)
     func received(message: String, from: WebSocketClient)
 }

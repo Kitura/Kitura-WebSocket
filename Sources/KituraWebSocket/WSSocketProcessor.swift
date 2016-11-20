@@ -102,6 +102,6 @@ class WSSocketProcessor: IncomingSocketProcessor {
     
     /// Called by the `IncomingSocketHandler` to tell us that the socket has been closed.
     public func socketClosed() {
-        client.connectionClosed()
+        client.connectionClosed(reason: .noReasonCodeSent)
     }
 }
