@@ -20,6 +20,6 @@ let package = Package(
     name: "Kitura-WebSocket",
     dependencies: [
         .Package(url: "https://github.com/IBM-Swift/Kitura-net.git", majorVersion: 1, minor: 2),
-        .Package(url: "https://github.com/IBM-Swift/BlueCryptor.git", majorVersion: 0, minor: 7),
+        .Package(url: "https://github.com/IBM-Swift/BlueCryptor.git", majorVersion: 0, minor: 8)
     ]
 )
