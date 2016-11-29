@@ -32,7 +32,9 @@ public class WebSocketClient {
     weak var service: WebSocketService? {
         didSet {
             guard let service = service else { return }
-            service.connected(client: self)
+            DispatchQueue.global().async { [unowned self] in
+                service.connected(client: self)
+            }
         }
     }
     
@@ -164,7 +166,9 @@ public class WebSocketClient {
     func connectionClosed(reason: WebSocketCloseReasonCode) {
         if active {
             active = false
-            service?.disconnected(client: self, reason: reason)
+            DispatchQueue.global().async { [unowned self] in
+                self.service?.disconnected(client: self, reason: reason)
+            }
         }
     }
     
@@ -179,7 +183,9 @@ public class WebSocketClient {
             
             if frame.finalFrame {
                 let data = Data(bytes: frame.payload.bytes, count: frame.payload.length)
-                service?.received(message: data, from: self)
+                DispatchQueue.global().async { [unowned self] in
+                    self.service?.received(message: data, from: self)
+                }
             }
             else {
                 messageState = .binary
@@ -220,7 +226,9 @@ public class WebSocketClient {
             if frame.finalFrame {
                 if messageState == .binary {
                     let data = Data(bytes: message.bytes, count: message.length)
-                    service?.received(message: data, from: self)
+                    DispatchQueue.global().async { [unowned self] in
+                        self.service?.received(message: data, from: self)
+                    }
                 } else {
                     fireReceivedString(from: message)
                 }
@@ -258,7 +266,9 @@ public class WebSocketClient {
         from.append(&zero, length: 1)
         let bytes = from.bytes.bindMemory(to: CChar.self, capacity: 1)
         if let text = String(cString: bytes, encoding: .utf8) {
-            service?.received(message: text, from: self)
+            DispatchQueue.global().async { [unowned self] in
+                self.service?.received(message: text, from: self)
+            }
         }
         else {
             // Error converting to String
