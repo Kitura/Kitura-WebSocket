@@ -78,6 +78,13 @@ public class WSConnectionUpgradeFactory: ConnectionUpgradeFactory {
     }
     
     func register(service: WebSocketService, onPath: String) {
-        registry[onPath] = service
+        let path: String
+        if onPath.hasPrefix("/") {
+            path = onPath
+        }
+        else {
+            path = "/" + onPath
+        }
+        registry[path] = service
     }
 }
