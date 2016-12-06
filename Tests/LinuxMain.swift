@@ -19,5 +19,6 @@ import XCTest
 @testable import KituraWebSocketTests
 
 XCTMain([
-    testCase(BasicTests.allTests)
+    testCase(BasicTests.allTests),
+    testCase(UpgradeErrors.allTests)
 ])
