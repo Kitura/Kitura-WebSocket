@@ -17,6 +17,7 @@
 import Foundation
 
 import KituraNet
+import LoggerAPI
 
 /// The implementation of the `IncomingSocketProcessor` protocol for the WebSocket protocol.
 /// Receives data from the `IncomingSocketHandler` for a specific socket and provides APIs
@@ -56,7 +57,8 @@ class WSSocketProcessor: IncomingSocketProcessor {
         
             guard error == nil else {
                 // What should be done if there is an error?
-                print("WSSocketProcessor: process: Error parsing frame. \(error!)")
+                Log.error("Error parsing frame. \(error!)")
+                client.close(reason: .protocolError, description: error?.description)
                 return true
             }
             
