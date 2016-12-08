@@ -1,12 +1,4 @@
-//
-//  BasicTests.swift
-//  Kitura-WebSocket
-//
-//  Created by Samuel Kallner on 26/10/2016.
-//
-//
-
-import Foundation/**
+/**
  * Copyright IBM Corporation 2016
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,16 +17,22 @@ import Foundation/**
 import XCTest
 import Foundation
 
+import LoggerAPI
 @testable import KituraNet
 @testable import KituraWebSocket
+import Cryptor
+import Socket
 
 class BasicTests: XCTestCase {
     
     static var allTests: [(String, (BasicTests) -> () throws -> Void)] {
         return [
-            ("testPing", testPing)
+            ("testGracefullClose", testGracefullClose),
+            ("testSuccessfullUpgrade", testSuccessfullUpgrade)
         ]
     }
+    
+    private let secWebKey = "test"
     
     override func setUp() {
         doSetUp()
@@ -44,46 +42,37 @@ class BasicTests: XCTestCase {
         doTearDown()
     }
     
-    func testPing() {
-        WebSocket.register(service: TestWebSocketService(), onPath: "/wstester")
+    func testGracefullClose() {
+        WebSocket.register(service: TestWebSocketService(closeReason: .normal), onPath: "/wstester")
         
-        performServerTest(TestServerDelegate()) { (expectation: XCTestExpectation) in
-        }
-    }
-    
-    class TestWebSocketService: WebSocketService {
-        public func connected(client: WebSocketClient) {
-            print("Connected - client \(client.id)")
-        }
-        
-        public func disconnected(client: WebSocketClient, reason: WebSocketCloseReasonCode) {
-            print("Disconnected - client \(client.id) - reason=\(reason)")
-        }
-        
-        public func received(message: Data, from: WebSocketClient) {
-            print("Received a binary message of length \(message.count)")
-            from.send(message: message)
-        }
-        
-        public func received(message: String, from: WebSocketClient) {
-            print("Received a String message of length \(message.characters.count)")
-            from.send(message: message)
+        performServerTest() { expectation in
+            guard let socket = self.sendUpgradeRequest(toPath: "/wstester", usingKey: self.secWebKey) else { return }
             
-            if message == "close" {
-                from.close(reason: .goingAway, description: "Going away...")
-            }
-            else if message == "drop" {
-                from.drop(reason: .policyViolation, description: "Droping...")
-            }
-            else if message == "ping" {
-                from.ping(withMessage: "Hello")
-            }
+            _ = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey, expectation: expectation)
+            
+            _ = self.sendFrame(final: true, withOpcode: self.opcodeClose,
+                               withPayload: self.payload(closeReasonCode: .normal), on: socket)
+            
+            // Wait a bit for the WebSocketService
+            usleep(150)
+            
+            expectation.fulfill()
         }
     }
     
-    class TestServerDelegate : ServerDelegate {
-        func handle(request: ServerRequest, response: ServerResponse) {
-            XCTFail("Server delegate invoked in an Upgrade scenario")
+    func testSuccessfullUpgrade() {
+        WebSocket.register(service: TestWebSocketService(closeReason: .noReasonCodeSent), onPath: "/wstester")
+        
+        performServerTest() { expectation in
+            guard let socket = self.sendUpgradeRequest(toPath: "/wstester", usingKey: self.secWebKey) else { return }
+            
+            _ = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey, expectation: expectation)
+            
+            // Close the socket abruptly. Need to wait to let the close percolate up on th eoter side
+            socket.close()
+            usleep(150)
+            
+            expectation.fulfill()
         }
     }
 }
