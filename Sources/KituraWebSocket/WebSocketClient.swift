@@ -165,10 +165,14 @@ public class WebSocketClient {
     
     func connectionClosed(reason: WebSocketCloseReasonCode) {
         if active {
-            active = false
+            closeConnection(reason: .normal, description: nil, hard: true)
+            
             DispatchQueue.global().async { [unowned self] in
                 self.service?.disconnected(client: self, reason: reason)
             }
+        }
+        else {
+            processor?.close()
         }
     }
     
@@ -196,7 +200,7 @@ public class WebSocketClient {
         case .close:
             if active {
                 let reasonCode: WebSocketCloseReasonCode
-                if frame.payload.length > 2 {
+                if frame.payload.length >= 2 {
                     let networkOrderedReasonCode = UnsafeRawPointer(frame.payload.bytes).assumingMemoryBound(to: UInt16.self)[0]
                 
                     let reasonCodeInt16: Int16
