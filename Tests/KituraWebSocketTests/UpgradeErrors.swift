@@ -42,7 +42,7 @@ class UpgradeErrors: XCTestCase {
     func testNoSecWebSocketKey() {
         ConnectionUpgrader.register(factory: WSConnectionUpgradeFactory())
         
-        performServerTest(TestServerDelegate()) { expectation in
+        performServerTest() { expectation in
             guard let socket = self.sendUpgradeRequest(forProtocolVersion: "13", toPath: "/testing123", usingKey: nil) else { return }
      
             self.checkUpgradeResponse(from: socket, expectedMessage: "Sec-WebSocket-Key header missing in the upgrade request", expectation: expectation)
@@ -52,7 +52,7 @@ class UpgradeErrors: XCTestCase {
     func testNoSecWebSocketVersion() {
         ConnectionUpgrader.register(factory: WSConnectionUpgradeFactory())
         
-        performServerTest(TestServerDelegate(), asyncTasks: { expectation in
+        performServerTest(asyncTasks: { expectation in
             guard let socket = self.sendUpgradeRequest(forProtocolVersion: nil, toPath: "/testing123", usingKey: nil) else { return }
             
             self.checkUpgradeResponse(from: socket, expectedMessage: "Sec-WebSocket-Version header missing in the upgrade request", expectation: expectation)
@@ -67,7 +67,7 @@ class UpgradeErrors: XCTestCase {
     func testNoService() {
         ConnectionUpgrader.register(factory: WSConnectionUpgradeFactory())
         
-        performServerTest(TestServerDelegate()) { expectation in
+        performServerTest() { expectation in
             guard let socket = self.sendUpgradeRequest(forProtocolVersion: "13", toPath: "/testing123", usingKey: "test") else { return }
             
             self.checkUpgradeResponse(from: socket, expectedMessage: "No service has been registered for the path /testing123", expectation: expectation)
@@ -92,12 +92,6 @@ class UpgradeErrors: XCTestCase {
         }
         catch {
             XCTFail("Failed to read the error message from the failed upgrade")
-        }
-    }
-
-    class TestServerDelegate : ServerDelegate {
-        func handle(request: ServerRequest, response: ServerResponse) {
-            XCTFail("Server delegate invoked in an Upgrade scenario")
         }
     }
 }
