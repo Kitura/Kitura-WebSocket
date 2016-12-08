@@ -40,7 +40,7 @@ struct WSFrame {
         if payloadLength < 126 {
             bytes[1] = UInt8(payloadLength)
             length += 1
-        } else if payloadLength < Int(UInt16.max) {
+        } else if payloadLength <= Int(UInt16.max) {
             bytes[1] = 126
             let tempPayloadLengh = UInt16(payloadLength)
             var payloadLengthUInt16: UInt16
