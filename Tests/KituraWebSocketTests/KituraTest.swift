@@ -16,8 +16,10 @@
 
 import XCTest
 
+import LoggerAPI
 @testable import KituraWebSocket
 @testable import KituraNet
+import Cryptor
 import Socket
 
 import Foundation
@@ -38,10 +40,12 @@ extension KituraTest {
         ConnectionUpgrader.clear()
     }
     
-    func performServerTest(_ router: ServerDelegate, line: Int = #line,
+    private var wsGUID: String { return "258EAFA5-E914-47DA-95CA-C5AB0DC85B11" }
+    
+    
+    func performServerTest(line: Int = #line,
                            asyncTasks: @escaping (XCTestExpectation) -> Void...) {
         let server = HTTP.createServer()
-        server.delegate = router
         
         do {
             try server.listen(on: 8090)
@@ -55,7 +59,7 @@ extension KituraTest {
                 }
             }
         
-            waitExpectation(timeout: 100) { error in
+            waitExpectation(timeout: 10) { error in
                 // blocks test until request completes
                 server.stop()
                 XCTAssertNil(error)
@@ -66,7 +70,7 @@ extension KituraTest {
         }
     }
     
-    func sendUpgradeRequest(forProtocolVersion: String?, toPath: String, usingKey: String?) -> Socket? {
+    func sendUpgradeRequest(forProtocolVersion: String?="13", toPath: String, usingKey: String?) -> Socket? {
         var socket: Socket?
         do {
             socket = try Socket.create()
@@ -97,9 +101,9 @@ extension KituraTest {
         return socket
     }
     
-    func processUpgradeResponse(socket: Socket) -> (HTTPIncomingMessage?, NSData?) {
+    func processUpgradeResponse(socket: Socket) -> (HTTPIncomingMessage?, NSMutableData?) {
         let response: HTTPIncomingMessage = HTTPIncomingMessage(isRequest: false)
-        var unparsedData: NSData?
+        var unparsedData: NSMutableData?
         var errorFlag = false
         
         var keepProcessing = true
@@ -116,7 +120,7 @@ extension KituraTest {
                     if parserStatus.state == .messageComplete {
                         keepProcessing = false
                         if parserStatus.bytesLeft != 0 {
-                            unparsedData = NSData(bytes: buffer.bytes+buffer.length-parserStatus.bytesLeft, length: parserStatus.bytesLeft)
+                            unparsedData = NSMutableData(bytes: buffer.bytes+buffer.length-parserStatus.bytesLeft, length: parserStatus.bytesLeft)
                         }
                     }
                 }
@@ -132,6 +136,43 @@ extension KituraTest {
             XCTFail("Failed to send upgrade request. Error=\(error)")
         }
         return (errorFlag ? nil : response, unparsedData)
+    }
+    
+    func checkUpgradeResponse(from: Socket, forKey: String, expectation: XCTestExpectation) -> NSMutableData {
+        let (rawResponse, extraData) = self.processUpgradeResponse(socket: from)
+        let buffer = extraData ?? NSMutableData()
+        
+        guard let response = rawResponse else {
+            XCTFail("Failed to get a response from the upgrade request")
+            return buffer
+        }
+        
+        XCTAssertEqual(response.httpStatusCode, HTTPStatusCode.switchingProtocols, "Returned status code on upgrade request was \(response.httpStatusCode) and not \(HTTPStatusCode.switchingProtocols)")
+        
+        if response.httpStatusCode != HTTPStatusCode.switchingProtocols {
+            do {
+                let body = try response.readString()
+                Log.error(body ?? "No error message in body")
+            }
+            catch {
+                Log.error("Failed to read the error message from the failed upgrade")
+            }
+        }
+        
+        guard let secWebAccept = response.headers["Sec-WebSocket-Accept"] else {
+            XCTFail("Sec-WebSocket-Accept is missing in the upgrade response")
+            return buffer
+        }
+        
+        let sha1 = Digest(using: .sha1)
+        let sha1Bytes = sha1.update(string: forKey + wsGUID)!.final()
+        let sha1Data = NSData(bytes: sha1Bytes, length: sha1Bytes.count)
+        let secWebAcceptExpected = sha1Data.base64EncodedString(options: .lineLength64Characters)
+        
+        XCTAssertEqual(secWebAccept[0], secWebAcceptExpected,
+                       "The Sec-WebSocket-Accept header value was [\(secWebAccept[0])] and not the expected value of [\(secWebAcceptExpected)]")
+        
+        return buffer
     }
 }
 
