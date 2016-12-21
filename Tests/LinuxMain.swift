@@ -20,5 +20,6 @@ import XCTest
 
 XCTMain([
     testCase(BasicTests.allTests),
+    testCase(ComplexTests.allTests),
     testCase(UpgradeErrors.allTests)
 ])
