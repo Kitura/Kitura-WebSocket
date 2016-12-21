@@ -58,8 +58,8 @@ public class WSConnectionUpgradeFactory: ConnectionUpgradeFactory {
             return (nil, "Sec-WebSocket-Key header missing in the upgrade request")
         }
         
-        guard let service = registry[request.urlComponents.path] else {
-            return (nil, "No service has been registered for the path \(request.urlComponents.path)")
+        guard let service = registry[request.urlURL.path] else {
+            return (nil, "No service has been registered for the path \(request.urlURL.path)")
         }
         
         let sha1 = Digest(using: .sha1)
