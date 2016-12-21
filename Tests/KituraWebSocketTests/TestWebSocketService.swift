@@ -56,3 +56,10 @@ class TestWebSocketService: WebSocketService {
         }
     }
 }
+
+extension TestWebSocketService: CustomStringConvertible {
+    /// Generate a printable version of this enum.
+    public var description: String {
+        return "TestWebSocketService(closeReason: \(closeReason))"
+    }
+}
