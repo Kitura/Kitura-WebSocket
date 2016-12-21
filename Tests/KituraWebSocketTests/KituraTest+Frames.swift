@@ -155,9 +155,7 @@ extension KituraTest {
         return (length, position+bytesConsumed)
     }
     
-    func sendFrame(final: Bool, withOpcode: Int, withMasking: Bool=true, withPayload: NSData, on: Socket) -> Bool {
-        var result = true
-        
+    func sendFrame(final: Bool, withOpcode: Int, withMasking: Bool=true, withPayload: NSData, on: Socket) {
         let buffer = NSMutableData()
         
         createFrameHeader(final: final, withOpcode: withOpcode, withMasking: withMasking,
@@ -187,9 +185,7 @@ extension KituraTest {
         }
         catch {
             XCTFail("Failed to send a frame. Error=\(error)")
-            result = false
         }
-        return result
     }
     
     private func createFrameHeader(final: Bool, withOpcode: Int, withMasking: Bool, payloadLength: Int, buffer: NSMutableData) {

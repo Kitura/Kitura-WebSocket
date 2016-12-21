@@ -28,12 +28,11 @@ class BasicTests: XCTestCase {
     static var allTests: [(String, (BasicTests) -> () throws -> Void)] {
         return [
             ("testGracefullClose", testGracefullClose),
+            ("testPing", testPing),
             ("testPingWithText", testPingWithText),
             ("testSuccessfullUpgrade", testSuccessfullUpgrade)
         ]
     }
-    
-    private let secWebKey = "test"
     
     override func setUp() {
         doSetUp()
@@ -44,15 +43,15 @@ class BasicTests: XCTestCase {
     }
     
     func testGracefullClose() {
-        WebSocket.register(service: TestWebSocketService(closeReason: .normal), onPath: "/wstester")
+        register(closeReason: .normal)
         
         performServerTest() { expectation in
             guard let socket = self.sendUpgradeRequest(toPath: "/wstester", usingKey: self.secWebKey) else { return }
             
             let buffer = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey, expectation: expectation)
             
-            _ = self.sendFrame(final: true, withOpcode: self.opcodeClose,
-                               withPayload: self.payload(closeReasonCode: .normal), on: socket)
+            self.sendFrame(final: true, withOpcode: self.opcodeClose,
+                           withPayload: self.payload(closeReasonCode: .normal), on: socket)
             
             let (final, opcode, payload, _) = self.parseFrame(using: buffer, position: 0, from: socket)
             
@@ -67,35 +66,34 @@ class BasicTests: XCTestCase {
         }
     }
     
-    func testPingWithText() {
-        WebSocket.register(service: TestWebSocketService(closeReason: .noReasonCodeSent), onPath: "/wstester")
+    func testPing() {
+        register(closeReason: .noReasonCodeSent)
         
         performServerTest() { expectation in
-            guard let socket = self.sendUpgradeRequest(toPath: "/wstester", usingKey: self.secWebKey) else { return }
             
-            let buffer = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey, expectation: expectation)
+            let pingPayload = NSData()
+            
+            self.performTest(framesToSend: [(true, self.opcodePing, pingPayload)],
+                             expectedFrames: [(true, self.opcodePong, pingPayload)],
+                             expectation: expectation)
+        }
+    }
+    
+    func testPingWithText() {
+        register(closeReason: .noReasonCodeSent)
+        
+        performServerTest() { expectation in
             
             let pingPayload = self.payload(text: "Testing, testing 1,2,3")
             
-            _ = self.sendFrame(final: true, withOpcode: self.opcodePing,
-                               withPayload: pingPayload, on: socket)
-            
-            let (final, opcode, payload, _) = self.parseFrame(using: buffer, position: 0, from: socket)
-            
-            XCTAssert(final, "Close message wasn't final")
-            XCTAssertEqual(opcode, self.opcodePong, "Opcode wasn't pong. was \(opcode)")
-            XCTAssertEqual(pingPayload, payload, "The pong message [\(payload)] doesn't equal the ping message [\(pingPayload)]")
-            
-            // Close the socket abruptly. Need to wait to let the close percolate up on the other side
-            socket.close()
-            usleep(150)
-            
-            expectation.fulfill()
+            self.performTest(framesToSend: [(true, self.opcodePing, pingPayload)],
+                             expectedFrames: [(true, self.opcodePong, pingPayload)],
+                             expectation: expectation)
         }
     }
     
     func testSuccessfullUpgrade() {
-        WebSocket.register(service: TestWebSocketService(closeReason: .noReasonCodeSent), onPath: "/wstester")
+        register(closeReason: .noReasonCodeSent)
         
         performServerTest() { expectation in
             guard let socket = self.sendUpgradeRequest(toPath: "/wstester", usingKey: self.secWebKey) else { return }

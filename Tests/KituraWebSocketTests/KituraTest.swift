@@ -41,6 +41,7 @@ extension KituraTest {
     
     private var wsGUID: String { return "258EAFA5-E914-47DA-95CA-C5AB0DC85B11" }
     
+    var secWebKey: String { return "test" }
     
     func performServerTest(line: Int = #line,
                            asyncTasks: @escaping (XCTestExpectation) -> Void...) {
@@ -67,6 +68,39 @@ extension KituraTest {
         catch {
             XCTFail("Test failed. Error=\(error)")
         }
+    }
+    
+    func performTest(framesToSend: [(Bool, Int, NSData)],
+                     expectedFrames: [(Bool, Int, NSData)], expectation: XCTestExpectation) {
+        guard let socket = sendUpgradeRequest(toPath: "/wstester", usingKey: secWebKey) else { return }
+        
+        let buffer = checkUpgradeResponse(from: socket, forKey: secWebKey, expectation: expectation)
+        
+        for frameToSend in framesToSend {
+            let (finalToSend, opCodeToSend, payloadToSend) = frameToSend
+            sendFrame(final: finalToSend, withOpcode: opCodeToSend, withPayload: payloadToSend, on: socket)
+        }
+        
+        var position = 0
+        for expectedFrame in expectedFrames {
+            let (final, opCode, payload, updatedPosition) = parseFrame(using: buffer, position: position, from: socket)
+            position = updatedPosition
+        
+            let (expectedFinal, expectedOpCode, expectedPayload) = expectedFrame
+            XCTAssertEqual(final, expectedFinal, "Expected message was\(expectedFinal ? "n't" : "") final")
+            XCTAssertEqual(opCode, expectedOpCode, "Opcode wasn't \(expectedOpCode). It was \(opCode)")
+            XCTAssertEqual(expectedPayload, payload, "The payload [\(payload)] doesn't equal the expected [\(expectedPayload)]")
+        }
+        
+        // Close the socket abruptly. Need to wait to let the close percolate up on the other side
+        socket.close()
+        usleep(150)
+        
+        expectation.fulfill()
+    }
+    
+    func register(closeReason: WebSocketCloseReasonCode) {
+        WebSocket.register(service: TestWebSocketService(closeReason: closeReason), onPath: "/wstester")
     }
     
     func sendUpgradeRequest(forProtocolVersion: String?="13", toPath: String, usingKey: String?) -> Socket? {
