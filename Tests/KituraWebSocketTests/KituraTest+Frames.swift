@@ -48,6 +48,96 @@ extension KituraTest {
         return payload
     }
     
+    func parseFrame(using: NSMutableData, position: Int, from: Socket) -> (Bool, Int, NSData, Int) {
+        var final = false
+        var opcode = -1
+        let payload = NSMutableData()
+        var payloadLength = -1
+        var updatedPosition = position
+        
+        var parsingFrame = true
+        
+        while parsingFrame {
+            updatedPosition = position
+            payload.length = 0
+            
+            (final, opcode, updatedPosition) = parseFrameOpcode(using: using, position: updatedPosition)
+            if opcode != -1 {
+                
+                (payloadLength, updatedPosition) = parseFrameLength(using: using, position: updatedPosition)
+                if payloadLength != -1 {
+                
+                    if using.length >= updatedPosition+payloadLength {
+                        payload.append(using.bytes+updatedPosition, length: payloadLength)
+                        parsingFrame = false
+                    }
+                }
+            }
+            
+            if parsingFrame {
+                do {
+                    let bytesRead = try from.read(into: using)
+                    if bytesRead == 0 {
+                        parsingFrame = false
+                        opcode = -1
+                    }
+                }
+                catch {
+                    XCTFail("Reading of WebSocket message from WebService failed. Error=\(error)")
+                }
+            }
+        
+        }
+        
+        return (final, opcode, payload, updatedPosition)
+    }
+    
+    private func parseFrameOpcode(using: NSMutableData, position: Int) -> (Bool, Int, Int) {
+        guard using.length > position else { return (false, -1, position) }
+        
+        let byte = using.bytes.bindMemory(to: UInt8.self, capacity: 1)[0]
+        return ((byte & 0x80) != 0, Int(byte & 0x7f), position+1)
+    }
+    
+    private func parseFrameLength(using: NSMutableData, position: Int) -> (Int, Int) {
+        guard position < using.length else {
+            return (-1, position)
+        }
+        
+        let byte = (using.bytes.bindMemory(to: UInt8.self, capacity: 1)+position)[0]
+        if byte & 0x80 != 0 {
+            XCTFail("The server isn't suppose to send masked frames")
+        }
+        var length = Int(byte)
+        var bytesConsumed = 1
+        if length == 126 {
+            guard position+2 < using.length else { return (-1, position+1) }
+            
+            let networkOrderedUInt16 = UnsafeRawPointer(using.bytes+position+1).assumingMemoryBound(to: UInt16.self)[0]
+            
+            #if os(Linux)
+                length = Int(Glibc.ntohs(networkOrderedUInt16))
+            #else
+                length = Int(CFSwapInt16BigToHost(networkOrderedUInt16))
+            #endif
+            bytesConsumed += 2
+        }
+        else if length == 127 {
+            guard position+8 < using.length else { return (-1, position+1) }
+            
+            let networkOrderedUInt32 = UnsafeRawPointer(using.bytes+position+5).assumingMemoryBound(to: UInt32.self)[0]
+            
+            #if os(Linux)
+                length = Int(Glibc.ntohl(networkOrderedUInt32))
+            #else
+                length = Int(CFSwapInt32BigToHost(networkOrderedUInt32))
+            #endif
+            bytesConsumed += 8
+        }
+        
+        return (length, position+bytesConsumed)
+    }
+    
     func sendFrame(final: Bool, withOpcode: Int, withMasking: Bool=true, withPayload: NSData, on: Socket) -> Bool {
         var result = true
         
