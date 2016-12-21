@@ -37,7 +37,6 @@ extension KituraTest {
     }
     
     func doTearDown() {
-        ConnectionUpgrader.clear()
     }
     
     private var wsGUID: String { return "258EAFA5-E914-47DA-95CA-C5AB0DC85B11" }
@@ -173,6 +172,21 @@ extension KituraTest {
                        "The Sec-WebSocket-Accept header value was [\(secWebAccept[0])] and not the expected value of [\(secWebAcceptExpected)]")
         
         return buffer
+    }
+    
+    func checkCloseReasonCode(payload: NSData, expectedReasonCode: WebSocketCloseReasonCode) {
+        XCTAssertEqual(payload.length, MemoryLayout<UInt16>.stride, "The payload wasn't \(MemoryLayout<UInt16>.stride) bytes long. It was \(payload.length) bytes long")
+        
+        let reasonCode: UInt16
+        let networkOrderedUInt16 = UnsafeRawPointer(payload.bytes).assumingMemoryBound(to: UInt16.self)[0]
+        
+        #if os(Linux)
+            reasonCode = Glibc.ntohs(networkOrderedUInt16)
+        #else
+            reasonCode = CFSwapInt16BigToHost(networkOrderedUInt16)
+        #endif
+        
+        XCTAssertEqual(reasonCode, UInt16(expectedReasonCode.code()), "The close reason code wasn't \(expectedReasonCode) - [\(expectedReasonCode.code())] it was \(reasonCode)")
     }
 }
 
