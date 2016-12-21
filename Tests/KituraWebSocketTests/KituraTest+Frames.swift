@@ -22,6 +22,9 @@ import LoggerAPI
 import Socket
 
 import Foundation
+#if os(Linux)
+    import Glibc
+#endif
 
 extension KituraTest {
     
@@ -46,6 +49,20 @@ extension KituraTest {
         payload.append(asBytes, length: 2)
         
         return payload
+    }
+    
+    func payload(text: String) -> NSData {
+        let result = NSMutableData()
+        
+        let utf8Length = text.lengthOfBytes(using: .utf8)
+        var utf8: [CChar] = Array<CChar>(repeating: 0, count: utf8Length + 10) // A little bit of padding
+        guard text.getCString(&utf8, maxLength: utf8Length + 10, encoding: .utf8)  else {
+            return result
+        }
+        
+        result.append(&utf8, length: utf8Length)
+        
+        return result
     }
     
     func parseFrame(using: NSMutableData, position: Int, from: Socket) -> (Bool, Int, NSData, Int) {
@@ -146,7 +163,13 @@ extension KituraTest {
         createFrameHeader(final: final, withOpcode: withOpcode, withMasking: withMasking,
                           payloadLength: withPayload.length, buffer: buffer)
         
-        var intMask = arc4random()
+        var intMask: UInt32
+            
+        #if os(Linux)
+            intMask = UInt32(random())
+        #else
+            intMask = arc4random()
+        #endif
         var mask: [UInt8] = [0, 0, 0, 0]
         UnsafeMutableRawPointer(mutating: mask).copyBytes(from: &intMask, count: mask.count)
         
