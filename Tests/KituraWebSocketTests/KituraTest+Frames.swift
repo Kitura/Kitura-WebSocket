@@ -87,6 +87,7 @@ extension KituraTest {
                     if using.length >= updatedPosition+payloadLength {
                         payload.append(using.bytes+updatedPosition, length: payloadLength)
                         parsingFrame = false
+                        updatedPosition += payloadLength
                     }
                 }
             }
@@ -112,7 +113,7 @@ extension KituraTest {
     private func parseFrameOpcode(using: NSMutableData, position: Int) -> (Bool, Int, Int) {
         guard using.length > position else { return (false, -1, position) }
         
-        let byte = using.bytes.bindMemory(to: UInt8.self, capacity: 1)[0]
+        let byte = (using.bytes.bindMemory(to: UInt8.self, capacity: 1)+position)[0]
         return ((byte & 0x80) != 0, Int(byte & 0x7f), position+1)
     }
     
