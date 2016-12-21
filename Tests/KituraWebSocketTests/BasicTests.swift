@@ -28,6 +28,7 @@ class BasicTests: XCTestCase {
     static var allTests: [(String, (BasicTests) -> () throws -> Void)] {
         return [
             ("testGracefullClose", testGracefullClose),
+            ("testPingWithText", testPingWithText),
             ("testSuccessfullUpgrade", testSuccessfullUpgrade)
         ]
     }
@@ -66,6 +67,33 @@ class BasicTests: XCTestCase {
         }
     }
     
+    func testPingWithText() {
+        WebSocket.register(service: TestWebSocketService(closeReason: .noReasonCodeSent), onPath: "/wstester")
+        
+        performServerTest() { expectation in
+            guard let socket = self.sendUpgradeRequest(toPath: "/wstester", usingKey: self.secWebKey) else { return }
+            
+            let buffer = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey, expectation: expectation)
+            
+            let pingPayload = self.payload(text: "Testing, testing 1,2,3")
+            
+            _ = self.sendFrame(final: true, withOpcode: self.opcodePing,
+                               withPayload: pingPayload, on: socket)
+            
+            let (final, opcode, payload, _) = self.parseFrame(using: buffer, position: 0, from: socket)
+            
+            XCTAssert(final, "Close message wasn't final")
+            XCTAssertEqual(opcode, self.opcodePong, "Opcode wasn't pong. was \(opcode)")
+            XCTAssertEqual(pingPayload, payload, "The pong message [\(payload)] doesn't equal the ping message [\(pingPayload)]")
+            
+            // Close the socket abruptly. Need to wait to let the close percolate up on the other side
+            socket.close()
+            usleep(150)
+            
+            expectation.fulfill()
+        }
+    }
+    
     func testSuccessfullUpgrade() {
         WebSocket.register(service: TestWebSocketService(closeReason: .noReasonCodeSent), onPath: "/wstester")
         
@@ -74,7 +102,7 @@ class BasicTests: XCTestCase {
             
             _ = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey, expectation: expectation)
             
-            // Close the socket abruptly. Need to wait to let the close percolate up on th eoter side
+            // Close the socket abruptly. Need to wait to let the close percolate up on the other side
             socket.close()
             usleep(150)
             
