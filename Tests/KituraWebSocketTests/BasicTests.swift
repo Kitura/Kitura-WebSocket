@@ -18,9 +18,7 @@ import XCTest
 import Foundation
 
 import LoggerAPI
-@testable import KituraNet
 @testable import KituraWebSocket
-import Cryptor
 import Socket
 
 class BasicTests: XCTestCase {
