@@ -48,10 +48,16 @@ class BasicTests: XCTestCase {
         performServerTest() { expectation in
             guard let socket = self.sendUpgradeRequest(toPath: "/wstester", usingKey: self.secWebKey) else { return }
             
-            _ = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey, expectation: expectation)
+            let buffer = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey, expectation: expectation)
             
             _ = self.sendFrame(final: true, withOpcode: self.opcodeClose,
                                withPayload: self.payload(closeReasonCode: .normal), on: socket)
+            
+            let (final, opcode, payload, _) = self.parseFrame(using: buffer, position: 0, from: socket)
+            
+            XCTAssert(final, "Close message wasn't final")
+            XCTAssertEqual(opcode, self.opcodeClose, "Opcode wasn't close. was \(opcode)")
+            self.checkCloseReasonCode(payload: payload, expectedReasonCode: .normal)
             
             // Wait a bit for the WebSocketService
             usleep(150)
