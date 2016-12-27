@@ -21,5 +21,6 @@ import XCTest
 XCTMain([
     testCase(BasicTests.allTests),
     testCase(ComplexTests.allTests),
+    testCase(ProtocolErrorTests.allTests),
     testCase(UpgradeErrors.allTests)
 ])
