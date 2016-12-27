@@ -163,9 +163,10 @@ public class WebSocketClient {
         }
     }
     
-    func connectionClosed(reason: WebSocketCloseReasonCode) {
+    func connectionClosed(reason: WebSocketCloseReasonCode, description: String?=nil, reasonToSendBack: WebSocketCloseReasonCode? = nil) {
         if active {
-            closeConnection(reason: .normal, description: nil, hard: true)
+            let reasonTosend = reasonToSendBack ?? reason
+            closeConnection(reason: reasonTosend, description: description, hard: true)
             
             DispatchQueue.global().async { [unowned self] in
                 self.service?.disconnected(client: self, reason: reason)
@@ -181,7 +182,7 @@ public class WebSocketClient {
         switch frame.opCode {
         case .binary:
             guard messageState == .unknown else {
-                // Need error handling: send close
+                connectionClosed(reason: .protocolError, description: "A binary frame must be the first in the message")
                 return
             }
             
@@ -215,13 +216,13 @@ public class WebSocketClient {
                     reasonCode = .noReasonCodeSent
                 }
                 
-                connectionClosed(reason: reasonCode)
+                connectionClosed(reason: reasonCode, reasonToSendBack: .normal)
             }
             break
             
         case .continuation:
             guard messageState != .unknown else {
-                // Need error handling: send close
+                connectionClosed(reason: .protocolError, description: "Continuation sent with prior binary or text frame")
                 return
             }
             
@@ -247,7 +248,7 @@ public class WebSocketClient {
             
         case .text:
             guard messageState == .unknown else {
-                // Need error handling: send close 
+                connectionClosed(reason: .protocolError, description: "A text frame must be the first in the message")
                 return
             }
             
