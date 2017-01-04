@@ -23,17 +23,17 @@ import Foundation
     import Darwin
 #endif
 
-/// Represents the client on a specific WebSocket connection. Provides a unique
-/// identifier for the client and APIs to send messages and control commands
-/// to the client.
-public class WebSocketClient {
+/// Represents a specific WebSocket connection. Provides a unique identifier for
+/// the connection and APIs to send messages and control commands to the client
+/// at the other end of the connection.
+public class WebSocketConnection {
     weak var processor: WSSocketProcessor?
     
     weak var service: WebSocketService? {
         didSet {
             guard let service = service else { return }
             DispatchQueue.global().async { [unowned self] in
-                service.connected(client: self)
+                service.connected(connection: self)
             }
         }
     }
@@ -51,14 +51,14 @@ public class WebSocketClient {
         case binary, text, unknown
     }
     
-    /// Unique identifier for this `WebSocketClient`
+    /// Unique identifier for this `WebSocketConnection`
     public let id: String
     
     private var messageState: MessageStates = .unknown
     
     init() {
         id = UUID().uuidString
-        buffer = NSMutableData(capacity: WebSocketClient.bufferSize) ?? NSMutableData()
+        buffer = NSMutableData(capacity: WebSocketConnection.bufferSize) ?? NSMutableData()
     }
     
     /// Close a WebSocket connection by sending a close control command to the client optionally
@@ -169,7 +169,7 @@ public class WebSocketClient {
             closeConnection(reason: reasonTosend, description: description, hard: true)
             
             DispatchQueue.global().async { [unowned self] in
-                self.service?.disconnected(client: self, reason: reason)
+                self.service?.disconnected(connection: self, reason: reason)
             }
         }
         else {
@@ -291,7 +291,7 @@ public class WebSocketClient {
         WSFrame.createFrameHeader(finalFrame: true, opCode: withOpCode, payloadLength: payloadLength, buffer: buffer)
         
         if let realPayload = payload {
-            if WebSocketClient.bufferSize >= buffer.length + payloadLength {
+            if WebSocketConnection.bufferSize >= buffer.length + payloadLength {
                 buffer.append(realPayload, length: payloadLength)
                 processor.write(from: buffer)
             }

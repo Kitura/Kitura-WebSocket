@@ -20,28 +20,28 @@ import Foundation
 @testable import KituraWebSocket
 
 class TestWebSocketService: WebSocketService {
-    var clientId = ""
+    var connectionId = ""
     let closeReason: WebSocketCloseReasonCode
     
     public init(closeReason: WebSocketCloseReasonCode) {
         self.closeReason = closeReason
     }
     
-    public func connected(client: WebSocketClient) {
-        clientId = client.id
+    public func connected(connection: WebSocketConnection) {
+        connectionId = connection.id
     }
     
-    public func disconnected(client: WebSocketClient, reason: WebSocketCloseReasonCode) {
-        XCTAssertEqual(clientId, client.id, "Client ID from connect wasn't client ID from disconnect")
+    public func disconnected(connection: WebSocketConnection, reason: WebSocketCloseReasonCode) {
+        XCTAssertEqual(connectionId, connection.id, "Client ID from connect wasn't client ID from disconnect")
         XCTAssertEqual(Int(closeReason.code()), Int(reason.code()), "Excpected close reason code of \(closeReason) received \(reason)")
     }
     
-    public func received(message: Data, from: WebSocketClient) {
+    public func received(message: Data, from: WebSocketConnection) {
         print("Received a binary message of length \(message.count)")
         from.send(message: message)
     }
     
-    public func received(message: String, from: WebSocketClient) {
+    public func received(message: String, from: WebSocketConnection) {
         print("Received a String message of length \(message.characters.count)")
         from.send(message: message)
         

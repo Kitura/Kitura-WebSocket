@@ -37,10 +37,10 @@ class WSSocketProcessor: IncomingSocketProcessor {
     
     private var byteIndex = 0
     
-    private let client: WebSocketClient
+    private let connection: WebSocketConnection
     
-    init(client: WebSocketClient) {
-        self.client = client
+    init(connection: WebSocketConnection) {
+        self.connection = connection
     }
     
     /// Process data read from the socket.
@@ -58,7 +58,7 @@ class WSSocketProcessor: IncomingSocketProcessor {
             guard error == nil else {
                 // What should be done if there is an error?
                 Log.error("Error parsing frame. \(error!)")
-                client.close(reason: .protocolError, description: error?.description)
+                connection.close(reason: .protocolError, description: error?.description)
                 return true
             }
             
@@ -69,7 +69,7 @@ class WSSocketProcessor: IncomingSocketProcessor {
             byteIndex += bytesConsumed
         
             if completed {
-                client.received(frame: parser.frame)
+                connection.received(frame: parser.frame)
                 parser.reset()
             }
         }
@@ -107,6 +107,6 @@ class WSSocketProcessor: IncomingSocketProcessor {
     
     /// Called by the `IncomingSocketHandler` to tell us that the socket has been closed.
     public func socketClosed() {
-        client.connectionClosed(reason: .noReasonCodeSent)
+        connection.connectionClosed(reason: .noReasonCodeSent)
     }
 }
