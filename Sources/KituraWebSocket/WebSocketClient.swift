@@ -86,7 +86,7 @@ public class WebSocketClient {
     /// Send a ping control frame to the client
     ///
     /// - Parameter withMessage: An optional string to be included in the ping control frame.
-    public func ping(withMessage: String?) {
+    public func ping(withMessage: String?=nil) {
         guard active else { return }
         
         if let message = withMessage {
