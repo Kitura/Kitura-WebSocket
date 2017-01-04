@@ -8,7 +8,8 @@
 
 ## Summary
 
-Kitura-WebSocket provides Kitura based servers the ability to receive and send messages to clients using the WebSocket protocol (RFC 6455). It is compatible with a variety of WebSocket clients, including:
+Kitura-WebSocket provides Kitura based servers the ability to receive and send messages to clients using the WebSocket
+protocol (RFC 6455). It is compatible with a variety of WebSocket clients, including:
 - The builtin WebSocket support in the Chrome, FireFox, and Safari browsers
 - The NPM [websocket](https://www.npmjs.com/package/websocket) package.
 
@@ -23,58 +24,66 @@ Kitura-WebSocket supports version thirteen of the WebSocket protocol.
 * [License](#license)
 
 ## Pre-requisites
-Working with Kitura-WebSocket requires that you are set up to work with Kitura. See [www.kitura.io](http://www.kitura.io/en/starter/settingup.html) for details.
+Working with Kitura-WebSocket requires that you are set up to work with Kitura. See
+[www.kitura.io](http://www.kitura.io/en/starter/settingup.html) for details.
 
 ## APIs
 The following is an overview of the Kitura-WebSocket APIs. For more details see http://ibm-swift.github.io/Kitura-WebSocket.
 
-When using the WebSocket protocol clients connect to WebSocket Services running on a particular server. WebSocket Services are identified on a particular server via a path. This path is sent in the Upgrade request used to upgrade a connection fro HTTP 1.1 to WebSocket.
+When using the WebSocket protocol clients connect to WebSocket Services running on a particular server. WebSocket Services are
+identified on a particular server via a path. This path is sent in the Upgrade request used to upgrade a connection from
+HTTP 1.1 to WebSocket.
 
-The Kitura-WebSocket API models that interaction using the class `WebSocketClient` which represents WebSocket client connections and the protocol `WebSocketService` which is implemented by classes that are WebSocket Services.
+The Kitura-WebSocket API reflects that interaction using the class `WebSocketConnection` which represents a WebSocket client's
+connection to a service and the protocol `WebSocketService` which is implemented by classes that are WebSocket Services.
 
-A specific `WebSocketClient` object is connected to a specific `WebSocketService` instance. On the other hand a specific `WebSocketService` instance is connected to many `WebSocketClient` objects.
+A specific `WebSocketConnection` object is connected to a specific `WebSocketService` instance. On the other hand a specific
+`WebSocketService` instance is connected to many `WebSocketConnection` objects.
 
-### WebSocketClient
-The WebSocketClient class provides:
+### WebSocketConnection
+The WebSocketConnection class provides:
 - Functions to send text and binary messages to the client
   ```swift
-  WebSocketClient.send(message: Data)
-  WebSocketClient.send(message: String)
+  WebSocketConnection.send(message: Data)
+  WebSocketConnection.send(message: String)
   ```
 - Functions to close the connection gracefully and forcefully
   ```swift
-  WebSocketClient.close(reason: WebSocketCloseReasonCode?=nil, description: String?=nil)
-  WebSocketClient.drop(reason: WebSocketCloseReasonCode?=nil, description: String?=nil)
+  WebSocketConnection.close(reason: WebSocketCloseReasonCode?=nil, description: String?=nil)
+  WebSocketConnection.drop(reason: WebSocketCloseReasonCode?=nil, description: String?=nil)
   ```
-  In both close() and drop(), the `WebSocketCloseReasonCode` enum provides the standard WebSocket Close Reason codes, with the ability to specify application specific ones.
+  In both close() and drop(), the `WebSocketCloseReasonCode` enum provides the standard WebSocket Close Reason codes, with the ability
+  to specify application specific ones.
 
-- A unique identifier that can be used to help manage the collection of `WebSocketClient` objects connected to a `WebSocketService`.
+- A unique identifier that can be used to help manage the collection of `WebSocketConnection` objects connected to a `WebSocketService`.
   ```swift
   id: String
   ```
 
 ### WebSocketService
-The functions of the WebSocketService protocol enable Kitura-WebSocket to notify a WebSocket service of a set of events that occur. These events include:
+The functions of the WebSocketService protocol enable Kitura-WebSocket to notify a WebSocket service of a set of events that
+occur. These events include:
 - A client has connected to the WebSocketService
 ```swift
-func connected(client: WebSocketClient)
+func connected(connection: WebSocketConnection)
 ```
 
 - A client has disconnected from the WebSocketService
 ```swift
-disconnected(client: WebSocketClient, reason: WebSocketCloseReasonCode)
+disconnected(connection: WebSocketConnection, reason: WebSocketCloseReasonCode)
 ```
-The reason parameter contains the reason code associated with the client disconnecting. It may come from either a close command sent by the client or determined by Kitura-WebSocket if the connection's socket suddenly was closed.
+The reason parameter contains the reason code associated with the client disconnecting. It may come from either
+a close command sent by the client or determined by Kitura-WebSocket if the connection's socket suddenly was closed.
 
 - A binary message was received from a client
 ```swift
-func received(message: Data, from: WebSocketClient)
+func received(message: Data, from: WebSocketConnection)
 ```
 The message parameter contains the bytes of the message in the form of a Data struct.
 
 - A text message was received from a client
 ```swift
-func received(message: String, from: WebSocketClient)
+func received(message: String, from: WebSocketConnection)
 ```
 The message parameter contains the message in the form of a String.
 
@@ -87,13 +96,16 @@ WebSocket.register(service: WebSocketService, onPath: String)
 This function is passed the `WebSocketService` being registered along with the path it is being registered on.
 
 ## An example
-A simple example to better describe the APIs of Kitura-WebSocket. This example, a very simplistic chat service. The server side is written in Swift using Kitura-WebSocket and the client side is written in JavaScript using Node.js and the websocket NPM package.
+A simple example to better describe the APIs of Kitura-WebSocket. This example, a very simplistic chat service.
+The server side is written in Swift using Kitura-WebSocket and the client side is written in JavaScript using
+Node.js and the websocket NPM package.
 
 ### Pre-requisites
 In order to run the client one must have Node.js installed.
 
 ### The server
-The server, keeps track of the clients that have connected to it and echoes all text messages sent to it to all of the clients that have connected to it, with the exception of the client that sent the message.
+The server, keeps track of the clients that have connected to it and echoes all text messages sent to it to all
+of the clients that have connected to it, with the exception of the client that sent the message.
 
 The server's directory setup is something like this:
 <pre>
@@ -129,34 +141,36 @@ import KituraWebSocket
 
 class ChatService: WebSocketService {
 
-    private var clients = [String: WebSocketClient]()
+    private var connections = [String: WebSocketConnection]()
 
-    public func connected(client: WebSocketClient) {
-        clients[client.id] = client
+    public func connected(connection: WebSocketConnection) {
+        connections[connection.id] = connection
     }
 
-    public func disconnected(client: WebSocketClient, reason: WebSocketCloseReasonCode) {
-        clients.removeValue(forKey: client.id)
+    public func disconnected(connection: WebSocketConnection, reason: WebSocketCloseReasonCode) {
+        connections.removeValue(forKey: connection.id)
     }
 
-    public func received(message: Data, from: WebSocketClient) {
+    public func received(message: Data, from: WebSocketConnection) {
         from.close(reason: .invalidDataType, description: "Chat-Server only accepts text messages")
 
-        clients.removeValue(forKey: from.id)
+        connections.removeValue(forKey: from.id)
     }
 
-    public func received(message: String, from: WebSocketClient) {
-        for (clientId, client) in clients {
-            if clientId != from.id {
-                client.send(message: message)
+    public func received(message: String, from: WebSocketConnection) {
+        for (connectionId, connection) in connections {
+            if connectionId != from.id {
+                connection.send(message: message)
             }
         }
     }
 }
 ```
-The class has a Dictionary, clients, which is used to keep track of all of the connected clients. The Dictionary is maintained by the `connected` and `disconnected` functions, which are, respectively, adding and removing clients from the dictionary.
+The class has a Dictionary, connections, which is used to keep track of the connections of all of the connected clients. The Dictionary is
+maintained by the `connected` and `disconnected` functions, which are, respectively, adding and removing connections from the dictionary.
 
-The `received` function, which receives binary messages, is rejecting the message, closing the client connection and removing the client from the set of known clients.
+The `received` function, which receives binary messages, is rejecting the message, closing the client connection and removing the connection
+from the set of known connections.
 
 Lastly, the `received` function, which receives text messages, simply echoes the message received to all clients except the one who sent the message.
 
@@ -200,7 +214,8 @@ In the main.swift file:
 With this server set up clients should connect to the chat service as *ws://__host__:8090/chat*, where **host** is the host running the server.
 
 ### The client
-The client has a simple command line interface. At startup one passes the host and port number. The client simply reads messages to be sent from the terminal and displays messages received on the terminal as well.
+The client has a simple command line interface. At startup one passes the host and port number. The client simply reads
+messages to be sent from the terminal and displays messages received on the terminal as well.
 
 The server's directory setup is something like this:
 <pre>
