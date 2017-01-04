@@ -50,7 +50,7 @@
                 <a class="nav-group-task-link" href="Classes/WebSocket.html">WebSocket</a>
               </li>
               <li class="nav-group-task">
-                <a class="nav-group-task-link" href="Classes/WebSocketClient.html">WebSocketClient</a>
+                <a class="nav-group-task-link" href="Classes/WebSocketConnection.html">WebSocketConnection</a>
               </li>
             </ul>
           </li>
@@ -82,7 +82,332 @@
             
             <a href='#kitura-websocket' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h1 id='kitura-websocket'>Kitura-WebSocket</h1>
 
-<p>Provides WebSocket support for Kitura</p>
+<p><strong>WebSocket support for Kitura base servers</strong></p>
+
+<p><img src="https://img.shields.io/badge/os-macOS-green.svg?style=flat" alt="macOS">
+<img src="https://img.shields.io/badge/os-linux-green.svg?style=flat" alt="Linux">
+<img src="https://img.shields.io/badge/license-Apache2-blue.svg?style=flat" alt="Apache 2">
+&nbsp;<a href="http://swift-at-ibm-slack.mybluemix.net/"><img src="http://swift-at-ibm-slack.mybluemix.net/badge.svg" alt="Slack Status"></a></p>
+<a href='#summary' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='summary'>Summary</h2>
+
+<p>Kitura-WebSocket provides Kitura based servers the ability to receive and send messages to clients using the WebSocket
+protocol (RFC 6455). It is compatible with a variety of WebSocket clients, including:
+- The builtin WebSocket support in the Chrome, FireFox, and Safari browsers
+- The NPM <a href="https://www.npmjs.com/package/websocket">websocket</a> package.</p>
+
+<p>Kitura-WebSocket supports version thirteen of the WebSocket protocol.</p>
+<a href='#table-of-contents' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='table-of-contents'>Table of Contents</h2>
+
+<ul>
+<li><a href="#summary">Summary</a></li>
+<li><a href="#pre-requisites">Pre-requisites</a></li>
+<li><a href="#apis">APIs</a></li>
+<li><a href="#an-example">An example</a></li>
+<li><a href="#community">Community</a></li>
+<li><a href="#license">License</a></li>
+</ul>
+<a href='#pre-requisites' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='pre-requisites'>Pre-requisites</h2>
+
+<p>Working with Kitura-WebSocket requires that you are set up to work with Kitura. See
+<a href="http://www.kitura.io/en/starter/settingup.html">www.kitura.io</a> for details.</p>
+<a href='#apis' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='apis'>APIs</h2>
+
+<p>The following is an overview of the Kitura-WebSocket APIs. For more details see <a href="http://ibm-swift.github.io/Kitura-WebSocket">http://ibm-swift.github.io/Kitura-WebSocket</a>.</p>
+
+<p>When using the WebSocket protocol clients connect to WebSocket Services running on a particular server. WebSocket Services are
+identified on a particular server via a path. This path is sent in the Upgrade request used to upgrade a connection from
+HTTP 1.1 to WebSocket.</p>
+
+<p>The Kitura-WebSocket API reflects that interaction using the class <code>WebSocketConnection</code> which represents a WebSocket client&rsquo;s
+connection to a service and the protocol <code>WebSocketService</code> which is implemented by classes that are WebSocket Services.</p>
+
+<p>A specific <code>WebSocketConnection</code> object is connected to a specific <code>WebSocketService</code> instance. On the other hand a specific
+<code>WebSocketService</code> instance is connected to many <code>WebSocketConnection</code> objects.</p>
+<a href='#websocketconnection' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='websocketconnection'>WebSocketConnection</h3>
+
+<p>The WebSocketConnection class provides:
+- Functions to send text and binary messages to the client
+  <code>swift
+  WebSocketConnection.send(message: Data)
+  WebSocketConnection.send(message: String)
+</code>
+- Functions to close the connection gracefully and forcefully
+  <code>swift
+  WebSocketConnection.close(reason: WebSocketCloseReasonCode?=nil, description: String?=nil)
+  WebSocketConnection.drop(reason: WebSocketCloseReasonCode?=nil, description: String?=nil)
+</code>
+  In both close() and drop(), the <code>WebSocketCloseReasonCode</code> enum provides the standard WebSocket Close Reason codes, with the ability
+  to specify application specific ones.</p>
+
+<ul>
+<li>A unique identifier that can be used to help manage the collection of <code>WebSocketConnection</code> objects connected to a <code>WebSocketService</code>.
+<code>swift
+id: String
+</code></li>
+</ul>
+<a href='#websocketservice' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='websocketservice'>WebSocketService</h3>
+
+<p>The functions of the WebSocketService protocol enable Kitura-WebSocket to notify a WebSocket service of a set of events that
+occur. These events include:
+- A client has connected to the WebSocketService
+<code>swift
+func connected(connection: WebSocketConnection)
+</code></p>
+
+<ul>
+<li><p>A client has disconnected from the WebSocketService
+<code>swift
+disconnected(connection: WebSocketConnection, reason: WebSocketCloseReasonCode)
+</code>
+The reason parameter contains the reason code associated with the client disconnecting. It may come from either
+a close command sent by the client or determined by Kitura-WebSocket if the connection&rsquo;s socket suddenly was closed.</p></li>
+<li><p>A binary message was received from a client
+<code>swift
+func received(message: Data, from: WebSocketConnection)
+</code>
+The message parameter contains the bytes of the message in the form of a Data struct.</p></li>
+<li><p>A text message was received from a client
+<code>swift
+func received(message: String, from: WebSocketConnection)
+</code>
+The message parameter contains the message in the form of a String.</p></li>
+</ul>
+<a href='#websocket' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='websocket'>WebSocket</h3>
+
+<p>Classes which implement the <code>WebSocketService</code> protocol are registered with the server using the function:
+<code>swift
+WebSocket.register(service: WebSocketService, onPath: String)
+</code>
+This function is passed the <code>WebSocketService</code> being registered along with the path it is being registered on.</p>
+<a href='#an-example' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='an-example'>An example</h2>
+
+<p>A simple example to better describe the APIs of Kitura-WebSocket. This example, a very simplistic chat service.
+The server side is written in Swift using Kitura-WebSocket and the client side is written in JavaScript using
+Node.js and the websocket NPM package.</p>
+<a href='#pre-requisites' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='pre-requisites'>Pre-requisites</h3>
+
+<p>In order to run the client one must have Node.js installed.</p>
+<a href='#the-server' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='the-server'>The server</h3>
+
+<p>The server, keeps track of the clients that have connected to it and echoes all text messages sent to it to all
+of the clients that have connected to it, with the exception of the client that sent the message.</p>
+
+<p>The server&rsquo;s directory setup is something like this:
+<pre>
+ServerDirectory
+├── Package.swift
+└── Sources
+    └── ChatServer
+        ├── ChatService.swift
+        └── main.swift
+</pre></p>
+
+<p>The Package.swift file contains:
+&ldquo;`swift
+import PackageDescription</p>
+
+<p>let package = Package(
+    name: <q>ChatServer</q>,
+    dependencies: [
+        .Package(url: <q>https://github.com/IBM-Swift/HeliumLogger.git</q>, majorVersion: 1, minor: 3),
+        .Package(url: <q>https://github.com/IBM-Swift/Kitura-WebSocket</q>, majorVersion: 0, minor: 2)
+    ]
+)
+&rdquo;`
+The HeliumLogger package, while strictly not required, was added to enable logging.</p>
+
+<p>The ChatService.swift file contains:
+&ldquo;`swift
+// ChatServer is a very simple chat server</p>
+
+<p>import Foundation</p>
+
+<p>import KituraWebSocket</p>
+
+<p>class ChatService: WebSocketService {</p>
+<pre class="highlight plaintext"><code>private var connections = [String: WebSocketConnection]()
+
+public func connected(connection: WebSocketConnection) {
+    connections[connection.id] = connection
+}
+
+public func disconnected(connection: WebSocketConnection, reason: WebSocketCloseReasonCode) {
+    connections.removeValue(forKey: connection.id)
+}
+
+public func received(message: Data, from: WebSocketConnection) {
+    from.close(reason: .invalidDataType, description: "Chat-Server only accepts text messages")
+
+    connections.removeValue(forKey: from.id)
+}
+
+public func received(message: String, from: WebSocketConnection) {
+    for (connectionId, connection) in connections {
+        if connectionId != from.id {
+            connection.send(message: message)
+        }
+    }
+}
+</code></pre>
+
+<p>}
+&rdquo;<code>
+The class has a Dictionary, connections, which is used to keep track of the connections of all of the connected clients. The Dictionary is
+maintained by the</code>connected<code>and</code>disconnected` functions, which are, respectively, adding and removing connections from the dictionary.</p>
+
+<p>The <code>received</code> function, which receives binary messages, is rejecting the message, closing the client connection and removing the connection
+from the set of known connections.</p>
+
+<p>Lastly, the <code>received</code> function, which receives text messages, simply echoes the message received to all clients except the one who sent the message.</p>
+
+<p>The main.swift file contains:
+&ldquo;`swift
+// ChatServer is a very simple chat server</p>
+
+<p>import Foundation</p>
+
+<p>import KituraNet
+import KituraWebSocket</p>
+
+<p>import HeliumLogger
+import LoggerAPI</p>
+
+<p>// Using an implementation for a Logger
+HeliumLogger.use(.info)</p>
+
+<p>WebSocket.register(service: ChatService(), onPath: <q>chat</q>)</p>
+
+<p>class ChatServerDelegate: ServerDelegate {
+    public func handle(request: ServerRequest, response: ServerResponse) {}
+}</p>
+
+<p>// Add HTTP Server to listen on port 8090
+let server = HTTP.createServer()
+server.delegate = ChatServerDelegate()</p>
+
+<p>do {
+    try server.listen(on: 8090)
+    ListenerGroup.waitForListeners()
+} catch {
+    Log.error(<q>Error listening on port 8090: \(error).</q>)
+}
+&rdquo;`
+In the main.swift file:
+- The HeliumLogger is set up to log info, warning, and error type messages.
+- The ChatService defined in the ChatService.swift file is registered on the path <em>chat</em>.
+- An HTTP server is created and setup to listen on port 8090.</p>
+
+<p>With this server set up clients should connect to the chat service as <em>ws://<strong>host</strong>:8090/chat</em>, where <strong>host</strong> is the host running the server.</p>
+<a href='#the-client' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='the-client'>The client</h3>
+
+<p>The client has a simple command line interface. At startup one passes the host and port number. The client simply reads
+messages to be sent from the terminal and displays messages received on the terminal as well.</p>
+
+<p>The server&rsquo;s directory setup is something like this:
+<pre>
+ClientDirectory
+├── package.json
+└── chat.js
+</pre></p>
+
+<p>The package.json at a minimum contains:
+<code>javascript
+{
+  &quot;name&quot;: &quot;chat&quot;,
+  &quot;description&quot;: &quot;Simple chat server client&quot;,
+  &quot;version&quot;: &quot;0.0.1&quot;,
+  &quot;engines&quot;: {
+    &quot;node&quot;: &quot;&gt;=0.8.0&quot;
+  },
+  &quot;dependencies&quot;: {
+    &quot;websocket&quot;: &quot;^1.0.23&quot;
+  }
+}
+</code></p>
+
+<p>The chat.js file contains:
+&ldquo;`javascript
+/* main file of Simple Chat Server Client */</p>
+
+<p>var readline = require(&lsquo;readline&rsquo;);
+var WebSocketClient = require(&#39;websocket&rsquo;).client</p>
+
+<p>var host = process.argv[2];</p>
+
+<p>rl = readline.createInterface(process.stdin, process.stdout);</p>
+
+<p>rl.setPrompt(&rsquo;&gt; &rsquo;);
+rl.prompt();
+var client = new WebSocketClient();</p>
+
+<p>client.on(&#39;connectFailed&rsquo;, function(error) {
+    console.log(&#39;Connect Error: &rsquo; + error.toString());
+    process.exit();
+});</p>
+
+<p>client.on(&#39;connect&rsquo;, function(connection) {
+    connection.on(&#39;error&rsquo;, function(error) {
+        console.log(<q>Connection Error:</q> + error.toString());
+        process.exit();
+    });</p>
+<pre class="highlight plaintext"><code>connection.on('close', function(reasonCode, description) {
+    console.log('chat Connection Closed. Code=' + reasonCode + ' (' + description +')');
+});
+
+connection.on('message', function(message) {
+    if (message.type === 'utf8') {
+        console.log('\r=&gt; ' + message.utf8Data);
+        rl.prompt();
+    }   
+});
+
+rl.on('line', function(line) {
+    connection.sendUTF(line);
+    rl.prompt();
+});
+
+rl.on('close', function() {
+    connection.close();
+    console.log('Have a great day!');
+    process.exit(0);
+});
+
+rl.prompt();
+</code></pre>
+
+<p>});</p>
+
+<p>client.connect(<q>ws://</q> + host +<q>/chat</q>, <q>chat</q>);
+&rdquo;`</p>
+<a href='#building-and-running-the-example' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='building-and-running-the-example'>Building and running the example</h3>
+
+<p>To build and run the server, in the server directory, simply:
+<code>
+swift build
+.build/debug/ChatServer
+</code>
+The server is now up and running.</p>
+<a href='#setting-up-and-running-the-client' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='setting-up-and-running-the-client'>Setting up and running the client</h3>
+
+<p>To setup the client, in the client directory, simply:
+<code>
+npm installed
+</code>
+That will install the websocket package.</p>
+
+<p>To run the client, again in the client directory, run:
+<code>
+node chat.js host:8090
+</code>
+Where <strong>host</strong> is the hostname of the host on which the server is running.</p>
+
+<p>The client can be run in several terminal windows on the same computer.</p>
+<a href='#community' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='community'>Community</h2>
+
+<p>We love to talk server-side Swift, and Kitura. Join our <a href="http://swift-at-ibm-slack.mybluemix.net/">Slack</a> to meet the team!</p>
+<a href='#license' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='license'>License</h2>
+
+<p>This library is licensed under Apache 2.0. Full license text is available in <a href="LICENSE.txt">LICENSE</a>.</p>
 
           </div>
         </section>
@@ -91,7 +416,7 @@
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2016 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2016-11-20)</p>
+      <p>&copy; 2017 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2017-01-04)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
