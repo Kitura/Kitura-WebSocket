@@ -1,6 +1,7 @@
 # Kitura-WebSocket
 **WebSocket support for Kitura base servers**
 
+[![Build Status - Master](https://travis-ci.org/IBM-Swift/Kitura-WebSocket.svg?branch=master)](https://travis-ci.org/IBM-Swift/Kitura-WebSocket)
 ![macOS](https://img.shields.io/badge/os-macOS-green.svg?style=flat)
 ![Linux](https://img.shields.io/badge/os-linux-green.svg?style=flat)
 ![Apache 2](https://img.shields.io/badge/license-Apache2-blue.svg?style=flat)
