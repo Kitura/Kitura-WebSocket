@@ -148,7 +148,7 @@ extension KituraTest {
                 let count = try socket.read(into: buffer)
                 
                 if count != 0 {
-                    let parserStatus = response.parse(buffer)
+                    let parserStatus = response.parse(buffer, from: 0, completeBuffer: false)
                     
                     if parserStatus.state == .messageComplete {
                         keepProcessing = false
