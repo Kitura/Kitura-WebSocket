@@ -32,8 +32,10 @@ public class WebSocketConnection {
     weak var service: WebSocketService? {
         didSet {
             guard let service = service else { return }
-            DispatchQueue.global().async { [unowned self] in
-                service.connected(connection: self)
+            DispatchQueue.global().async { [weak self] in
+                if let strongSelf = self {
+                    service.connected(connection: strongSelf)
+                }
             }
         }
     }
@@ -168,8 +170,10 @@ public class WebSocketConnection {
             let reasonTosend = reasonToSendBack ?? reason
             closeConnection(reason: reasonTosend, description: description, hard: true)
             
-            DispatchQueue.global().async { [unowned self] in
-                self.service?.disconnected(connection: self, reason: reason)
+            DispatchQueue.global().async { [weak self] in
+                if let strongSelf = self {
+                    strongSelf.service?.disconnected(connection: strongSelf, reason: reason)
+                }
             }
         }
         else {
