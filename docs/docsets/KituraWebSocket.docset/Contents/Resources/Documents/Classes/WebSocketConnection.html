@@ -128,6 +128,33 @@ at the other end of the connection.</p>
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/s:vC15KituraWebSocket19WebSocketConnection7requestP9KituraNet13ServerRequest_"></a>
+                    <a name="//apple_ref/swift/Property/request" class="dashAnchor"></a>
+                    <a class="token" href="#/s:vC15KituraWebSocket19WebSocketConnection7requestP9KituraNet13ServerRequest_">request</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The ServerRequest from the original protocol upgrade</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">request</span><span class="p">:</span> <span class="kt">ServerRequest</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/s:FC15KituraWebSocket19WebSocketConnection5closeFT6reasonGSqOS_24WebSocketCloseReasonCode_11descriptionGSqSS__T_"></a>
                     <a name="//apple_ref/swift/Method/close(reason:description:)" class="dashAnchor"></a>
                     <a class="token" href="#/s:FC15KituraWebSocket19WebSocketConnection5closeFT6reasonGSqOS_24WebSocketCloseReasonCode_11descriptionGSqSS__T_">close(reason:description:)</a>
@@ -331,9 +358,9 @@ with the specified reason code and description text followed by closing the sock
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:FC15KituraWebSocket19WebSocketConnection4sendFT7messageV10Foundation4Data_T_"></a>
-                    <a name="//apple_ref/swift/Method/send(message:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:FC15KituraWebSocket19WebSocketConnection4sendFT7messageV10Foundation4Data_T_">send(message:)</a>
+                    <a name="/s:FC15KituraWebSocket19WebSocketConnection4sendFT7messageV10Foundation4Data8asBinarySb_T_"></a>
+                    <a name="//apple_ref/swift/Method/send(message:asBinary:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:FC15KituraWebSocket19WebSocketConnection4sendFT7messageV10Foundation4Data8asBinarySb_T_">send(message:asBinary:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -341,12 +368,19 @@ with the specified reason code and description text followed by closing the sock
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Send a binary message to the client</p>
+                        <p>Send a message to the client contained in a Data struct.</p>
 
 <div class="aside aside-parameter">
     <p class="aside-title">Parameter</p>
     Parameter message: A Data struct containing the bytes to be sent to the client as a
-                binary message.
+                message.
+
+</div>
+
+<div class="aside aside-parameter">
+    <p class="aside-title">Parameter</p>
+    Parameter type: asBinary if true, which is the default, the message is sent as a 
+             binary mesage. If false, the message will be sent as a text message
 
 </div>
 
@@ -355,7 +389,7 @@ with the specified reason code and description text followed by closing the sock
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">send</span><span class="p">(</span><span class="nv">message</span><span class="p">:</span> <span class="kt">Data</span><span class="p">)</span></code></pre>
+                          <pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">send</span><span class="p">(</span><span class="nv">message</span><span class="p">:</span> <span class="kt">Data</span><span class="p">,</span> <span class="nv">asBinary</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">true</span><span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -371,7 +405,20 @@ with the specified reason code and description text followed by closing the sock
                               </td>
                               <td>
                                 <div>
-                                  <p>A Data struct containing the bytes to be sent to the client as a binary message.</p>
+                                  <p>A Data struct containing the bytes to be sent to the client as a message.</p>
+
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>type</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>asBinary if true, which is the default, the message is sent as a binary mesage. If false, the message will be sent as a text message</p>
 
                                 </div>
                               </td>
@@ -444,7 +491,7 @@ with the specified reason code and description text followed by closing the sock
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2017 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2017-01-04)</p>
+      <p>&copy; 2017 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2017-02-12)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
