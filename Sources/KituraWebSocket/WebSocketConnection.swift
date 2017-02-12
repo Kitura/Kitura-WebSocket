@@ -17,6 +17,8 @@
 import Dispatch
 import Foundation
 
+import KituraNet
+
 #if os(Linux)
     import Glibc
 #else
@@ -56,10 +58,14 @@ public class WebSocketConnection {
     /// Unique identifier for this `WebSocketConnection`
     public let id: String
     
+    /// The ServerRequest from the original protocol upgrade
+    public let request: ServerRequest
+    
     private var messageState: MessageStates = .unknown
     
-    init() {
+    init(request: ServerRequest) {
         id = UUID().uuidString
+        self.request = request
         buffer = NSMutableData(capacity: WebSocketConnection.bufferSize) ?? NSMutableData()
     }
     
@@ -106,15 +112,17 @@ public class WebSocketConnection {
         }
     }
     
-    /// Send a binary message to the client
+    /// Send a message to the client contained in a Data struct.
     ///
     /// - Parameter message: A Data struct containing the bytes to be sent to the client as a
-    ///                     binary message.
-    public func send(message: Data) {
+    ///                     message.
+    /// - Parameter type: asBinary if true, which is the default, the message is sent as a 
+    ///                  binary mesage. If false, the message will be sent as a text message
+    public func send(message: Data, asBinary: Bool = true) {
         guard active else { return }
         
         let dataToWrite = NSData(data: message)
-        sendMessage(withOpCode: .binary, payload: dataToWrite.bytes, payloadLength: dataToWrite.length)
+        sendMessage(withOpCode: asBinary ? .binary : .text, payload: dataToWrite.bytes, payloadLength: dataToWrite.length)
     }
     
     /// Send a text message to the client

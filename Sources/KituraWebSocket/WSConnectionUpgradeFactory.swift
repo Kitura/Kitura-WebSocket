@@ -69,7 +69,7 @@ public class WSConnectionUpgradeFactory: ConnectionUpgradeFactory {
                            [sha1Data.base64EncodedString(options: .lineLength64Characters)]
         response.headers["Sec-WebSocket-Protocol"] = request.headers["Sec-WebSocket-Protocol"]
         
-        let connection = WebSocketConnection()
+        let connection = WebSocketConnection(request: request)
         let processor = WSSocketProcessor(connection: connection)
         connection.processor = processor
         connection.service = service
