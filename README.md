@@ -21,6 +21,7 @@ Kitura-WebSocket supports version thirteen of the WebSocket protocol.
 * [Pre-requisites](#pre-requisites)
 * [APIs](#apis)
 * [An example](#an-example)
+* [A more complete example](a-more-complete-example)
 * [Community](#community)
 * [License](#license)
 
@@ -175,6 +176,10 @@ from the set of known connections.
 
 Lastly, the `received` function, which receives text messages, simply echoes the message received to all clients except the one who sent the message.
 
+It should be noted that all of these functions can be invoked from many threads simultaneously. In real applications,
+one should add locking around the access of non-thread safe artifacts of the application such as the
+connections Dictionary in this very simplistic example.
+
 The main.swift file contains:
 ```swift
 // ChatServer is a very simple chat server
@@ -316,6 +321,10 @@ node chat.js host:8090
 Where **host** is the hostname of the host on which the server is running.
 
 The client can be run in several terminal windows on the same computer.
+
+## A more complete example
+For amore complete example please see [Kitura-Chat-Server](https://github.com/IBM-Swift/Kitura-Chat-Server)
+
 ## Community
 
 We love to talk server-side Swift, and Kitura. Join our [Slack](http://swift-at-ibm-slack.mybluemix.net/) to meet the team!
