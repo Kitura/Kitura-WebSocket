@@ -134,8 +134,8 @@ extension KituraTest {
         return socket
     }
     
-    func processUpgradeResponse(socket: Socket) -> (HTTPIncomingMessage?, NSMutableData?) {
-        let response: HTTPIncomingMessage = HTTPIncomingMessage(isRequest: false)
+    func processUpgradeResponse(socket: Socket) -> (ClientResponse?, NSMutableData?) {
+        let response = ClientResponse()
         var unparsedData: NSMutableData?
         var errorFlag = false
         
@@ -148,7 +148,7 @@ extension KituraTest {
                 let count = try socket.read(into: buffer)
                 
                 if count != 0 {
-                    let parserStatus = response.parse(buffer, from: 0, completeBuffer: false)
+                    let parserStatus = response.parse(buffer, from: 0)
                     
                     if parserStatus.state == .messageComplete {
                         keepProcessing = false
