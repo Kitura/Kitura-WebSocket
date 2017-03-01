@@ -16,6 +16,11 @@ protocol (RFC 6455). It is compatible with a variety of WebSocket clients, inclu
 
 Kitura-WebSocket supports version thirteen of the WebSocket protocol.
 
+Both the WS and WSS (SSL/TLS secured WS) protocols are supported by Kitura-WebSocket. 
+To enable WSS simply set up your Kitura based server for SSL/TLS support. See the tutorial 
+[Enabling SSL/TLS on your Kitura server](http://www.kitura.io/en/resources/tutorials/ssl.html) on
+[www.kitura.io](http://www.kitura.io/en/starter/settingup.html) for details.  
+
 ## Table of Contents
 * [Summary](#summary)
 * [Pre-requisites](#pre-requisites)
