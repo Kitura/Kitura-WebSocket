@@ -86,7 +86,7 @@ class UpgradeErrors: XCTestCase {
         
         do {
             let body = try response.readString()
-            XCTAssertEqual(body, expectedMessage, "The received error message [\(body)] was not equal to the expected one [\(expectedMessage)]")
+            XCTAssertEqual(body, expectedMessage, "The received error message [\(String(describing: body))] was not equal to the expected one [\(expectedMessage)]")
             
             expectation.fulfill()
         }
