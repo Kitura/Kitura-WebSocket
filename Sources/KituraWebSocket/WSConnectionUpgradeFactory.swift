@@ -64,7 +64,7 @@ public class WSConnectionUpgradeFactory: ConnectionUpgradeFactory {
         
         let sha1 = Digest(using: .sha1)
         let sha1Bytes = sha1.update(string: securityKey[0] + wsGUID)!.final()
-        let sha1Data = NSData(bytes: sha1Bytes, length: sha1Bytes.count)
+        let sha1Data = Data(bytes: sha1Bytes, count: sha1Bytes.count)
         response.headers["Sec-WebSocket-Accept"] =
                            [sha1Data.base64EncodedString(options: .lineLength64Characters)]
         response.headers["Sec-WebSocket-Protocol"] = request.headers["Sec-WebSocket-Protocol"]
