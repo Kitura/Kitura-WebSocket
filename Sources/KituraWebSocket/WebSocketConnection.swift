@@ -34,7 +34,7 @@ public class WebSocketConnection {
     weak var service: WebSocketService? {
         didSet {
             guard let service = service else { return }
-            DispatchQueue.global().async { [weak self] in
+            callbackQueue.async { [weak self] in
                 if let strongSelf = self {
                     service.connected(connection: strongSelf)
                 }
@@ -46,7 +46,13 @@ public class WebSocketConnection {
     private let buffer: NSMutableData
     
     private var writeLock = DispatchSemaphore(value: 1)
-    
+
+    // Each message from a given socket needs to be processed in order. All callbacks such as
+    // connected(...), received(...), or disconnected(...) will be called on this serial queue.
+    // Each socket still has its own serial queue which means separate sockets can still be
+    // processed concurrently.
+    private var callbackQueue = DispatchQueue(label: "SocketCallbackQueue")
+
     private let message = NSMutableData()
     
     private var active = true
@@ -178,7 +184,7 @@ public class WebSocketConnection {
             let reasonTosend = reasonToSendBack ?? reason
             closeConnection(reason: reasonTosend, description: description, hard: true)
             
-            DispatchQueue.global().async { [weak self] in
+            callbackQueue.async { [weak self] in
                 if let strongSelf = self {
                     strongSelf.service?.disconnected(connection: strongSelf, reason: reason)
                 }
@@ -200,7 +206,7 @@ public class WebSocketConnection {
             
             if frame.finalFrame {
                 let data = Data(bytes: frame.payload.bytes, count: frame.payload.length)
-                DispatchQueue.global().async { [unowned self] in
+                callbackQueue.async { [unowned self] in
                     self.service?.received(message: data, from: self)
                 }
             }
@@ -243,7 +249,7 @@ public class WebSocketConnection {
             if frame.finalFrame {
                 if messageState == .binary {
                     let data = Data(bytes: message.bytes, count: message.length)
-                    DispatchQueue.global().async { [unowned self] in
+                    callbackQueue.async { [unowned self] in
                         self.service?.received(message: data, from: self)
                     }
                 } else {
@@ -283,7 +289,7 @@ public class WebSocketConnection {
         from.append(&zero, length: 1)
         let bytes = from.bytes.bindMemory(to: CChar.self, capacity: 1)
         if let text = String(cString: bytes, encoding: .utf8) {
-            DispatchQueue.global().async { [unowned self] in
+            callbackQueue.async { [unowned self] in
                 self.service?.received(message: text, from: self)
             }
         }
