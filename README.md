@@ -206,23 +206,23 @@ class ChatServerDelegate: ServerDelegate {
     public func handle(request: ServerRequest, response: ServerResponse) {}
 }
 
-// Add HTTP Server to listen on port 8090
+// Add HTTP Server to listen on port 8080
 let server = HTTP.createServer()
 server.delegate = ChatServerDelegate()
 
 do {
-    try server.listen(on: 8090)
+    try server.listen(on: 8080)
     ListenerGroup.waitForListeners()
 } catch {
-    Log.error("Error listening on port 8090: \(error).")
+    Log.error("Error listening on port 8080: \(error).")
 }
 ```
 In the main.swift file:
 - The HeliumLogger is set up to log info, warning, and error type messages.
 - The ChatService defined in the ChatService.swift file is registered on the path *chat*.
-- An HTTP server is created and setup to listen on port 8090.
+- An HTTP server is created and setup to listen on port 8080.
 
-With this server set up clients should connect to the chat service as *ws://__host__:8090/chat*, where **host** is the host running the server.
+With this server set up clients should connect to the chat service as *ws://__host__:8080/chat*, where **host** is the host running the server.
 
 ### The client
 The client has a simple command line interface. At startup one passes the host and port number. The client simply reads
@@ -321,7 +321,7 @@ That will install the websocket package.
 
 To run the client, again in the client directory, run:
 ```
-node chat.js host:8090
+node chat.js host:8080
 ```
 Where **host** is the hostname of the host on which the server is running.
 
