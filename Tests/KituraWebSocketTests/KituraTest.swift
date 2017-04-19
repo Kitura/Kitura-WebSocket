@@ -48,7 +48,7 @@ extension KituraTest {
         let server = HTTP.createServer()
         
         do {
-            try server.listen(on: 8090)
+            try server.listen(on: 8080)
         
             let requestQueue = DispatchQueue(label: "Request queue")
         
@@ -107,10 +107,10 @@ extension KituraTest {
         var socket: Socket?
         do {
             socket = try Socket.create()
-            try socket?.connect(to: "localhost", port: 8090)
+            try socket?.connect(to: "localhost", port: 8080)
             
             var request = "GET " + toPath + " HTTP/1.1\r\n" +
-                "Host: localhost:8090\r\n" +
+                "Host: localhost:8080\r\n" +
                 "Upgrade: websocket\r\n" +
                 "Connection: Upgrade\r\n"
             
