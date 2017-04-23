@@ -15,6 +15,7 @@
  **/
 
 import XCTest
+import Glibc
 
 @testable import KituraWebSocketTests
 
