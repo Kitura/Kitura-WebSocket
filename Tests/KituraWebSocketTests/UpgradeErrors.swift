@@ -32,7 +32,7 @@ class UpgradeErrors: KituraTest {
     }
     
     func testNoSecWebSocketKey() {
-        ConnectionUpgrader.register(factory: WSConnectionUpgradeFactory())
+        WebSocket.factory.clear()
         
         performServerTest() { expectation in
             guard let socket = self.sendUpgradeRequest(forProtocolVersion: "13", toPath: "/testing123", usingKey: nil) else { return }
@@ -42,7 +42,7 @@ class UpgradeErrors: KituraTest {
     }
     
     func testNoSecWebSocketVersion() {
-        ConnectionUpgrader.register(factory: WSConnectionUpgradeFactory())
+        WebSocket.factory.clear()
         
         performServerTest(asyncTasks: { expectation in
             guard let socket = self.sendUpgradeRequest(forProtocolVersion: nil, toPath: "/testing123", usingKey: nil) else { return }
@@ -57,7 +57,7 @@ class UpgradeErrors: KituraTest {
     }
     
     func testNoService() {
-        ConnectionUpgrader.register(factory: WSConnectionUpgradeFactory())
+        WebSocket.factory.clear()
         
         performServerTest() { expectation in
             guard let socket = self.sendUpgradeRequest(forProtocolVersion: "13", toPath: "/testing123", usingKey: "test") else { return }
