@@ -36,7 +36,8 @@ class KituraTest: XCTestCase {
         KituraTest.initOnce
     }
     
-    func doTearDown() {
+    override func tearDown() {
+        ConnectionUpgrader.register(factory: WebSocket.factory)
     }
     
     private var wsGUID: String { return "258EAFA5-E914-47DA-95CA-C5AB0DC85B11" }
@@ -59,7 +60,7 @@ class KituraTest: XCTestCase {
                 }
             }
         
-            waitExpectation(timeout: 10) { error in
+            waitForExpectations(timeout: 10) { error in
                 // blocks test until request completes
                 server.stop()
                 XCTAssertNil(error)
@@ -225,10 +226,6 @@ class KituraTest: XCTestCase {
 
     func expectation(line: Int, index: Int) -> XCTestExpectation {
         return self.expectation(description: "\(type(of: self)):\(line)[\(index)]")
-    }
-    
-    func waitExpectation(timeout t: TimeInterval, handler: XCWaitCompletionHandler?) {
-        self.waitForExpectations(timeout: t, handler: handler)
     }
 }
 
