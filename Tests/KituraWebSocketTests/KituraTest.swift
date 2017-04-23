@@ -36,10 +36,6 @@ class KituraTest: XCTestCase {
         KituraTest.initOnce
     }
     
-    override func tearDown() {
-        ConnectionUpgrader.register(factory: WebSocket.factory)
-    }
-    
     private var wsGUID: String { return "258EAFA5-E914-47DA-95CA-C5AB0DC85B11" }
     
     var secWebKey: String { return "test" }
