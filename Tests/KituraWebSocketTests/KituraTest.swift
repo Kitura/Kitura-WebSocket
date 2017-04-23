@@ -25,15 +25,15 @@ import Socket
 import Foundation
 import Dispatch
 
-protocol KituraTest {
-    func expectation(line: Int, index: Int) -> XCTestExpectation
-    func waitExpectation(timeout t: TimeInterval, handler: XCWaitCompletionHandler?)
-}
-
-extension KituraTest {
+class KituraTest: XCTestCase {
     
-    func doSetUp() {
-        PrintLogger.use()
+    private static let initOnce: () = {
+        PrintLogger.use(colored: true)
+    }()
+    
+    override func setUp() {
+        super.setUp()
+        KituraTest.initOnce
     }
     
     func doTearDown() {
@@ -222,9 +222,7 @@ extension KituraTest {
         
         XCTAssertEqual(reasonCode, UInt16(expectedReasonCode.code()), "The close reason code wasn't \(expectedReasonCode) - [\(expectedReasonCode.code())] it was \(reasonCode)")
     }
-}
 
-extension XCTestCase: KituraTest {
     func expectation(line: Int, index: Int) -> XCTestExpectation {
         return self.expectation(description: "\(type(of: self)):\(line)[\(index)]")
     }

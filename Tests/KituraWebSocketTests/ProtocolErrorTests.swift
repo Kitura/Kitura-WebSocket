@@ -20,7 +20,7 @@ import Foundation
 import LoggerAPI
 @testable import KituraWebSocket
 
-class ProtocolErrorTests: XCTestCase {
+class ProtocolErrorTests: KituraTest {
     
     static var allTests: [(String, (ProtocolErrorTests) -> () throws -> Void)] {
         return [
@@ -29,14 +29,6 @@ class ProtocolErrorTests: XCTestCase {
             ("testJustFinalContinuationFrame", testJustFinalContinuationFrame),
             ("testTextAndBinaryFrames", testTextAndBinaryFrames)
         ]
-    }
-    
-    override func setUp() {
-        doSetUp()
-    }
-    
-    override func tearDown() {
-        doTearDown()
     }
     
     func testBinaryAndTextFrames() {

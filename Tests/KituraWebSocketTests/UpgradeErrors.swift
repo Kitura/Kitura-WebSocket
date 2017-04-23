@@ -21,7 +21,7 @@ import Foundation
 @testable import KituraNet
 import Socket
 
-class UpgradeErrors: XCTestCase {
+class UpgradeErrors: KituraTest {
     
     static var allTests: [(String, (UpgradeErrors) -> () throws -> Void)] {
         return [
@@ -29,14 +29,6 @@ class UpgradeErrors: XCTestCase {
             ("testNoSecWebSocketVersion", testNoSecWebSocketVersion),
             ("testNoService", testNoService)
         ]
-    }
-    
-    override func setUp() {
-        doSetUp()
-    }
-    
-    override func tearDown() {
-        doTearDown()
     }
     
     func testNoSecWebSocketKey() {
