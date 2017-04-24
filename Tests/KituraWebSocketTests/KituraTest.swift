@@ -25,18 +25,15 @@ import Socket
 import Foundation
 import Dispatch
 
-protocol KituraTest {
-    func expectation(line: Int, index: Int) -> XCTestExpectation
-    func waitExpectation(timeout t: TimeInterval, handler: XCWaitCompletionHandler?)
-}
-
-extension KituraTest {
+class KituraTest: XCTestCase {
     
-    func doSetUp() {
-        PrintLogger.use()
-    }
+    private static let initOnce: () = {
+        PrintLogger.use(colored: true)
+    }()
     
-    func doTearDown() {
+    override func setUp() {
+        super.setUp()
+        KituraTest.initOnce
     }
     
     private var wsGUID: String { return "258EAFA5-E914-47DA-95CA-C5AB0DC85B11" }
@@ -59,7 +56,7 @@ extension KituraTest {
                 }
             }
         
-            waitExpectation(timeout: 10) { error in
+            waitForExpectations(timeout: 10) { error in
                 // blocks test until request completes
                 server.stop()
                 XCTAssertNil(error)
@@ -222,15 +219,9 @@ extension KituraTest {
         
         XCTAssertEqual(reasonCode, UInt16(expectedReasonCode.code()), "The close reason code wasn't \(expectedReasonCode) - [\(expectedReasonCode.code())] it was \(reasonCode)")
     }
-}
 
-extension XCTestCase: KituraTest {
     func expectation(line: Int, index: Int) -> XCTestExpectation {
         return self.expectation(description: "\(type(of: self)):\(line)[\(index)]")
-    }
-    
-    func waitExpectation(timeout t: TimeInterval, handler: XCWaitCompletionHandler?) {
-        self.waitForExpectations(timeout: t, handler: handler)
     }
 }
 

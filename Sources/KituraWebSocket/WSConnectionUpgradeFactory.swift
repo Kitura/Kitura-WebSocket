@@ -87,4 +87,9 @@ public class WSConnectionUpgradeFactory: ConnectionUpgradeFactory {
         }
         registry[path] = service
     }
+    
+    /// Clear the `WebSocketService` registry. Used in testing.
+    func clear() {
+        registry.removeAll()
+    }
 }

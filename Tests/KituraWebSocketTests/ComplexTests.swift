@@ -20,7 +20,7 @@ import Foundation
 import LoggerAPI
 @testable import KituraWebSocket
 
-class ComplexTests: XCTestCase {
+class ComplexTests: KituraTest {
     
     static var allTests: [(String, (ComplexTests) -> () throws -> Void)] {
         return [
@@ -33,15 +33,7 @@ class ComplexTests: XCTestCase {
         ]
     }
     
-    override func setUp() {
-        doSetUp()
-    }
-    
-    override func tearDown() {
-        doTearDown()
-    }
-    
-    func testBinaryShortAndMediumFrames() {
+        func testBinaryShortAndMediumFrames() {
         register(closeReason: .noReasonCodeSent)
         
         performServerTest() { expectation in

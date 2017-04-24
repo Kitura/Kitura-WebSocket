@@ -19,7 +19,7 @@ import KituraNet
 /// Main class for the Kitura-WebSocket API. Used to register `WebSocketService` classes
 /// that will handle WebSocket connections for specific paths.
 public class WebSocket {
-    private static let factory = WSConnectionUpgradeFactory()
+    static let factory = WSConnectionUpgradeFactory()
     
     /// Register a `WebSocketService` for a specific path
     ///

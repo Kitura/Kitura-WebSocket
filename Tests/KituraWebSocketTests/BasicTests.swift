@@ -21,7 +21,7 @@ import LoggerAPI
 @testable import KituraWebSocket
 import Socket
 
-class BasicTests: XCTestCase {
+class BasicTests: KituraTest {
     
     static var allTests: [(String, (BasicTests) -> () throws -> Void)] {
         return [
@@ -36,14 +36,6 @@ class BasicTests: XCTestCase {
             ("testTextMediumMessage", testTextMediumMessage),
             ("testTextShortMessage", testTextShortMessage)
         ]
-    }
-    
-    override func setUp() {
-        doSetUp()
-    }
-    
-    override func tearDown() {
-        doTearDown()
     }
     
     func testBinaryLongMessage() {
