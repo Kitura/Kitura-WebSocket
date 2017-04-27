@@ -23,15 +23,26 @@ import KituraNet
 class TestWebSocketService: WebSocketService {
     var connectionId = ""
     let closeReason: WebSocketCloseReasonCode
+    let pingMessage: String?
     let testServerRequest: Bool
     
-    public init(closeReason: WebSocketCloseReasonCode, testServerRequest: Bool) {
+    public init(closeReason: WebSocketCloseReasonCode, testServerRequest: Bool, pingMessage: String?) {
         self.closeReason = closeReason
         self.testServerRequest = testServerRequest
+        self.pingMessage = pingMessage
     }
     
     public func connected(connection: WebSocketConnection) {
         connectionId = connection.id
+        
+        if let pingMessage = pingMessage {
+            if pingMessage.characters.count > 0 {
+                connection.ping(withMessage: pingMessage)
+            }
+            else {
+                connection.ping()
+            }
+        }
         
         if testServerRequest {
             performServerRequestTests(request: connection.request)
