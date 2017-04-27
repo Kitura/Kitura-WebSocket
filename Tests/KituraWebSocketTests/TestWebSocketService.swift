@@ -18,17 +18,53 @@ import XCTest
 import Foundation
 
 @testable import KituraWebSocket
+import KituraNet
 
 class TestWebSocketService: WebSocketService {
     var connectionId = ""
     let closeReason: WebSocketCloseReasonCode
+    let testServerRequest: Bool
     
-    public init(closeReason: WebSocketCloseReasonCode) {
+    public init(closeReason: WebSocketCloseReasonCode, testServerRequest: Bool) {
         self.closeReason = closeReason
+        self.testServerRequest = testServerRequest
     }
     
     public func connected(connection: WebSocketConnection) {
         connectionId = connection.id
+        
+        if testServerRequest {
+            performServerRequestTests(request: connection.request)
+            
+            sleep(2)
+            
+            performServerRequestTests(request: connection.request)
+        }
+    }
+    
+    private func performServerRequestTests(request: ServerRequest) {
+        XCTAssertEqual(request.method, "GET", "The method of the request should be GET, it was \(request.method))")
+        XCTAssertEqual(request.httpVersionMajor, 1, "HTTP version major should be 1, it was \(String(describing: request.httpVersionMajor))")
+        XCTAssertEqual(request.httpVersionMinor, 1, "HTTP version major should be 1, it was \(String(describing: request.httpVersionMinor))")
+        XCTAssertEqual(request.urlURL.pathComponents[1], "wstester", "Path of the request should be /wstester, it was /\(request.urlURL.pathComponents[1])")
+        XCTAssertEqual(request.url, String("/wstester")?.data(using: .utf8)!, "Path of the request should be /wstester, it was \(String(data: request.url, encoding: .utf8) ?? "Not UTF-8")")
+        let protocolVersion = request.headers["Sec-WebSocket-Version"]
+        XCTAssertNotNil(protocolVersion, "The Sec-WebSocket-Version header wasn't in the headers")
+        XCTAssertEqual(protocolVersion!.count, 1, "The Sec-WebSocket-Version header should have one value")
+        XCTAssertEqual(protocolVersion![0], "13", "The Sec-WebSocket-Version header value should be 13, it was \(protocolVersion![0])")
+        
+        do {
+            let bodyString = try request.readString()
+            XCTAssertNil(bodyString, "Read of body should have returned nil, it returned \"\(String(describing: bodyString))\"")
+            var body = Data()
+            var count = try request.read(into: &body)
+            XCTAssertEqual(count, 0, "Read of body into a Data should have returned 0, it returned \(count)")
+            count = try request.readAllData(into: &body)
+            XCTAssertEqual(count, 0, "Read of entire body into a Data should have returned 0, it returned \(count)")
+        }
+        catch {
+            XCTFail("Failed to read from the body. Error=\(error)")
+        }
     }
     
     public func disconnected(connection: WebSocketConnection, reason: WebSocketCloseReasonCode) {

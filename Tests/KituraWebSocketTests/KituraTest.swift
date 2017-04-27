@@ -96,8 +96,8 @@ class KituraTest: XCTestCase {
         expectation.fulfill()
     }
     
-    func register(closeReason: WebSocketCloseReasonCode) {
-        WebSocket.register(service: TestWebSocketService(closeReason: closeReason), onPath: "/wstester")
+    func register(closeReason: WebSocketCloseReasonCode, testServerRequest: Bool=false) {
+        WebSocket.register(service: TestWebSocketService(closeReason: closeReason, testServerRequest: testServerRequest), onPath: "/wstester")
     }
     
     func sendUpgradeRequest(forProtocolVersion: String?="13", toPath: String, usingKey: String?) -> Socket? {

@@ -71,7 +71,7 @@ public class WebSocketConnection {
     
     init(request: ServerRequest) {
         id = UUID().uuidString
-        self.request = request
+        self.request = WSServerRequest(request: request)
         buffer = NSMutableData(capacity: WebSocketConnection.bufferSize) ?? NSMutableData()
     }
     

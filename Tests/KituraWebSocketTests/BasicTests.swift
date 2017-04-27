@@ -31,6 +31,7 @@ class BasicTests: KituraTest {
             ("testGracefullClose", testGracefullClose),
             ("testPing", testPing),
             ("testPingWithText", testPingWithText),
+            ("testServerRequest", testServerRequest),
             ("testSuccessfullUpgrade", testSuccessfullUpgrade),
             ("testTextLongMessage", testTextLongMessage),
             ("testTextMediumMessage", testTextMediumMessage),
@@ -134,6 +135,24 @@ class BasicTests: KituraTest {
             self.performTest(framesToSend: [(true, self.opcodePing, pingPayload)],
                              expectedFrames: [(true, self.opcodePong, pingPayload)],
                              expectation: expectation)
+        }
+    }
+    
+    func testServerRequest() {
+        register(closeReason: .noReasonCodeSent, testServerRequest: true)
+        
+        performServerTest() { expectation in
+            guard let socket = self.sendUpgradeRequest(toPath: "/wstester", usingKey: self.secWebKey) else { return }
+            
+            _ = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey, expectation: expectation)
+            
+            sleep(3)       // Wait a bit for the WebSocketService to test the ServerRequest
+            
+            // Close the socket abruptly. Need to wait to let the close percolate up on the other side
+            socket.close()
+            usleep(150)
+            
+            expectation.fulfill()
         }
     }
     
