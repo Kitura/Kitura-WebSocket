@@ -30,6 +30,8 @@ class BasicTests: KituraTest {
             ("testBinaryShortMessage", testBinaryShortMessage),
             ("testGracefullClose", testGracefullClose),
             ("testPing", testPing),
+            ("testPingFromServer", testPingFromServer),
+            ("testPingFromServerWithNoText", testPingFromServerWithNoText),
             ("testPingWithText", testPingWithText),
             ("testServerRequest", testServerRequest),
             ("testSuccessfullUpgrade", testSuccessfullUpgrade),
@@ -94,7 +96,7 @@ class BasicTests: KituraTest {
         performServerTest() { expectation in
             guard let socket = self.sendUpgradeRequest(toPath: "/wstester", usingKey: self.secWebKey) else { return }
             
-            let buffer = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey, expectation: expectation)
+            let buffer = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey)
             
             self.sendFrame(final: true, withOpcode: self.opcodeClose,
                            withPayload: self.payload(closeReasonCode: .normal), on: socket)
@@ -125,6 +127,58 @@ class BasicTests: KituraTest {
         }
     }
     
+    func testPingFromServer() {
+        register(closeReason: .noReasonCodeSent, pingMessage: "A test of ping")
+        
+        performServerTest() { expectation in
+            
+            let socket = self.pingFromServerHelper(text: "A test of ping")
+            
+            // Close the socket abruptly. Need to wait to let the close percolate up on the other side
+            if let socket = socket {
+                socket.close()
+                usleep(150)
+            
+                expectation.fulfill()
+            }
+        }
+    }
+    
+    func testPingFromServerWithNoText() {
+        register(closeReason: .noReasonCodeSent, pingMessage: "")
+        
+        performServerTest() { expectation in
+            
+            let socket = self.pingFromServerHelper(text: "")
+            
+            // Close the socket abruptly. Need to wait to let the close percolate up on the other side
+            if let socket = socket {
+                socket.close()
+                usleep(150)
+                
+                expectation.fulfill()
+            }
+        }
+    }
+    
+    private func pingFromServerHelper(text: String) -> Socket? {
+        let expectedPayload = payload(text: text)
+        
+        guard let socket = sendUpgradeRequest(toPath: "/wstester", usingKey: self.secWebKey) else { return nil }
+        
+        let buffer = checkUpgradeResponse(from: socket, forKey: self.secWebKey)
+        
+        let (final, opCode, returnedPayload, _) = self.parseFrame(using: buffer, position: 0, from: socket)
+        
+        XCTAssert(final, "Expected message wasn't final")
+        XCTAssertEqual(opCode, opcodePing, "Opcode wasn't \(opcodePing). It was \(opCode)")
+        XCTAssertEqual(expectedPayload, returnedPayload, "The payload [\(returnedPayload)] doesn't equal the expected [\(expectedPayload)]")
+        
+        self.sendFrame(final: true, withOpcode: opcodePong, withPayload: returnedPayload, on: socket)
+        
+        return socket
+    }
+    
     func testPingWithText() {
         register(closeReason: .noReasonCodeSent)
         
@@ -144,7 +198,7 @@ class BasicTests: KituraTest {
         performServerTest() { expectation in
             guard let socket = self.sendUpgradeRequest(toPath: "/wstester", usingKey: self.secWebKey) else { return }
             
-            _ = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey, expectation: expectation)
+            _ = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey)
             
             sleep(3)       // Wait a bit for the WebSocketService to test the ServerRequest
             
@@ -162,7 +216,7 @@ class BasicTests: KituraTest {
         performServerTest() { expectation in
             guard let socket = self.sendUpgradeRequest(toPath: "/wstester", usingKey: self.secWebKey) else { return }
             
-            _ = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey, expectation: expectation)
+            _ = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey)
             
             // Close the socket abruptly. Need to wait to let the close percolate up on the other side
             socket.close()
