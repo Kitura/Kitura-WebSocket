@@ -71,7 +71,7 @@ class KituraTest: XCTestCase {
                      expectedFrames: [(Bool, Int, NSData)], expectation: XCTestExpectation) {
         guard let socket = sendUpgradeRequest(toPath: "/wstester", usingKey: secWebKey) else { return }
         
-        let buffer = checkUpgradeResponse(from: socket, forKey: secWebKey, expectation: expectation)
+        let buffer = checkUpgradeResponse(from: socket, forKey: secWebKey)
         
         for frameToSend in framesToSend {
             let (finalToSend, opCodeToSend, payloadToSend) = frameToSend
@@ -96,8 +96,9 @@ class KituraTest: XCTestCase {
         expectation.fulfill()
     }
     
-    func register(closeReason: WebSocketCloseReasonCode, testServerRequest: Bool=false) {
-        WebSocket.register(service: TestWebSocketService(closeReason: closeReason, testServerRequest: testServerRequest), onPath: "/wstester")
+    func register(closeReason: WebSocketCloseReasonCode, testServerRequest: Bool=false, pingMessage: String?=nil) {
+        let service = TestWebSocketService(closeReason: closeReason, testServerRequest: testServerRequest, pingMessage: pingMessage)
+        WebSocket.register(service: service, onPath: "/wstester")
     }
     
     func sendUpgradeRequest(forProtocolVersion: String?="13", toPath: String, usingKey: String?) -> Socket? {
@@ -168,7 +169,7 @@ class KituraTest: XCTestCase {
         return (errorFlag ? nil : response, unparsedData)
     }
     
-    func checkUpgradeResponse(from: Socket, forKey: String, expectation: XCTestExpectation) -> NSMutableData {
+    func checkUpgradeResponse(from: Socket, forKey: String) -> NSMutableData {
         let (rawResponse, extraData) = self.processUpgradeResponse(socket: from)
         let buffer = extraData ?? NSMutableData()
         

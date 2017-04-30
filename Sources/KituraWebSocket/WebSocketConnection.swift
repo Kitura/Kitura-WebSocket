@@ -31,16 +31,7 @@ import KituraNet
 public class WebSocketConnection {
     weak var processor: WSSocketProcessor?
     
-    weak var service: WebSocketService? {
-        didSet {
-            guard let service = service else { return }
-            callbackQueue.async { [weak self] in
-                if let strongSelf = self {
-                    service.connected(connection: strongSelf)
-                }
-            }
-        }
-    }
+    weak var service: WebSocketService?
     
     private static let bufferSize = 2000
     private let buffer: NSMutableData
@@ -192,6 +183,16 @@ public class WebSocketConnection {
         }
         else {
             processor?.close()
+        }
+    }
+    
+    func fireConnected() {
+        guard let service = service else { return }
+        
+        callbackQueue.async { [weak self] in
+            if let strongSelf = self {
+                service.connected(connection: strongSelf)
+            }
         }
     }
     

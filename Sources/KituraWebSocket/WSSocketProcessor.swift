@@ -25,7 +25,12 @@ import LoggerAPI
 class WSSocketProcessor: IncomingSocketProcessor {
     /// A back reference to the `IncomingSocketHandler` processing the socket that
     /// this `IncomingDataProcessor` is processing.
-    public weak var handler: IncomingSocketHandler?
+    public weak var handler: IncomingSocketHandler? {
+        didSet {
+            guard handler != nil else { return }
+            connection.fireConnected()
+        }
+    }
     
     /// The socket if idle will be kept alive until...
     public var keepAliveUntil: TimeInterval = 500.0

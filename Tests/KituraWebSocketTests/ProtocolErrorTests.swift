@@ -25,9 +25,11 @@ class ProtocolErrorTests: KituraTest {
     static var allTests: [(String, (ProtocolErrorTests) -> () throws -> Void)] {
         return [
             ("testBinaryAndTextFrames", testBinaryAndTextFrames),
+            ("testInvalidOpCode", testInvalidOpCode),
             ("testJustContinuationFrame", testJustContinuationFrame),
             ("testJustFinalContinuationFrame", testJustFinalContinuationFrame),
-            ("testTextAndBinaryFrames", testTextAndBinaryFrames)
+            ("testTextAndBinaryFrames", testTextAndBinaryFrames),
+            ("testUnmaskedFrame", testUnmaskedFrame)
         ]
     }
     
@@ -50,6 +52,26 @@ class ProtocolErrorTests: KituraTest {
             
             self.performTest(framesToSend: [(false, self.opcodeBinary, binaryPayload),
                                             (true, self.opcodeText, textPayload)],
+                             expectedFrames: [(true, self.opcodeClose, expectedPayload)],
+                             expectation: expectation)
+        }
+    }
+    
+    func testInvalidOpCode() {
+        register(closeReason: .protocolError)
+        
+        performServerTest() { expectation in
+            
+            var bytes = [0x00, 0x01]
+            let payload = NSMutableData(bytes: &bytes, length: bytes.count)
+            
+            let expectedPayload = NSMutableData()
+            var part = self.payload(closeReasonCode: .protocolError)
+            expectedPayload.append(part.bytes, length: part.length)
+            part = self.payload(text: "Parsed a frame with an invalid operation code of 15")
+            expectedPayload.append(part.bytes, length: part.length)
+            
+            self.performTest(framesToSend: [(true, 15, payload)],
                              expectedFrames: [(true, self.opcodeClose, expectedPayload)],
                              expectation: expectation)
         }
@@ -118,6 +140,40 @@ class ProtocolErrorTests: KituraTest {
                                             (true, self.opcodeBinary, binaryPayload)],
                              expectedFrames: [(true, self.opcodeClose, expectedPayload)],
                              expectation: expectation)
+        }
+    }
+    
+    func testUnmaskedFrame() {
+        register(closeReason: .protocolError)
+        
+        performServerTest() { expectation in
+            
+            var bytes = [0x00, 0x01]
+            let payload = NSMutableData(bytes: &bytes, length: bytes.count)
+            
+            let expectedPayload = NSMutableData()
+            var part = self.payload(closeReasonCode: .protocolError)
+            expectedPayload.append(part.bytes, length: part.length)
+            part = self.payload(text: "Received a frame from a client that wasn't masked")
+            expectedPayload.append(part.bytes, length: part.length)
+            
+            guard let socket = self.sendUpgradeRequest(toPath: "/wstester", usingKey: self.secWebKey) else { return }
+            
+            let buffer = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey)
+            
+            self.sendFrame(final: true, withOpcode: self.opcodeBinary, withMasking: false, withPayload: payload, on: socket)
+            
+            let (final, opCode, returnedPayload, _) = self.parseFrame(using: buffer, position: 0, from: socket)
+            
+            XCTAssert(final, "Expected message wasn't final")
+            XCTAssertEqual(opCode, self.opcodeClose, "Opcode wasn't \(self.opcodeClose). It was \(opCode)")
+            XCTAssertEqual(expectedPayload, returnedPayload, "The payload [\(returnedPayload)] doesn't equal the expected [\(expectedPayload)]")
+            
+            // Close the socket abruptly. Need to wait to let the close percolate up on the other side
+            socket.close()
+            usleep(150)
+            
+            expectation.fulfill()
         }
     }
 }
