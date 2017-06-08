@@ -29,4 +29,12 @@ public class WebSocket {
     public static func register(service: WebSocketService, onPath path: String) {
         factory.register(service: service, onPath: path.lowercased())
     }
+    
+    /// Unregister a `WebSocketService` for a specific path
+    ///
+    /// - Parameter path: The path that on which the `WebSocketService` being unregistered,
+    ///                  was registered on.
+    public static func unregister(path: String) {
+        factory.unregister(path: path.lowercased())
+    }
 }

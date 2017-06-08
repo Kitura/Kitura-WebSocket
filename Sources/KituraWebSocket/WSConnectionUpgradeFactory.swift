@@ -88,6 +88,17 @@ public class WSConnectionUpgradeFactory: ConnectionUpgradeFactory {
         registry[path] = service
     }
     
+    func unregister(path thePath: String) {
+        let path: String
+        if thePath.hasPrefix("/") {
+            path = thePath
+        }
+        else {
+            path = "/" + thePath
+        }
+        registry.removeValue(forKey: path)
+    }
+    
     /// Clear the `WebSocketService` registry. Used in testing.
     func clear() {
         registry.removeAll()
