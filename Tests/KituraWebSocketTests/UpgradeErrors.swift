@@ -37,7 +37,7 @@ class UpgradeErrors: KituraTest {
         performServerTest() { expectation in
             guard let socket = self.sendUpgradeRequest(forProtocolVersion: "13", toPath: "/testing123", usingKey: nil) else { return }
      
-            self.checkUpgradeResponse(from: socket, expectedMessage: "Sec-WebSocket-Key header missing in the upgrade request", expectation: expectation)
+            self.checkUpgradeFailureResponse(from: socket, expectedMessage: "Sec-WebSocket-Key header missing in the upgrade request", expectation: expectation)
         }
     }
     
@@ -47,12 +47,12 @@ class UpgradeErrors: KituraTest {
         performServerTest(asyncTasks: { expectation in
             guard let socket = self.sendUpgradeRequest(forProtocolVersion: nil, toPath: "/testing123", usingKey: nil) else { return }
             
-            self.checkUpgradeResponse(from: socket, expectedMessage: "Sec-WebSocket-Version header missing in the upgrade request", expectation: expectation)
+            self.checkUpgradeFailureResponse(from: socket, expectedMessage: "Sec-WebSocket-Version header missing in the upgrade request", expectation: expectation)
         },
         { expectation in
             guard let socket = self.sendUpgradeRequest(forProtocolVersion: "12", toPath: "/testing123", usingKey: nil) else { return }
             
-            self.checkUpgradeResponse(from: socket, expectedMessage: "Only WebSocket protocol version 13 is supported", expectation: expectation)
+            self.checkUpgradeFailureResponse(from: socket, expectedMessage: "Only WebSocket protocol version 13 is supported", expectation: expectation)
         })
     }
     
@@ -62,28 +62,7 @@ class UpgradeErrors: KituraTest {
         performServerTest() { expectation in
             guard let socket = self.sendUpgradeRequest(forProtocolVersion: "13", toPath: "/testing123", usingKey: "test") else { return }
             
-            self.checkUpgradeResponse(from: socket, expectedMessage: "No service has been registered for the path /testing123", expectation: expectation)
-        }
-    }
-    
-    private func checkUpgradeResponse(from: Socket, expectedMessage: String, expectation: XCTestExpectation) {
-        let (rawResponse, _) = self.processUpgradeResponse(socket: from)
-        
-        guard let response = rawResponse else {
-            XCTFail("Failed to get a response from the upgrade request")
-            return
-        }
-        
-        XCTAssertEqual(response.httpStatusCode, HTTPStatusCode.badRequest, "Returned status code on upgrade request was \(response.httpStatusCode) and not \(HTTPStatusCode.badRequest)")
-        
-        do {
-            let body = try response.readString()
-            XCTAssertEqual(body, expectedMessage, "The received error message [\(String(describing: body))] was not equal to the expected one [\(expectedMessage)]")
-            
-            expectation.fulfill()
-        }
-        catch {
-            XCTFail("Failed to read the error message from the failed upgrade")
+            self.checkUpgradeFailureResponse(from: socket, expectedMessage: "No service has been registered for the path /testing123", expectation: expectation)
         }
     }
 }
