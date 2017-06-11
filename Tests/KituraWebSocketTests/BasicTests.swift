@@ -34,7 +34,8 @@ class BasicTests: KituraTest {
             ("testPingFromServerWithNoText", testPingFromServerWithNoText),
             ("testPingWithText", testPingWithText),
             ("testServerRequest", testServerRequest),
-            ("testSuccessfullUpgrade", testSuccessfullUpgrade),
+            ("testSuccessfulRemove", testSuccessfulRemove),
+            ("testSuccessfulUpgrade", testSuccessfulUpgrade),
             ("testTextLongMessage", testTextLongMessage),
             ("testTextMediumMessage", testTextMediumMessage),
             ("testTextShortMessage", testTextShortMessage)
@@ -94,7 +95,7 @@ class BasicTests: KituraTest {
         register(closeReason: .normal)
         
         performServerTest() { expectation in
-            guard let socket = self.sendUpgradeRequest(toPath: "/wstester", usingKey: self.secWebKey) else { return }
+            guard let socket = self.sendUpgradeRequest(toPath: self.servicePath, usingKey: self.secWebKey) else { return }
             
             let buffer = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey)
             
@@ -164,7 +165,7 @@ class BasicTests: KituraTest {
     private func pingFromServerHelper(text: String) -> Socket? {
         let expectedPayload = payload(text: text)
         
-        guard let socket = sendUpgradeRequest(toPath: "/wstester", usingKey: self.secWebKey) else { return nil }
+        guard let socket = sendUpgradeRequest(toPath: self.servicePath, usingKey: self.secWebKey) else { return nil }
         
         let buffer = checkUpgradeResponse(from: socket, forKey: self.secWebKey)
         
@@ -196,7 +197,7 @@ class BasicTests: KituraTest {
         register(closeReason: .noReasonCodeSent, testServerRequest: true)
         
         performServerTest() { expectation in
-            guard let socket = self.sendUpgradeRequest(toPath: "/wstester", usingKey: self.secWebKey) else { return }
+            guard let socket = self.sendUpgradeRequest(toPath: self.servicePath, usingKey: self.secWebKey) else { return }
             
             _ = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey)
             
@@ -210,11 +211,33 @@ class BasicTests: KituraTest {
         }
     }
     
-    func testSuccessfullUpgrade() {
+    func testSuccessfulRemove() {
         register(closeReason: .noReasonCodeSent)
         
         performServerTest() { expectation in
-            guard let socket = self.sendUpgradeRequest(toPath: "/wstester", usingKey: self.secWebKey) else { return }
+            guard let socket1 = self.sendUpgradeRequest(toPath: self.servicePath, usingKey: self.secWebKey) else { return }
+            
+            _ = self.checkUpgradeResponse(from: socket1, forKey: self.secWebKey)
+            
+            // Close the socket abruptly. Need to wait to let the close percolate up on the other side
+            socket1.close()
+            
+            WebSocket.unregister(path: self.servicePath)
+
+            guard let socket2 = self.sendUpgradeRequest(toPath: self.servicePath, usingKey: self.secWebKey) else { return }
+            
+            self.checkUpgradeFailureResponse(from: socket2, expectedMessage: "No service has been registered for the path \(self.servicePath)", expectation: expectation)
+            
+            usleep(150)
+        }
+    }
+    
+    func testSuccessfulUpgrade() {
+        
+        performServerTest(asyncTasks: { expectation in
+            self.register(closeReason: .noReasonCodeSent)
+            
+            guard let socket = self.sendUpgradeRequest(toPath: self.servicePath, usingKey: self.secWebKey) else { return }
             
             _ = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey)
             
@@ -223,7 +246,21 @@ class BasicTests: KituraTest {
             usleep(150)
             
             expectation.fulfill()
-        }
+        },
+        { expectation in
+            WebSocket.unregister(path: self.servicePathNoSlash)
+            self.register(onPath: self.servicePathNoSlash, closeReason: .noReasonCodeSent)
+            
+            guard let socket = self.sendUpgradeRequest(toPath: self.servicePath, usingKey: self.secWebKey) else { return }
+
+            _ = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey)
+
+            // Close the socket abruptly. Need to wait to let the close percolate up on the other side
+            socket.close()
+            usleep(150)
+
+            expectation.fulfill()
+        })
     }
     
     func testTextLongMessage() {

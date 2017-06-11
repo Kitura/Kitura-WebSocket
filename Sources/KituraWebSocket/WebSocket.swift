@@ -1,5 +1,5 @@
 /*
- * Copyright IBM Corporation 2015
+ * Copyright IBM Corporation 2016, 2017
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,5 +28,13 @@ public class WebSocket {
     ///                    to connect the upgrade request with a specific `WebSocketService`
     public static func register(service: WebSocketService, onPath path: String) {
         factory.register(service: service, onPath: path.lowercased())
+    }
+    
+    /// Unregister a `WebSocketService` for a specific path
+    ///
+    /// - Parameter path: The path on which the `WebSocketService` being unregistered,
+    ///                  was registered on.
+    public static func unregister(path: String) {
+        factory.unregister(path: path.lowercased())
     }
 }

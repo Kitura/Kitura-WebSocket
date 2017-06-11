@@ -40,6 +40,10 @@ class KituraTest: XCTestCase {
     
     var secWebKey: String { return "test" }
     
+    // Note: These two paths must only differ by the leading slash
+    let servicePathNoSlash = "wstester"
+    let servicePath = "/wstester"
+    
     func performServerTest(line: Int = #line,
                            asyncTasks: @escaping (XCTestExpectation) -> Void...) {
         let server = HTTP.createServer()
@@ -69,7 +73,7 @@ class KituraTest: XCTestCase {
     
     func performTest(framesToSend: [(Bool, Int, NSData)],
                      expectedFrames: [(Bool, Int, NSData)], expectation: XCTestExpectation) {
-        guard let socket = sendUpgradeRequest(toPath: "/wstester", usingKey: secWebKey) else { return }
+        guard let socket = sendUpgradeRequest(toPath: servicePath, usingKey: secWebKey) else { return }
         
         let buffer = checkUpgradeResponse(from: socket, forKey: secWebKey)
         
@@ -96,9 +100,9 @@ class KituraTest: XCTestCase {
         expectation.fulfill()
     }
     
-    func register(closeReason: WebSocketCloseReasonCode, testServerRequest: Bool=false, pingMessage: String?=nil) {
+    func register(onPath: String?=nil, closeReason: WebSocketCloseReasonCode, testServerRequest: Bool=false, pingMessage: String?=nil) {
         let service = TestWebSocketService(closeReason: closeReason, testServerRequest: testServerRequest, pingMessage: pingMessage)
-        WebSocket.register(service: service, onPath: "/wstester")
+        WebSocket.register(service: service, onPath: onPath ?? servicePath)
     }
     
     func sendUpgradeRequest(forProtocolVersion: String?="13", toPath: String, usingKey: String?) -> Socket? {
@@ -204,6 +208,27 @@ class KituraTest: XCTestCase {
                        "The Sec-WebSocket-Accept header value was [\(secWebAccept[0])] and not the expected value of [\(secWebAcceptExpected)]")
         
         return buffer
+    }
+    
+    func checkUpgradeFailureResponse(from: Socket, expectedMessage: String, expectation: XCTestExpectation) {
+        let (rawResponse, _) = self.processUpgradeResponse(socket: from)
+        
+        guard let response = rawResponse else {
+            XCTFail("Failed to get a response from the upgrade request")
+            return
+        }
+        
+        XCTAssertEqual(response.httpStatusCode, HTTPStatusCode.badRequest, "Returned status code on upgrade request was \(response.httpStatusCode) and not \(HTTPStatusCode.badRequest)")
+        
+        do {
+            let body = try response.readString()
+            XCTAssertEqual(body, expectedMessage, "The received error message [\(String(describing: body))] was not equal to the expected one [\(expectedMessage)]")
+            
+            expectation.fulfill()
+        }
+        catch {
+            XCTFail("Failed to read the error message from the failed upgrade")
+        }
     }
     
     func checkCloseReasonCode(payload: NSData, expectedReasonCode: WebSocketCloseReasonCode) {

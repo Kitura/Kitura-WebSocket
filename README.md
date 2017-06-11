@@ -102,6 +102,12 @@ WebSocket.register(service: WebSocketService, onPath: String)
 ```
 This function is passed the `WebSocketService` being registered along with the path it is being registered on.
 
+A registered `WebSocketService` can be unregistered from the server by using the function:
+```swift
+WebSocket.unregister(path: String)
+```
+This function is passed the path on which the `WebSocketService` being unregistered, was registered on.
+
 ## An example
 A simple example to better describe the APIs of Kitura-WebSocket. This example, a very simplistic chat service.
 The server side is written in Swift using Kitura-WebSocket and the client side is written in JavaScript using
