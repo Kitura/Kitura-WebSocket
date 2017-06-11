@@ -1,5 +1,5 @@
 /*
- * Copyright IBM Corporation 2015
+ * Copyright IBM Corporation 2016, 2017
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ public class WebSocket {
     
     /// Unregister a `WebSocketService` for a specific path
     ///
-    /// - Parameter path: The path that on which the `WebSocketService` being unregistered,
+    /// - Parameter path: The path on which the `WebSocketService` being unregistered,
     ///                  was registered on.
     public static func unregister(path: String) {
         factory.unregister(path: path.lowercased())

@@ -106,7 +106,7 @@ A registered `WebSocketService` can be unregistered from the server by using the
 ```swift
 WebSocket.unregister(path: String)
 ```
-This function is passed the path that on which the `WebSocketService` being unregistered, was registered on.
+This function is passed the path on which the `WebSocketService` being unregistered, was registered on.
 
 ## An example
 A simple example to better describe the APIs of Kitura-WebSocket. This example, a very simplistic chat service.
