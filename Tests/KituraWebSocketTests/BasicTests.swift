@@ -34,8 +34,8 @@ class BasicTests: KituraTest {
             ("testPingFromServerWithNoText", testPingFromServerWithNoText),
             ("testPingWithText", testPingWithText),
             ("testServerRequest", testServerRequest),
-            ("testSuccessfullRemove", testSuccessfullRemove),
-            ("testSuccessfullUpgrade", testSuccessfullUpgrade),
+            ("testSuccessfulRemove", testSuccessfulRemove),
+            ("testSuccessfulUpgrade", testSuccessfulUpgrade),
             ("testTextLongMessage", testTextLongMessage),
             ("testTextMediumMessage", testTextMediumMessage),
             ("testTextShortMessage", testTextShortMessage)
@@ -211,7 +211,7 @@ class BasicTests: KituraTest {
         }
     }
     
-    func testSuccessfullRemove() {
+    func testSuccessfulRemove() {
         register(closeReason: .noReasonCodeSent)
         
         performServerTest() { expectation in
@@ -232,7 +232,7 @@ class BasicTests: KituraTest {
         }
     }
     
-    func testSuccessfullUpgrade() {
+    func testSuccessfulUpgrade() {
         
         performServerTest(asyncTasks: { expectation in
             self.register(closeReason: .noReasonCodeSent)
