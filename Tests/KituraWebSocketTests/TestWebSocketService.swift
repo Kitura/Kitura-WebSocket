@@ -58,7 +58,7 @@ class TestWebSocketService: WebSocketService {
         XCTAssertEqual(request.httpVersionMajor, 1, "HTTP version major should be 1, it was \(String(describing: request.httpVersionMajor))")
         XCTAssertEqual(request.httpVersionMinor, 1, "HTTP version major should be 1, it was \(String(describing: request.httpVersionMinor))")
         XCTAssertEqual(request.urlURL.pathComponents[1], "wstester", "Path of the request should be /wstester, it was /\(request.urlURL.pathComponents[1])")
-        XCTAssertEqual(request.url, String("/wstester")?.data(using: .utf8)!, "Path of the request should be /wstester, it was \(String(data: request.url, encoding: .utf8) ?? "Not UTF-8")")
+        XCTAssertEqual(request.url, "/wstester".data(using: .utf8)!, "Path of the request should be /wstester, it was \(String(data: request.url, encoding: .utf8) ?? "Not UTF-8")")
         let protocolVersion = request.headers["Sec-WebSocket-Version"]
         XCTAssertNotNil(protocolVersion, "The Sec-WebSocket-Version header wasn't in the headers")
         XCTAssertEqual(protocolVersion!.count, 1, "The Sec-WebSocket-Version header should have one value")
