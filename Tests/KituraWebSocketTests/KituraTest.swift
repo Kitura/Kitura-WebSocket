@@ -45,7 +45,7 @@ class KituraTest: XCTestCase {
     let servicePath = "/wstester"
     
     func performServerTest(line: Int = #line,
-                           asyncTasks: @escaping (XCTestExpectation) -> Void...) {
+                           asyncTasks: (XCTestExpectation) -> Void...) {
         let server = HTTP.createServer()
         
         do {
