@@ -53,7 +53,7 @@ public class WebSocketConnection {
     }
     
     /// Unique identifier for this `WebSocketConnection`
-    public let id: String
+    public let id = UUID().uuidString
     
     /// The ServerRequest from the original protocol upgrade
     public let request: ServerRequest
@@ -61,7 +61,6 @@ public class WebSocketConnection {
     private var messageState: MessageStates = .unknown
     
     init(request: ServerRequest) {
-        id = UUID().uuidString
         self.request = WSServerRequest(request: request)
         buffer = NSMutableData(capacity: WebSocketConnection.bufferSize) ?? NSMutableData()
     }
@@ -73,7 +72,7 @@ public class WebSocketConnection {
     ///                    describing why the connection was closed. If nil, a reason code
     ///                    of `WebSocketCloseReasonCode.normal` will be sent.
     /// - Parameter description: An optional text description to be sent in the close control frame.
-    public func close(reason: WebSocketCloseReasonCode?=nil, description: String?=nil) {
+    public func close(reason: WebSocketCloseReasonCode? = nil, description: String? = nil) {
         closeConnection(reason: reason, description: description, hard: false)
     }
     
@@ -84,19 +83,19 @@ public class WebSocketConnection {
     ///                    describing why the connection was closed. If nil, a reason code
     ///                    of `WebSocketCloseReasonCode.normal` will be sent.
     /// - Parameter description: An optional text description to be sent in the close control frame.
-    public func drop(reason: WebSocketCloseReasonCode?=nil, description: String?=nil) {
+    public func drop(reason: WebSocketCloseReasonCode? = nil, description: String? = nil) {
         closeConnection(reason: reason, description: description, hard: true)
     }
     
     /// Send a ping control frame to the client
     ///
     /// - Parameter withMessage: An optional string to be included in the ping control frame.
-    public func ping(withMessage: String?=nil) {
+    public func ping(withMessage: String? = nil) {
         guard active else { return }
         
         if let message = withMessage {
             let count = message.lengthOfBytes(using: .utf8)
-            let bufferLength = count+1 // Allow space for null terminator
+            let bufferLength = count + 1 // Allow space for null terminator
             var utf8: [CChar] = Array<CChar>(repeating: 0, count: bufferLength)
             if !message.getCString(&utf8, maxLength: bufferLength, encoding: .utf8) {
                 // throw something?
@@ -113,8 +112,8 @@ public class WebSocketConnection {
     ///
     /// - Parameter message: A Data struct containing the bytes to be sent to the client as a
     ///                     message.
-    /// - Parameter type: asBinary if true, which is the default, the message is sent as a 
-    ///                  binary mesage. If false, the message will be sent as a text message
+    /// - Parameter asBinary: If true, which is the default, the message is sent as a
+    ///                       binary mesage. If false, the message will be sent as a text message.
     public func send(message: Data, asBinary: Bool = true) {
         guard active else { return }
         
@@ -125,12 +124,12 @@ public class WebSocketConnection {
     /// Send a text message to the client
     ///
     /// - Parameter message: A String containing the text to be sent to the client as a
-    ///                     text message.
+    ///                      text message.
     public func send(message: String) {
         guard active else { return }
         
         let count = message.lengthOfBytes(using: .utf8)
-        let bufferLength = count+1 // Allow space for null terminator
+        let bufferLength = count + 1 // Allow space for null terminator
         var utf8: [CChar] = Array<CChar>(repeating: 0, count: bufferLength)
         if !message.getCString(&utf8, maxLength: bufferLength, encoding: .utf8) {
             // throw something?
@@ -154,7 +153,7 @@ public class WebSocketConnection {
         
         if let descriptionToSend = description {
             let count = descriptionToSend.lengthOfBytes(using: .utf8)
-            let bufferLength = count+1 // Allow space for null terminator
+            let bufferLength = count + 1 // Allow space for null terminator
             var utf8: [CChar] = Array<CChar>(repeating: 0, count: bufferLength)
             if !descriptionToSend.getCString(&utf8, maxLength: bufferLength, encoding: .utf8) {
                 // throw something?
@@ -170,7 +169,7 @@ public class WebSocketConnection {
         }
     }
     
-    func connectionClosed(reason: WebSocketCloseReasonCode, description: String?=nil, reasonToSendBack: WebSocketCloseReasonCode? = nil) {
+    func connectionClosed(reason: WebSocketCloseReasonCode, description: String? = nil, reasonToSendBack: WebSocketCloseReasonCode? = nil) {
         if active {
             let reasonTosend = reasonToSendBack ?? reason
             closeConnection(reason: reasonTosend, description: description, hard: true)
@@ -207,8 +206,10 @@ public class WebSocketConnection {
             
             if frame.finalFrame {
                 let data = Data(bytes: frame.payload.bytes, count: frame.payload.length)
-                callbackQueue.async { [unowned self] in
-                    self.service?.received(message: data, from: self)
+                callbackQueue.async { [weak self] in
+                    if let strongSelf = self {
+                        strongSelf.service?.received(message: data, from: strongSelf)
+                    }
                 }
             }
             else {
@@ -250,8 +251,10 @@ public class WebSocketConnection {
             if frame.finalFrame {
                 if messageState == .binary {
                     let data = Data(bytes: message.bytes, count: message.length)
-                    callbackQueue.async { [unowned self] in
-                        self.service?.received(message: data, from: self)
+                    callbackQueue.async { [weak self] in
+                        if let strongSelf = self {
+                            strongSelf.service?.received(message: data, from: strongSelf)
+                        }
                     }
                 } else {
                     fireReceivedString(from: message)
@@ -290,8 +293,10 @@ public class WebSocketConnection {
         from.append(&zero, length: 1)
         let bytes = from.bytes.bindMemory(to: CChar.self, capacity: 1)
         if let text = String(cString: bytes, encoding: .utf8) {
-            callbackQueue.async { [unowned self] in
-                self.service?.received(message: text, from: self)
+            callbackQueue.async { [weak self] in
+                if let strongSelf = self {
+                    strongSelf.service?.received(message: text, from: strongSelf)
+                }
             }
         }
         else {

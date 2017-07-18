@@ -25,7 +25,8 @@ public class WebSocket {
     ///
     /// - Parameter service: The `WebSocketService` being registered.
     /// - Parameter onPath: The path that will be in the HTTP "Upgrade" request. Used
-    ///                    to connect the upgrade request with a specific `WebSocketService`
+    ///                     to connect the upgrade request with a specific `WebSocketService`
+    ///                     Caps-insensitive.
     public static func register(service: WebSocketService, onPath path: String) {
         factory.register(service: service, onPath: path.lowercased())
     }

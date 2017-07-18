@@ -6,12 +6,13 @@
 ![Linux](https://img.shields.io/badge/os-linux-green.svg?style=flat)
 ![Apache 2](https://img.shields.io/badge/license-Apache2-blue.svg?style=flat)
 &nbsp;[![Slack Status](http://swift-at-ibm-slack.mybluemix.net/badge.svg)](http://swift-at-ibm-slack.mybluemix.net/)
+[![codecov](https://codecov.io/gh/IBM-Swift/Kitura-WebSocket/branch/master/graph/badge.svg)](https://codecov.io/gh/IBM-Swift/Kitura-WebSocket)
 
 ## Summary
 
 Kitura-WebSocket provides Kitura based servers the ability to receive and send messages to clients using the WebSocket
 protocol (RFC 6455). It is compatible with a variety of WebSocket clients, including:
-- The builtin WebSocket support in the Chrome, FireFox, and Safari browsers
+- The built in WebSocket support in the Chrome, FireFox, and Safari browsers
 - The NPM [websocket](https://www.npmjs.com/package/websocket) package.
 
 Kitura-WebSocket supports version thirteen of the WebSocket protocol.
@@ -37,7 +38,7 @@ Working with Kitura-WebSocket requires that you are set up to work with Kitura. 
 ## APIs
 The following is an overview of the Kitura-WebSocket APIs. For more details see http://ibm-swift.github.io/Kitura-WebSocket.
 
-When using the WebSocket protocol clients connect to WebSocket Services running on a particular server. WebSocket Services are
+When using the WebSocket protocol, clients connect to WebSocket Services running on a particular server. WebSocket Services are
 identified on a particular server via a path. This path is sent in the Upgrade request used to upgrade a connection from
 HTTP 1.1 to WebSocket.
 
@@ -117,7 +118,7 @@ Node.js and the websocket NPM package.
 In order to run the client one must have Node.js installed.
 
 ### The server
-The server, keeps track of the clients that have connected to it and echoes all text messages sent to it to all
+The server keeps track of the clients that have connected to it and echoes all text messages sent to it to all
 of the clients that have connected to it, with the exception of the client that sent the message.
 
 The server's directory setup is something like this:
@@ -137,8 +138,8 @@ import PackageDescription
 let package = Package(
     name: "ChatServer",
     dependencies: [
-        .Package(url: "https://github.com/IBM-Swift/HeliumLogger.git", majorVersion: 1, minor: 6),
-        .Package(url: "https://github.com/IBM-Swift/Kitura-WebSocket", majorVersion: 0, minor: 7)
+        .Package(url: "https://github.com/IBM-Swift/HeliumLogger.git", majorVersion: 1, minor: 7),
+        .Package(url: "https://github.com/IBM-Swift/Kitura-WebSocket", majorVersion: 0, minor: 9)
     ]
 )
 ```
@@ -242,6 +243,7 @@ ClientDirectory
 </pre>
 
 The package.json at a minimum contains:
+
 ```javascript
 {
   "name": "chat",
@@ -257,6 +259,7 @@ The package.json at a minimum contains:
 ```
 
 The chat.js file contains:
+
 ```javascript
 /* main file of Simple Chat Server Client */
 
@@ -334,7 +337,7 @@ Where **host** is the hostname of the host on which the server is running.
 The client can be run in several terminal windows on the same computer.
 
 ## A more complete example
-For amore complete example please see [Kitura-Chat-Server](https://github.com/IBM-Swift/Kitura-Chat-Server)
+For a more complete example please see [Kitura-Chat-Server](https://github.com/IBM-Swift/Kitura-Chat-Server)
 
 ## Community
 

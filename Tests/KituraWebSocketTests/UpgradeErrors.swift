@@ -30,7 +30,7 @@ class UpgradeErrors: KituraTest {
             ("testNoService", testNoService)
         ]
     }
-    
+
     func testNoSecWebSocketKey() {
         WebSocket.factory.clear()
         
