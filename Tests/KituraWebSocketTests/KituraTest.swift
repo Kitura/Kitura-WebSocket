@@ -36,9 +36,9 @@ class KituraTest: XCTestCase {
         KituraTest.initOnce
     }
     
-    private var wsGUID: String { return "258EAFA5-E914-47DA-95CA-C5AB0DC85B11" }
+    private var wsGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
     
-    var secWebKey: String { return "test" }
+    var secWebKey = "test"
     
     // Note: These two paths must only differ by the leading slash
     let servicePathNoSlash = "wstester"
@@ -100,12 +100,12 @@ class KituraTest: XCTestCase {
         expectation.fulfill()
     }
     
-    func register(onPath: String?=nil, closeReason: WebSocketCloseReasonCode, testServerRequest: Bool=false, pingMessage: String?=nil) {
+    func register(onPath: String? = nil, closeReason: WebSocketCloseReasonCode, testServerRequest: Bool = false, pingMessage: String? = nil) {
         let service = TestWebSocketService(closeReason: closeReason, testServerRequest: testServerRequest, pingMessage: pingMessage)
         WebSocket.register(service: service, onPath: onPath ?? servicePath)
     }
     
-    func sendUpgradeRequest(forProtocolVersion: String?="13", toPath: String, usingKey: String?) -> Socket? {
+    func sendUpgradeRequest(forProtocolVersion: String? = "13", toPath: String, usingKey: String?) -> Socket? {
         var socket: Socket?
         do {
             socket = try Socket.create()
@@ -155,7 +155,7 @@ class KituraTest: XCTestCase {
                     if parserStatus.state == .messageComplete {
                         keepProcessing = false
                         if parserStatus.bytesLeft != 0 {
-                            unparsedData = NSMutableData(bytes: buffer.bytes+buffer.length-parserStatus.bytesLeft, length: parserStatus.bytesLeft)
+                            unparsedData = NSMutableData(bytes: buffer.bytes + buffer.length - parserStatus.bytesLeft, length: parserStatus.bytesLeft)
                         }
                     }
                 }

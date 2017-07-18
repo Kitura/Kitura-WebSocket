@@ -149,13 +149,13 @@ struct WSFrameParser {
         var unmaskedBytes = [UInt8](repeating: 0, count: 125)
         var bytesConsumed: Int = 0
         
-        let bytesToUnMask = min(payloadLength - frame.payload.length, length - from)
+        let bytesToUnmask = min(payloadLength - frame.payload.length, length - from)
         var bytesUnmasked = frame.payload.length
         
         // Loop to unmask the bytes we have in this frame piece
-        while bytesConsumed < bytesToUnMask {
+        while bytesConsumed < bytesToUnmask {
             
-            let bytesToUnMaskInLoop = min(unmaskedBytes.count, bytesToUnMask-bytesConsumed)
+            let bytesToUnMaskInLoop = min(unmaskedBytes.count, bytesToUnmask-bytesConsumed)
             
             for index in 0 ..< bytesToUnMaskInLoop {
                 unmaskedBytes[index] = payloadPiece[bytesConsumed] ^ mask[bytesUnmasked % maskSize]

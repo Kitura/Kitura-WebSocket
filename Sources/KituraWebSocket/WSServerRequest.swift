@@ -41,9 +41,8 @@ class WSServerRequest: ServerRequest {
     private var urlc: URLComponents?
     
     /// The URL from the request as URLComponents
-    /// URLComponents has a memory leak on linux as of swift 3.0.1. Use 'urlURL' instead
-    @available(*, deprecated, message:
-    "URLComponents has a memory leak on linux as of swift 3.0.1. use 'urlURL' instead")
+    /// URLComponents has a memory leak on Linux as of Swift 3.0.1. Use 'urlURL' instead.
+    /// This is fixed in Swift 3.1.
     public var urlComponents: URLComponents {
         if let urlc = self.urlc {
             return urlc
