@@ -12,7 +12,7 @@
 
 Kitura-WebSocket provides Kitura based servers the ability to receive and send messages to clients using the WebSocket
 protocol (RFC 6455). It is compatible with a variety of WebSocket clients, including:
-- The built in WebSocket support in the Chrome, FireFox, and Safari browsers
+- The built-in WebSocket support in the Chrome, FireFox, and Safari browsers
 - The NPM [websocket](https://www.npmjs.com/package/websocket) package.
 
 Kitura-WebSocket supports version thirteen of the WebSocket protocol.

@@ -38,23 +38,12 @@ class WSServerRequest: ServerRequest {
     /// Use 'urlURL' for the full URL
     let url: Data
     
-    private var urlc: URLComponents?
-    
-    /// The URL from the request as URLComponents
-    /// URLComponents has a memory leak on Linux as of Swift 3.0.1. Use 'urlURL' instead.
-    /// This is fixed in Swift 3.1.
-    public var urlComponents: URLComponents {
-        if let urlc = self.urlc {
-            return urlc
-        }
-        let urlc = URLComponents(url: self.urlURL, resolvingAgainstBaseURL: false) ?? URLComponents()
-        self.urlc = urlc
-        return urlc
-    }
-    
     /// The URL from the request
     let urlURL: URL
-    
+
+    /// The URL from the request as URLComponents
+    public var urlComponents: URLComponents
+
     /// The IP address of the client
     let remoteAddress: String
     
@@ -68,13 +57,15 @@ class WSServerRequest: ServerRequest {
     var method: String = "GET"
     
     init(request: ServerRequest) {
-        url = request.url
-        urlURL = request.urlURL
-        remoteAddress = request.remoteAddress
-        
         for (key, values) in request.headers {
             headers.append(key, value: values)
         }
+
+        url = request.url
+        urlURL = request.urlURL
+        urlComponents = URLComponents(url: request.urlURL, resolvingAgainstBaseURL: false) ?? URLComponents()
+
+        remoteAddress = request.remoteAddress
     }
     
     /// Read data from the body of the request
