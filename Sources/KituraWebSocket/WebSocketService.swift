@@ -33,7 +33,7 @@ public protocol WebSocketService: class {
     ///
     /// - Parameter connection: The `WebSocketConnection` object that represents the connection that
     ///                    was disconnected from this `WebSocketService`.
-    /// - Paramater reason: The `WebSocketCloseReasonCode` that describes why the client disconnected.
+    /// - Parameter reason: The `WebSocketCloseReasonCode` that describes why the client disconnected.
     func disconnected(connection: WebSocketConnection, reason: WebSocketCloseReasonCode)
     
     /// Called when a WebSocket client sent a binary message to the server to this `WebSocketService`.

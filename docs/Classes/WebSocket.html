@@ -8,6 +8,9 @@
     <script src="../js/jquery.min.js" defer></script>
     <script src="../js/jazzy.js" defer></script>
     
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
   </head>
   <body>
 
@@ -21,6 +24,12 @@
           KituraWebSocket Docs
         </a>
          (100% documented)
+      </p>
+    
+      <p class="header-col--secondary">
+        <form role="search" action="../search.json">
+          <input type="text" placeholder="Search documentation" data-typeahead>
+        </form>
       </p>
     
         <p class="header-col header-col--secondary">
@@ -100,9 +109,9 @@ that will handle WebSocket connections for specific paths.</p>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:ZFC15KituraWebSocket9WebSocket8registerFT7servicePS_16WebSocketService_6onPathSS_T_"></a>
+                    <a name="/s:15KituraWebSocket0bC0C8registeryAA0bC7Service_p7service_SS6onPathtFZ"></a>
                     <a name="//apple_ref/swift/Method/register(service:onPath:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:ZFC15KituraWebSocket9WebSocket8registerFT7servicePS_16WebSocketService_6onPathSS_T_">register(service:onPath:)</a>
+                    <a class="token" href="#/s:15KituraWebSocket0bC0C8registeryAA0bC7Service_p7service_SS6onPathtFZ">register(service:onPath:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -111,19 +120,6 @@ that will handle WebSocket connections for specific paths.</p>
                       <div class="pointer"></div>
                       <div class="abstract">
                         <p>Register a <code><a href="../Protocols/WebSocketService.html">WebSocketService</a></code> for a specific path</p>
-
-<div class="aside aside-parameter">
-    <p class="aside-title">Parameter</p>
-    Parameter service: The <code><a href="../Protocols/WebSocketService.html">WebSocketService</a></code> being registered.
-
-</div>
-
-<div class="aside aside-parameter">
-    <p class="aside-title">Parameter</p>
-    Parameter onPath: The path that will be in the HTTP <q>Upgrade</q> request. Used
-               to connect the upgrade request with a specific <code><a href="../Protocols/WebSocketService.html">WebSocketService</a></code>
-
-</div>
 
                       </div>
                       <div class="declaration">
@@ -134,48 +130,15 @@ that will handle WebSocket connections for specific paths.</p>
 
                         </div>
                       </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>service</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The <code>WebSocketService</code> being registered.</p>
-
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>onPath</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The path that will be in the HTTP “Upgrade” request. Used to connect the upgrade request with a specific <code>WebSocketService</code></p>
-
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:ZFC15KituraWebSocket9WebSocket10unregisterFT4pathSS_T_"></a>
+                    <a name="/s:15KituraWebSocket0bC0C10unregisterySS4path_tFZ"></a>
                     <a name="//apple_ref/swift/Method/unregister(path:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:ZFC15KituraWebSocket9WebSocket10unregisterFT4pathSS_T_">unregister(path:)</a>
+                    <a class="token" href="#/s:15KituraWebSocket0bC0C10unregisterySS4path_tFZ">unregister(path:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -185,13 +148,6 @@ that will handle WebSocket connections for specific paths.</p>
                       <div class="abstract">
                         <p>Unregister a <code><a href="../Protocols/WebSocketService.html">WebSocketService</a></code> for a specific path</p>
 
-<div class="aside aside-parameter">
-    <p class="aside-title">Parameter</p>
-    Parameter path: The path on which the <code><a href="../Protocols/WebSocketService.html">WebSocketService</a></code> being unregistered,
-             was registered on.
-
-</div>
-
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
@@ -200,26 +156,6 @@ that will handle WebSocket connections for specific paths.</p>
                           <pre class="highlight"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">unregister</span><span class="p">(</span><span class="nv">path</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span></code></pre>
 
                         </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>path</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The path on which the <code>WebSocketService</code> being unregistered, was registered on.</p>
-
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
                       </div>
                     </section>
                   </div>
@@ -232,8 +168,8 @@ that will handle WebSocket connections for specific paths.</p>
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2017 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2017-06-11)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2017 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2017-07-25)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.5</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>
