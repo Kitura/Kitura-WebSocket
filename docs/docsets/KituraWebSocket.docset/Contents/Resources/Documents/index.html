@@ -8,6 +8,9 @@
     <script src="js/jquery.min.js" defer></script>
     <script src="js/jazzy.js" defer></script>
     
+    <script src="js/lunr.min.js" defer></script>
+    <script src="js/typeahead.jquery.js" defer></script>
+    <script src="js/jazzy.search.js" defer></script>
   </head>
   <body>
 
@@ -20,6 +23,12 @@
           KituraWebSocket Docs
         </a>
          (100% documented)
+      </p>
+    
+      <p class="header-col--secondary">
+        <form role="search" action="search.json">
+          <input type="text" placeholder="Search documentation" data-typeahead>
+        </form>
       </p>
     
         <p class="header-col header-col--secondary">
@@ -88,12 +97,13 @@
 <img src="https://img.shields.io/badge/os-macOS-green.svg?style=flat" alt="macOS">
 <img src="https://img.shields.io/badge/os-linux-green.svg?style=flat" alt="Linux">
 <img src="https://img.shields.io/badge/license-Apache2-blue.svg?style=flat" alt="Apache 2">
-&nbsp;<a href="http://swift-at-ibm-slack.mybluemix.net/"><img src="http://swift-at-ibm-slack.mybluemix.net/badge.svg" alt="Slack Status"></a></p>
+&nbsp;<a href="http://swift-at-ibm-slack.mybluemix.net/"><img src="http://swift-at-ibm-slack.mybluemix.net/badge.svg" alt="Slack Status"></a>
+<a href="https://codecov.io/gh/IBM-Swift/Kitura-WebSocket"><img src="https://codecov.io/gh/IBM-Swift/Kitura-WebSocket/branch/master/graph/badge.svg" alt="codecov"></a></p>
 <a href='#summary' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='summary'>Summary</h2>
 
 <p>Kitura-WebSocket provides Kitura based servers the ability to receive and send messages to clients using the WebSocket
 protocol (RFC 6455). It is compatible with a variety of WebSocket clients, including:
-- The builtin WebSocket support in the Chrome, FireFox, and Safari browsers
+- The built-in WebSocket support in the Chrome, FireFox, and Safari browsers
 - The NPM <a href="https://www.npmjs.com/package/websocket">websocket</a> package.</p>
 
 <p>Kitura-WebSocket supports version thirteen of the WebSocket protocol.</p>
@@ -121,7 +131,7 @@ To enable WSS simply set up your Kitura based server for SSL/TLS support. See th
 
 <p>The following is an overview of the Kitura-WebSocket APIs. For more details see <a href="http://ibm-swift.github.io/Kitura-WebSocket">http://ibm-swift.github.io/Kitura-WebSocket</a>.</p>
 
-<p>When using the WebSocket protocol clients connect to WebSocket Services running on a particular server. WebSocket Services are
+<p>When using the WebSocket protocol, clients connect to WebSocket Services running on a particular server. WebSocket Services are
 identified on a particular server via a path. This path is sent in the Upgrade request used to upgrade a connection from
 HTTP 1.1 to WebSocket.</p>
 
@@ -202,7 +212,7 @@ Node.js and the websocket NPM package.</p>
 <p>In order to run the client one must have Node.js installed.</p>
 <a href='#the-server' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='the-server'>The server</h3>
 
-<p>The server, keeps track of the clients that have connected to it and echoes all text messages sent to it to all
+<p>The server keeps track of the clients that have connected to it and echoes all text messages sent to it to all
 of the clients that have connected to it, with the exception of the client that sent the message.</p>
 
 <p>The server&rsquo;s directory setup is something like this:
@@ -222,8 +232,8 @@ import PackageDescription</p>
 <p>let package = Package(
     name: <q>ChatServer</q>,
     dependencies: [
-        .Package(url: <q>https://github.com/IBM-Swift/HeliumLogger.git</q>, majorVersion: 1, minor: 6),
-        .Package(url: <q>https://github.com/IBM-Swift/Kitura-WebSocket</q>, majorVersion: 0, minor: 7)
+        .Package(url: <q>https://github.com/IBM-Swift/HeliumLogger.git</q>, majorVersion: 1, minor: 7),
+        .Package(url: <q>https://github.com/IBM-Swift/Kitura-WebSocket</q>, majorVersion: 0, minor: 9)
     ]
 )
 &rdquo;`
@@ -327,75 +337,72 @@ ClientDirectory
 └── chat.js
 </pre></p>
 
-<p>The package.json at a minimum contains:
-<code>javascript
-{
-  &quot;name&quot;: &quot;chat&quot;,
-  &quot;description&quot;: &quot;Simple chat server client&quot;,
-  &quot;version&quot;: &quot;0.0.1&quot;,
-  &quot;engines&quot;: {
-    &quot;node&quot;: &quot;&gt;=0.8.0&quot;
-  },
-  &quot;dependencies&quot;: {
-    &quot;websocket&quot;: &quot;^1.0.23&quot;
-  }
-}
-</code></p>
-
-<p>The chat.js file contains:
-&ldquo;`javascript
-/* main file of Simple Chat Server Client */</p>
-
-<p>var readline = require(&lsquo;readline&rsquo;);
-var WebSocketClient = require(&#39;websocket&rsquo;).client</p>
-
-<p>var host = process.argv[2];</p>
-
-<p>rl = readline.createInterface(process.stdin, process.stdout);</p>
-
-<p>rl.setPrompt(&rsquo;&gt; &rsquo;);
-rl.prompt();
-var client = new WebSocketClient();</p>
-
-<p>client.on(&#39;connectFailed&rsquo;, function(error) {
-    console.log(&#39;Connect Error: &rsquo; + error.toString());
-    process.exit();
-});</p>
-
-<p>client.on(&#39;connect&rsquo;, function(connection) {
-    connection.on(&#39;error&rsquo;, function(error) {
-        console.log(<q>Connection Error:</q> + error.toString());
-        process.exit();
-    });</p>
-<pre class="highlight plaintext"><code>connection.on('close', function(reasonCode, description) {
-    console.log('chat Connection Closed. Code=' + reasonCode + ' (' + description +')');
-});
-
-connection.on('message', function(message) {
-    if (message.type === 'utf8') {
-        console.log('\r=&gt; ' + message.utf8Data);
-        rl.prompt();
-    }   
-});
-
-rl.on('line', function(line) {
-    connection.sendUTF(line);
-    rl.prompt();
-});
-
-rl.on('close', function() {
-    connection.close();
-    console.log('Have a great day!');
-    process.exit(0);
-});
-
-rl.prompt();
+<p>The package.json at a minimum contains:</p>
+<pre class="highlight javascript"><code><span class="p">{</span>
+  <span class="s2">"name"</span><span class="err">:</span> <span class="s2">"chat"</span><span class="p">,</span>
+  <span class="s2">"description"</span><span class="err">:</span> <span class="s2">"Simple chat server client"</span><span class="p">,</span>
+  <span class="s2">"version"</span><span class="err">:</span> <span class="s2">"0.0.1"</span><span class="p">,</span>
+  <span class="s2">"engines"</span><span class="err">:</span> <span class="p">{</span>
+    <span class="s2">"node"</span><span class="err">:</span> <span class="s2">"&gt;=0.8.0"</span>
+  <span class="p">},</span>
+  <span class="s2">"dependencies"</span><span class="err">:</span> <span class="p">{</span>
+    <span class="s2">"websocket"</span><span class="err">:</span> <span class="s2">"^1.0.23"</span>
+  <span class="p">}</span>
+<span class="p">}</span>
 </code></pre>
 
-<p>});</p>
+<p>The chat.js file contains:</p>
+<pre class="highlight javascript"><code><span class="cm">/* main file of Simple Chat Server Client */</span>
 
-<p>client.connect(<q>ws://</q> + host +<q>/chat</q>, <q>chat</q>);
-&rdquo;`</p>
+<span class="kd">var</span> <span class="nx">readline</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'readline'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">WebSocketClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'websocket'</span><span class="p">).</span><span class="nx">client</span>
+
+<span class="kd">var</span> <span class="nx">host</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+
+<span class="nx">rl</span> <span class="o">=</span> <span class="nx">readline</span><span class="p">.</span><span class="nx">createInterface</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">stdin</span><span class="p">,</span> <span class="nx">process</span><span class="p">.</span><span class="nx">stdout</span><span class="p">);</span>
+
+<span class="nx">rl</span><span class="p">.</span><span class="nx">setPrompt</span><span class="p">(</span><span class="s1">'&gt; '</span><span class="p">);</span>
+<span class="nx">rl</span><span class="p">.</span><span class="nx">prompt</span><span class="p">();</span>
+<span class="kd">var</span> <span class="nx">client</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">WebSocketClient</span><span class="p">();</span>
+
+<span class="nx">client</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'connectFailed'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'Connect Error: '</span> <span class="o">+</span> <span class="nx">error</span><span class="p">.</span><span class="nx">toString</span><span class="p">());</span>
+    <span class="nx">process</span><span class="p">.</span><span class="nx">exit</span><span class="p">();</span>
+<span class="p">});</span>
+
+<span class="nx">client</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'connect'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">connection</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">connection</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'error'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Connection Error: "</span> <span class="o">+</span> <span class="nx">error</span><span class="p">.</span><span class="nx">toString</span><span class="p">());</span>
+        <span class="nx">process</span><span class="p">.</span><span class="nx">exit</span><span class="p">();</span>
+    <span class="p">});</span>
+
+    <span class="nx">connection</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'close'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">reasonCode</span><span class="p">,</span> <span class="nx">description</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'chat Connection Closed. Code='</span> <span class="o">+</span> <span class="nx">reasonCode</span> <span class="o">+</span> <span class="s1">' ('</span> <span class="o">+</span> <span class="nx">description</span> <span class="o">+</span><span class="s1">')'</span><span class="p">);</span>
+    <span class="p">});</span>
+
+    <span class="nx">connection</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'message'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nx">type</span> <span class="o">===</span> <span class="s1">'utf8'</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'\r=&gt; '</span> <span class="o">+</span> <span class="nx">message</span><span class="p">.</span><span class="nx">utf8Data</span><span class="p">);</span>
+            <span class="nx">rl</span><span class="p">.</span><span class="nx">prompt</span><span class="p">();</span>
+        <span class="p">}</span>   
+    <span class="p">});</span>
+
+    <span class="nx">rl</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'line'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">line</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">connection</span><span class="p">.</span><span class="nx">sendUTF</span><span class="p">(</span><span class="nx">line</span><span class="p">);</span>
+        <span class="nx">rl</span><span class="p">.</span><span class="nx">prompt</span><span class="p">();</span>
+    <span class="p">});</span>
+
+    <span class="nx">rl</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'close'</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">connection</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'Have a great day!'</span><span class="p">);</span>
+        <span class="nx">process</span><span class="p">.</span><span class="nx">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+    <span class="p">});</span>
+
+    <span class="nx">rl</span><span class="p">.</span><span class="nx">prompt</span><span class="p">();</span>
+<span class="p">});</span>
+
+<span class="nx">client</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="s2">"ws://"</span> <span class="o">+</span> <span class="nx">host</span> <span class="o">+</span><span class="s2">"/chat"</span><span class="p">,</span> <span class="s2">"chat"</span><span class="p">);</span>
+</code></pre>
 <a href='#building-and-running-the-example' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='building-and-running-the-example'>Building and running the example</h3>
 
 <p>To build and run the server, in the server directory, simply:
@@ -421,7 +428,7 @@ Where <strong>host</strong> is the hostname of the host on which the server is r
 <p>The client can be run in several terminal windows on the same computer.</p>
 <a href='#a-more-complete-example' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='a-more-complete-example'>A more complete example</h2>
 
-<p>For amore complete example please see <a href="https://github.com/IBM-Swift/Kitura-Chat-Server">Kitura-Chat-Server</a></p>
+<p>For a more complete example please see <a href="https://github.com/IBM-Swift/Kitura-Chat-Server">Kitura-Chat-Server</a></p>
 <a href='#community' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='community'>Community</h2>
 
 <p>We love to talk server-side Swift, and Kitura. Join our <a href="http://swift-at-ibm-slack.mybluemix.net/">Slack</a> to meet the team!</p>
@@ -436,8 +443,8 @@ Where <strong>host</strong> is the hostname of the host on which the server is r
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2017 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2017-06-11)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2017 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2017-07-25)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.5</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>

@@ -8,6 +8,9 @@
     <script src="../js/jquery.min.js" defer></script>
     <script src="../js/jazzy.js" defer></script>
     
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
   </head>
   <body>
 
@@ -21,6 +24,12 @@
           KituraWebSocket Docs
         </a>
          (100% documented)
+      </p>
+    
+      <p class="header-col--secondary">
+        <form role="search" action="../search.json">
+          <input type="text" placeholder="Search documentation" data-typeahead>
+        </form>
       </p>
     
         <p class="header-col header-col--secondary">
@@ -87,10 +96,10 @@
 
                 </div>
               </div>
-            <p>The <code>WebSocketService</code> protocol is implemented by classes that which to be WebSocket server side
+            <p>The <code>WebSocketService</code> protocol is implemented by classes that wish to be WebSocket server side
 end points. An instance of the <code>WebSocketService</code> protocol is the server side of a WebSocket connection.
 There can be many WebSocket connections connected to a single <code>WebSocketService</code> protocol instance.
-The protocol is a set of callbacks that are invokes when various events occur.</p>
+The protocol is a set of callbacks that are invoked when various events occur.</p>
 
           </div>
         </section>
@@ -102,9 +111,9 @@ The protocol is a set of callbacks that are invokes when various events occur.</
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:FP15KituraWebSocket16WebSocketService9connectedFT10connectionCS_19WebSocketConnection_T_"></a>
+                    <a name="/s:15KituraWebSocket0bC7ServiceP9connectedyAA0bC10ConnectionC10connection_tF"></a>
                     <a name="//apple_ref/swift/Method/connected(connection:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:FP15KituraWebSocket16WebSocketService9connectedFT10connectionCS_19WebSocketConnection_T_">connected(connection:)</a>
+                    <a class="token" href="#/s:15KituraWebSocket0bC7ServiceP9connectedyAA0bC10ConnectionC10connection_tF">connected(connection:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -115,13 +124,6 @@ The protocol is a set of callbacks that are invokes when various events occur.</
                         <p>Called when a WebSocket client connects to the server and is connected to a specific 
 <code>WebSocketService</code>.</p>
 
-<div class="aside aside-parameter">
-    <p class="aside-title">Parameter</p>
-    Parameter connection: The <code><a href="../Classes/WebSocketConnection.html">WebSocketConnection</a></code> object that represents the client&rsquo;s
-               connection to this <code>WebSocketService</code>
-
-</div>
-
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
@@ -131,35 +133,15 @@ The protocol is a set of callbacks that are invokes when various events occur.</
 
                         </div>
                       </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>connection</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The <code>WebSocketConnection</code> object that represents the client’s connection to this <code>WebSocketService</code></p>
-
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:FP15KituraWebSocket16WebSocketService12disconnectedFT10connectionCS_19WebSocketConnection6reasonOS_24WebSocketCloseReasonCode_T_"></a>
+                    <a name="/s:15KituraWebSocket0bC7ServiceP12disconnectedyAA0bC10ConnectionC10connection_AA0bC15CloseReasonCodeO6reasontF"></a>
                     <a name="//apple_ref/swift/Method/disconnected(connection:reason:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:FP15KituraWebSocket16WebSocketService12disconnectedFT10connectionCS_19WebSocketConnection6reasonOS_24WebSocketCloseReasonCode_T_">disconnected(connection:reason:)</a>
+                    <a class="token" href="#/s:15KituraWebSocket0bC7ServiceP12disconnectedyAA0bC10ConnectionC10connection_AA0bC15CloseReasonCodeO6reasontF">disconnected(connection:reason:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -168,15 +150,6 @@ The protocol is a set of callbacks that are invokes when various events occur.</
                       <div class="pointer"></div>
                       <div class="abstract">
                         <p>Called when a WebSocket client disconnects from the server.</p>
-
-<div class="aside aside-parameter">
-    <p class="aside-title">Parameter</p>
-    Parameter connection: The <code><a href="../Classes/WebSocketConnection.html">WebSocketConnection</a></code> object that represents the connection that
-               was disconnected from this <code>WebSocketService</code>.
-
-</div>
-
-<p><li>Paramater reason: The <code><a href="../Enums/WebSocketCloseReasonCode.html">WebSocketCloseReasonCode</a></code> that describes why the client disconnected.</li></p>
 
                       </div>
                       <div class="declaration">
@@ -187,35 +160,15 @@ The protocol is a set of callbacks that are invokes when various events occur.</
 
                         </div>
                       </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>connection</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The <code>WebSocketConnection</code> object that represents the connection that was disconnected from this <code>WebSocketService</code>.</p>
-
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:FP15KituraWebSocket16WebSocketService8receivedFT7messageV10Foundation4Data4fromCS_19WebSocketConnection_T_"></a>
+                    <a name="/s:15KituraWebSocket0bC7ServiceP8receivedy10Foundation4DataV7message_AA0bC10ConnectionC4fromtF"></a>
                     <a name="//apple_ref/swift/Method/received(message:from:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:FP15KituraWebSocket16WebSocketService8receivedFT7messageV10Foundation4Data4fromCS_19WebSocketConnection_T_">received(message:from:)</a>
+                    <a class="token" href="#/s:15KituraWebSocket0bC7ServiceP8receivedy10Foundation4DataV7message_AA0bC10ConnectionC4fromtF">received(message:from:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -224,19 +177,6 @@ The protocol is a set of callbacks that are invokes when various events occur.</
                       <div class="pointer"></div>
                       <div class="abstract">
                         <p>Called when a WebSocket client sent a binary message to the server to this <code>WebSocketService</code>.</p>
-
-<div class="aside aside-parameter">
-    <p class="aside-title">Parameter</p>
-    Parameter message: A Data struct containing the bytes of the binary message sent by the client.
-
-</div>
-
-<div class="aside aside-parameter">
-    <p class="aside-title">Parameter</p>
-    Parameter client: The <code><a href="../Classes/WebSocketConnection.html">WebSocketConnection</a></code> object that represents the connection over which
-               the client sent the message to this <code>WebSocketService</code>
-
-</div>
 
                       </div>
                       <div class="declaration">
@@ -247,48 +187,15 @@ The protocol is a set of callbacks that are invokes when various events occur.</
 
                         </div>
                       </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>message</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>A Data struct containing the bytes of the binary message sent by the client.</p>
-
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>client</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The <code>WebSocketConnection</code> object that represents the connection over which the client sent the message to this <code>WebSocketService</code></p>
-
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
                     </section>
                   </div>
                 </li>
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:FP15KituraWebSocket16WebSocketService8receivedFT7messageSS4fromCS_19WebSocketConnection_T_"></a>
+                    <a name="/s:15KituraWebSocket0bC7ServiceP8receivedySS7message_AA0bC10ConnectionC4fromtF"></a>
                     <a name="//apple_ref/swift/Method/received(message:from:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:FP15KituraWebSocket16WebSocketService8receivedFT7messageSS4fromCS_19WebSocketConnection_T_">received(message:from:)</a>
+                    <a class="token" href="#/s:15KituraWebSocket0bC7ServiceP8receivedySS7message_AA0bC10ConnectionC4fromtF">received(message:from:)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -298,19 +205,6 @@ The protocol is a set of callbacks that are invokes when various events occur.</
                       <div class="abstract">
                         <p>Called when a WebSocket client sent a text message to the server to this <code>WebSocketService</code>.</p>
 
-<div class="aside aside-parameter">
-    <p class="aside-title">Parameter</p>
-    Parameter message: A String containing the text message sent by the client.
-
-</div>
-
-<div class="aside aside-parameter">
-    <p class="aside-title">Parameter</p>
-    Parameter client: The <code><a href="../Classes/WebSocketConnection.html">WebSocketConnection</a></code> object that represents the connection over which
-               the client sent the message to this <code>WebSocketService</code>
-
-</div>
-
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
@@ -319,39 +213,6 @@ The protocol is a set of callbacks that are invokes when various events occur.</
                           <pre class="highlight"><code><span class="kd">func</span> <span class="nf">received</span><span class="p">(</span><span class="nv">message</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">from</span><span class="p">:</span> <span class="kt"><a href="../Classes/WebSocketConnection.html">WebSocketConnection</a></span><span class="p">)</span></code></pre>
 
                         </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>message</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>A String containing the text message sent by the client.</p>
-
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>client</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The <code>WebSocketConnection</code> object that represents the connection over which the client sent the message to this <code>WebSocketService</code></p>
-
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
                       </div>
                     </section>
                   </div>
@@ -364,8 +225,8 @@ The protocol is a set of callbacks that are invokes when various events occur.</
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2017 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2017-06-11)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.0</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2017 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2017-07-25)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.5</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>

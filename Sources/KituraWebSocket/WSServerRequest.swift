@@ -42,7 +42,7 @@ class WSServerRequest: ServerRequest {
     let urlURL: URL
 
     /// The URL from the request as URLComponents
-    public var urlComponents: URLComponents
+    public let urlComponents: URLComponents
 
     /// The IP address of the client
     let remoteAddress: String
