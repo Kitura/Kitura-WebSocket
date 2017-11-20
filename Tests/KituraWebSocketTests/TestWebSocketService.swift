@@ -36,7 +36,7 @@ class TestWebSocketService: WebSocketService {
         connectionId = connection.id
         
         if let pingMessage = pingMessage {
-            if pingMessage.characters.count > 0 {
+            if pingMessage.count > 0 {
                 connection.ping(withMessage: pingMessage)
             }
             else {
@@ -89,7 +89,7 @@ class TestWebSocketService: WebSocketService {
     }
     
     public func received(message: String, from: WebSocketConnection) {
-        print("Received a String message of length \(message.characters.count)")
+        print("Received a String message of length \(message.count)")
         from.send(message: message)
         
         if message == "close" {

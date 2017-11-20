@@ -129,7 +129,7 @@ class ComplexTests: KituraTest {
             var mediumText = ""
             repeat {
                 mediumText += "Testing, testing 1,2,3. "
-            } while mediumText.characters.count < 1000
+            } while mediumText.count < 1000
             let mediumTextPayload = self.payload(text: mediumText)
             
             let textExpectedPayload = self.payload(text: shortText + mediumText)
