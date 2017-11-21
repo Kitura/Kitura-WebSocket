@@ -1,3 +1,6 @@
+// swift-tools-version:4.0
+// The swift-tools-version declares the minimum version of Swift required to build this package.
+
 /**
  * Copyright IBM Corporation 2016, 2017
  *
@@ -18,8 +21,27 @@ import PackageDescription
 
 let package = Package(
     name: "Kitura-WebSocket",
+    products: [
+        // Products define the executables and libraries produced by a package, and make them visible to other packages.
+        .library(
+            name: "Kitura-WebSocket",
+            targets: ["KituraWebSocket"]),
+        ],
     dependencies: [
-        .Package(url: "https://github.com/IBM-Swift/Kitura-net.git", majorVersion: 1, minor: 7),
-        .Package(url: "https://github.com/IBM-Swift/BlueCryptor.git", majorVersion: 0, minor: 8)
-    ]
+        // Dependencies declare other packages that this package depends on.
+        // .package(url: /* package url */, from: "1.0.0"),
+        .package(url: "https://github.com/IBM-Swift/Kitura-net.git", .upToNextMinor(from: "2.0.0")),
+        .package(url: "https://github.com/IBM-Swift/BlueCryptor.git", .upToNextMinor(from: "0.8.0")),
+
+    ],
+    targets: [
+        // Targets are the basic building blocks of a package. A target defines a module or a test suite.
+        // Targets can depend on other targets in this package, and on products in packages which this package depends on.
+        .target(
+            name: "KituraWebSocket",
+            dependencies: ["KituraNet", "Cryptor"]),
+        .testTarget(
+            name: "KituraWebSocketTests",
+            dependencies: ["KituraWebSocket"]),
+        ]
 )

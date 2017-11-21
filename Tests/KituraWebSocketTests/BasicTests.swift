@@ -271,7 +271,7 @@ class BasicTests: KituraTest {
             var text = "Testing, testing 1, 2, 3."
             repeat {
                 text += " " + text
-            } while text.characters.count < 100000
+            } while text.count < 100000
             let textPayload = self.payload(text: text)
             
             self.performTest(framesToSend: [(true, self.opcodeText, textPayload)],
@@ -288,7 +288,7 @@ class BasicTests: KituraTest {
             var text = ""
             repeat {
                 text += "Testing, testing 1,2,3. "
-            } while text.characters.count < 1000
+            } while text.count < 1000
             let textPayload = self.payload(text: text)
             
             self.performTest(framesToSend: [(true, self.opcodeText, textPayload)],
