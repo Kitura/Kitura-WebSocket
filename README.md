@@ -17,8 +17,8 @@ protocol (RFC 6455). It is compatible with a variety of WebSocket clients, inclu
 
 Kitura-WebSocket supports version thirteen of the WebSocket protocol.
 
-Both the WS and WSS (SSL/TLS secured WS) protocols are supported by Kitura-WebSocket. 
-To enable WSS simply set up your Kitura based server for SSL/TLS support. See the tutorial 
+Both the WS and WSS (SSL/TLS secured WS) protocols are supported by Kitura-WebSocket.
+To enable WSS simply set up your Kitura based server for SSL/TLS support. See the tutorial
 [Enabling SSL/TLS on your Kitura server](http://www.kitura.io/en/resources/tutorials/ssl.html) on
 [www.kitura.io](http://www.kitura.io/en/starter/settingup.html) for details.  
 
@@ -138,8 +138,14 @@ import PackageDescription
 let package = Package(
     name: "ChatServer",
     dependencies: [
-        .Package(url: "https://github.com/IBM-Swift/HeliumLogger.git", majorVersion: 1, minor: 7),
-        .Package(url: "https://github.com/IBM-Swift/Kitura-WebSocket", majorVersion: 0, minor: 9)
+         .package(url: "https://github.com/IBM-Swift/Kitura.git", .upToNextMinor(from: "2.2.0")),
+         .package(url: "https://github.com/IBM-Swift/HeliumLogger.git", from: "1.7.0")),
+         .package(url: "https://github.com/IBM-Swift/Kitura-WebSocket.git", from: "1.0.1"))
+    ],
+    targets: [
+        .target(
+            name: "ChatServer",
+            dependencies: ["Kitura", "HeliumLogger", "Kitura-WebSocket"]),
     ]
 )
 ```
@@ -337,11 +343,11 @@ Where **host** is the hostname of the host on which the server is running.
 The client can be run in several terminal windows on the same computer.
 
 ## A more complete example
-For a more complete example please see [Kitura-Chat-Server](https://github.com/IBM-Swift/Kitura-Chat-Server)
+For a more complete example please see [Kitura-Sample](https://github.com/IBM-Swift/Kitura-Sample)
 
 ## Community
 
 We love to talk server-side Swift, and Kitura. Join our [Slack](http://swift-at-ibm-slack.mybluemix.net/) to meet the team!
 
 ## License
-This library is licensed under Apache 2.0. Full license text is available in [LICENSE](LICENSE.txt).
+This library is licensed under Apache 2.0. Full license text is available in [LICENSE](https://github.com/IBM-Swift/Kitura-Sample/blob/master/LICENSE.txt).
