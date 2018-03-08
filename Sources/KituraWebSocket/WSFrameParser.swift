@@ -81,8 +81,15 @@ struct WSFrameParser {
     
     private mutating func parseOpCode(bytes: UnsafePointer<UInt8>, from: Int) -> (WebSocketError?, Int) {
         let byte = bytes[from]
-        frame.finalFrame = byte & 0x80 != 0
+        // 0x.. is the hexadecimal representation of the bits you would like to check
+        // e.g.0x0f is 15 which is 00001111 so rawOpCode is the last 4 digits
         
+        // Check RSV (three reserved bits) is equal to 0
+        let rsv = (byte & 0x70) >> 4
+        guard rsv == 0 else {
+            return (.invalidOpCode(byte & 0x7F), 0)
+        }
+        frame.finalFrame = byte & 0x80 != 0
         let rawOpCode = byte & 0x0f
         if let opCode = WSFrame.FrameOpcode(rawValue: Int(rawOpCode)) {
             self.frame.opCode = opCode
