@@ -25,6 +25,7 @@ class ProtocolErrorTests: KituraTest {
     static var allTests: [(String, (ProtocolErrorTests) -> () throws -> Void)] {
         return [
             ("testBinaryAndTextFrames", testBinaryAndTextFrames),
+            ("testPingWithOversizedPayload", testPingWithOversizedPayload),
             ("testInvalidOpCode", testInvalidOpCode),
             ("testJustContinuationFrame", testJustContinuationFrame),
             ("testJustFinalContinuationFrame", testJustFinalContinuationFrame),
@@ -57,7 +58,44 @@ class ProtocolErrorTests: KituraTest {
         }
     }
     
+    func testPingWithOversizedPayload() {
+        register(closeReason: .protocolError)
+        
+        let expectedPayload = NSMutableData()
+        var part = self.payload(closeReasonCode: .protocolError)
+        expectedPayload.append(part.bytes, length: part.length)
+        part = self.payload(text: "Control frames are only allowed to have payload up to and including 125 octets")
+        expectedPayload.append(part.bytes, length: part.length)
+        
+        performServerTest() { expectation in
+            let oversizedPayload = Data(repeatElement(0, count: 126))
+            self.performTest(framesToSend: [(true, self.opcodePing, oversizedPayload as NSData)],
+                             expectedFrames: [(true, self.opcodeClose, expectedPayload)],
+                             expectation: expectation)
+        }
+    }
+    
     func testInvalidOpCode() {
+        register(closeReason: .protocolError)
+        
+        performServerTest() { expectation in
+            
+            var bytes = [0x00, 0x01]
+            let payload = NSMutableData(bytes: &bytes, length: bytes.count)
+            
+            let expectedPayload = NSMutableData()
+            var part = self.payload(closeReasonCode: .protocolError)
+            expectedPayload.append(part.bytes, length: part.length)
+            part = self.payload(text: "Parsed a frame with an invalid operation code of 15")
+            expectedPayload.append(part.bytes, length: part.length)
+            
+            self.performTest(framesToSend: [(true, 15, payload)],
+                             expectedFrames: [(true, self.opcodeClose, expectedPayload)],
+                             expectation: expectation)
+        }
+    }
+    
+    func testInvalidRSV() {
         register(closeReason: .protocolError)
         
         performServerTest() { expectation in

@@ -19,6 +19,9 @@ import Foundation
 /// An error enum used when throwing errors within KituraWebSocket.
 public enum WebSocketError: Error {
     
+    /// An invalid RSV was received in a WebSocket frame
+    case invalidRSV(UInt8)
+    
     /// An invalid opcode was received in a WebSocket frame
     case invalidOpCode(UInt8)
     
