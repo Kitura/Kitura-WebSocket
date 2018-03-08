@@ -27,7 +27,7 @@ class ProtocolErrorTests: KituraTest {
             ("testBinaryAndTextFrames", testBinaryAndTextFrames),
             ("testPingWithOversizedPayload", testPingWithOversizedPayload),
             ("testInvalidOpCode", testInvalidOpCode),
-            //("testInvalidRSVCode", testInvalidRSVCode),
+            ("testInvalidRSVCode", testInvalidRSVCode),
             ("testJustContinuationFrame", testJustContinuationFrame),
             ("testJustFinalContinuationFrame", testJustFinalContinuationFrame),
             ("testTextAndBinaryFrames", testTextAndBinaryFrames),
