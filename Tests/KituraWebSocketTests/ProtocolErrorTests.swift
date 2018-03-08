@@ -94,27 +94,7 @@ class ProtocolErrorTests: KituraTest {
                              expectation: expectation)
         }
     }
-    
-    func testInvalidRSV() {
-        register(closeReason: .protocolError)
-        
-        performServerTest() { expectation in
-            
-            var bytes = [0x00, 0x01]
-            let payload = NSMutableData(bytes: &bytes, length: bytes.count)
-            
-            let expectedPayload = NSMutableData()
-            var part = self.payload(closeReasonCode: .protocolError)
-            expectedPayload.append(part.bytes, length: part.length)
-            part = self.payload(text: "Parsed a frame with an invalid operation code of 15")
-            expectedPayload.append(part.bytes, length: part.length)
-            
-            self.performTest(framesToSend: [(true, 15, payload)],
-                             expectedFrames: [(true, self.opcodeClose, expectedPayload)],
-                             expectation: expectation)
-        }
-    }
-    
+
     func testJustContinuationFrame() {
         register(closeReason: .protocolError)
         
