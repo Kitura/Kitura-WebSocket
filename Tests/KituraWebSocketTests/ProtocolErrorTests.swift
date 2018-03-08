@@ -95,7 +95,7 @@ class ProtocolErrorTests: KituraTest {
                              expectation: expectation)
         }
     }
-    
+
     func testInvalidRSVCode() {
         register(closeReason: .protocolError)
 
