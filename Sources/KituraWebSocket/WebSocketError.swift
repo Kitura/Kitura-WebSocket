@@ -18,10 +18,7 @@ import Foundation
 
 /// An error enum used when throwing errors within KituraWebSocket.
 public enum WebSocketError: Error {
-    
-    /// An invalid RSV was received in a WebSocket frame
-    case invalidRSV(UInt8)
-    
+
     /// An invalid opcode was received in a WebSocket frame
     case invalidOpCode(UInt8)
     
@@ -34,8 +31,6 @@ extension WebSocketError: CustomStringConvertible {
     /// Generate a printable version of this enum.
     public var description: String {
         switch self {
-        case .invalidRSV(let rsv):
-            return "Parsed a frame with an invalid RSV code of \(rsv)"
         case .invalidOpCode(let opCode):
             return "Parsed a frame with an invalid operation code of \(opCode)"
         case .unmaskedFrame:

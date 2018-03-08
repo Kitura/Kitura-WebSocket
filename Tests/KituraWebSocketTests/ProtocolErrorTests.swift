@@ -27,6 +27,7 @@ class ProtocolErrorTests: KituraTest {
             ("testBinaryAndTextFrames", testBinaryAndTextFrames),
             ("testPingWithOversizedPayload", testPingWithOversizedPayload),
             ("testInvalidOpCode", testInvalidOpCode),
+            //("testInvalidRSVCode", testInvalidRSVCode),
             ("testJustContinuationFrame", testJustContinuationFrame),
             ("testJustFinalContinuationFrame", testJustFinalContinuationFrame),
             ("testTextAndBinaryFrames", testTextAndBinaryFrames),
@@ -95,26 +96,26 @@ class ProtocolErrorTests: KituraTest {
         }
     }
     
-    func testInvalidRSV() {
+    func testInvalidRSVCode() {
         register(closeReason: .protocolError)
-        
+
         performServerTest() { expectation in
-            
+
             var bytes = [0x00, 0x01]
             let payload = NSMutableData(bytes: &bytes, length: bytes.count)
-            
+
             let expectedPayload = NSMutableData()
             var part = self.payload(closeReasonCode: .protocolError)
             expectedPayload.append(part.bytes, length: part.length)
-            part = self.payload(text: "Parsed a frame with an invalid operation code of 15")
+            part = self.payload(text: "Parsed a frame with an invalid operation code of 25")
             expectedPayload.append(part.bytes, length: part.length)
-            
-            self.performTest(framesToSend: [(true, 15, payload)],
+            // 25 becomes 0011001 which is a ping (op code 9) and rsv = 1
+            self.performTest(framesToSend: [(true, 25, payload)],
                              expectedFrames: [(true, self.opcodeClose, expectedPayload)],
                              expectation: expectation)
         }
     }
-    
+
     func testJustContinuationFrame() {
         register(closeReason: .protocolError)
         
