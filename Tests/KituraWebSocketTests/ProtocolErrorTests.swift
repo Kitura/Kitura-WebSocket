@@ -69,8 +69,9 @@ class ProtocolErrorTests: KituraTest {
         expectedPayload.append(part.bytes, length: part.length)
         
         performServerTest() { expectation in
-            let oversizedPayload = Data(repeatElement(0, count: 126))
-            self.performTest(framesToSend: [(true, self.opcodePing, oversizedPayload as NSData)],
+            let oversizedPayload = NSMutableData()
+            oversizedPayload.append(Data(repeatElement(0, count: 126)))
+            self.performTest(framesToSend: [(true, self.opcodePing, oversizedPayload)],
                              expectedFrames: [(true, self.opcodeClose, expectedPayload)],
                              expectation: expectation)
         }
