@@ -224,14 +224,14 @@ public class WebSocketConnection {
                 if frame.payload.length >= 2 {
                     let networkOrderedReasonCode = UnsafeRawPointer(frame.payload.bytes).assumingMemoryBound(to: UInt16.self)[0]
                 
-                    let reasonCodeUInt16: UInt16
+                    let hostOrderedReasonCode: UInt16
                     #if os(Linux)
-                        reasonCodeUInt16 = UInt16(Glibc.ntohs(networkOrderedReasonCode))
+                        hostOrderedReasonCode = UInt16(Glibc.ntohs(networkOrderedReasonCode))
                     #else
-                        reasonCodeUInt16 = UInt16(CFSwapInt16BigToHost(networkOrderedReasonCode))
+                        hostOrderedReasonCode = UInt16(CFSwapInt16BigToHost(networkOrderedReasonCode))
                     #endif
                     
-                    reasonCode = WebSocketCloseReasonCode.from(code: reasonCodeUInt16)                }
+                    reasonCode = WebSocketCloseReasonCode.from(code: hostOrderedReasonCode)                }
                 else {
                     reasonCode = .noReasonCodeSent
                 }

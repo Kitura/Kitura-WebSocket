@@ -38,7 +38,8 @@ class BasicTests: KituraTest {
             ("testSuccessfulUpgrade", testSuccessfulUpgrade),
             ("testTextLongMessage", testTextLongMessage),
             ("testTextMediumMessage", testTextMediumMessage),
-            ("testTextShortMessage", testTextShortMessage)
+            ("testTextShortMessage", testTextShortMessage),
+            ("testUserDefinedCloseMessage", testUserDefinedCloseMessage)
         ]
     }
     
