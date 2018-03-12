@@ -316,10 +316,11 @@ class BasicTests: KituraTest {
         
         performServerTest() { expectation in
             
-            let textPayload = self.payload(text: "Testing, testing 1,2,3")
+            let closePayload = self.payload(closeReasonCode: .userDefined(65535))
+            let returnPayload = self.payload(closeReasonCode: .normal)
             
-            self.performTest(framesToSend: [(true, self.opcodeText, textPayload)],
-                             expectedFrames: [(true, self.opcodeText, textPayload)],
+            self.performTest(framesToSend: [(true, self.opcodeClose, closePayload)],
+                             expectedFrames: [(true, self.opcodeClose, returnPayload)],
                              expectation: expectation)
         }
     }
