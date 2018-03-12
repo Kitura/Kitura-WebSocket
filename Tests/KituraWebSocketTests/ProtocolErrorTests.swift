@@ -77,6 +77,31 @@ class ProtocolErrorTests: KituraTest {
         }
     }
     
+    func testFragmentedPing() {
+        register(closeReason: .protocolError)
+        
+        performServerTest() { expectation in
+            
+            let text = "Testing, testing 1, 2, 3. "
+            
+            let textPayload = self.payload(text: text)
+            
+            let expectedPayload = NSMutableData()
+            var part = self.payload(closeReasonCode: .protocolError)
+            expectedPayload.append(part.bytes, length: part.length)
+            part = self.payload(text: "Control frames cannot be fragmented")
+            expectedPayload.append(part.bytes, length: part.length)
+            
+            let pingPayload = self.payload(text: "Testing, testing 1,2,3")
+            
+            self.performTest(framesToSend: [(false, self.opcodePing, pingPayload),
+                                            (false, self.opcodeContinuation, textPayload),
+                                            (true, self.opcodeContinuation, textPayload)],
+                             expectedFrames: [(true, self.opcodeClose, expectedPayload)],
+                             expectation: expectation)
+        }
+    }
+    
     func testInvalidOpCode() {
         register(closeReason: .protocolError)
         
