@@ -90,7 +90,7 @@ class ProtocolErrorTests: KituraTest {
             let expectedPayload = NSMutableData()
             var part = self.payload(closeReasonCode: .protocolError)
             expectedPayload.append(part.bytes, length: part.length)
-            part = self.payload(text: "Control frames cannot be fragmented")
+            part = self.payload(text: "Control frames must not be fragmented")
             expectedPayload.append(part.bytes, length: part.length)
             
             let pingPayload = self.payload(text: "Testing, testing 1,2,3")
