@@ -263,12 +263,15 @@ public class WebSocketConnection {
             }
             
         case .ping:
-            if frame.payload.length < 126 {
-                sendMessage(withOpCode: .pong, payload: frame.payload.bytes, payloadLength: frame.payload.length)
-            } else {
+            guard frame.payload.length < 126 else {
                 connectionClosed(reason: .protocolError, description: "Control frames are only allowed to have payload up to and including 125 octets")
                 return
             }
+            guard frame.finalFrame else {
+                connectionClosed(reason: .protocolError, description: "Control frames must not be fragmented")
+                return
+            }
+            sendMessage(withOpCode: .pong, payload: frame.payload.bytes, payloadLength: frame.payload.length)
             
         case .pong:
             break

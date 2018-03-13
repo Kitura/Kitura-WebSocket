@@ -26,6 +26,7 @@ class ProtocolErrorTests: KituraTest {
         return [
             ("testBinaryAndTextFrames", testBinaryAndTextFrames),
             ("testPingWithOversizedPayload", testPingWithOversizedPayload),
+            ("testFragmentedPing", testFragmentedPing),
             ("testInvalidOpCode", testInvalidOpCode),
             ("testInvalidRSVCode", testInvalidRSVCode),
             ("testJustContinuationFrame", testJustContinuationFrame),
@@ -72,6 +73,31 @@ class ProtocolErrorTests: KituraTest {
             let oversizedPayload = NSMutableData()
             oversizedPayload.append(Data(repeatElement(0, count: 126)))
             self.performTest(framesToSend: [(true, self.opcodePing, oversizedPayload)],
+                             expectedFrames: [(true, self.opcodeClose, expectedPayload)],
+                             expectation: expectation)
+        }
+    }
+    
+    func testFragmentedPing() {
+        register(closeReason: .protocolError)
+        
+        performServerTest() { expectation in
+            
+            let text = "Testing, testing 1, 2, 3. "
+            
+            let textPayload = self.payload(text: text)
+            
+            let expectedPayload = NSMutableData()
+            var part = self.payload(closeReasonCode: .protocolError)
+            expectedPayload.append(part.bytes, length: part.length)
+            part = self.payload(text: "Control frames must not be fragmented")
+            expectedPayload.append(part.bytes, length: part.length)
+            
+            let pingPayload = self.payload(text: "Testing, testing 1,2,3")
+            
+            self.performTest(framesToSend: [(false, self.opcodePing, pingPayload),
+                                            (false, self.opcodeContinuation, textPayload),
+                                            (true, self.opcodeContinuation, textPayload)],
                              expectedFrames: [(true, self.opcodeClose, expectedPayload)],
                              expectation: expectation)
         }
