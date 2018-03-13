@@ -38,7 +38,8 @@ class BasicTests: KituraTest {
             ("testSuccessfulUpgrade", testSuccessfulUpgrade),
             ("testTextLongMessage", testTextLongMessage),
             ("testTextMediumMessage", testTextMediumMessage),
-            ("testTextShortMessage", testTextShortMessage)
+            ("testTextShortMessage", testTextShortMessage),
+            ("testUserDefinedCloseMessage", testUserDefinedCloseMessage)
         ]
     }
     
@@ -306,6 +307,20 @@ class BasicTests: KituraTest {
             
             self.performTest(framesToSend: [(true, self.opcodeText, textPayload)],
                              expectedFrames: [(true, self.opcodeText, textPayload)],
+                             expectation: expectation)
+        }
+    }
+    
+    func testUserDefinedCloseMessage() {
+        register(closeReason: .userDefined(65535))
+        
+        performServerTest() { expectation in
+            
+            let closePayload = self.payload(closeReasonCode: .userDefined(65535))
+            let returnPayload = self.payload(closeReasonCode: .normal)
+            
+            self.performTest(framesToSend: [(true, self.opcodeClose, closePayload)],
+                             expectedFrames: [(true, self.opcodeClose, returnPayload)],
                              expectation: expectation)
         }
     }
