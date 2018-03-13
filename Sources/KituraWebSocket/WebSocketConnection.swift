@@ -268,7 +268,7 @@ public class WebSocketConnection {
                 return
             }
             guard frame.finalFrame else {
-                connectionClosed(reason: .protocolError, description: "Control frames cannot be fragmented")
+                connectionClosed(reason: .protocolError, description: "Control frames must not be fragmented")
                 return
             }
             sendMessage(withOpCode: .pong, payload: frame.payload.bytes, payloadLength: frame.payload.length)
