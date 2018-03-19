@@ -1,12 +1,27 @@
-# Kitura-WebSocket
-**WebSocket support for Kitura base servers**
 
-[![Build Status - Master](https://travis-ci.org/IBM-Swift/Kitura-WebSocket.svg?branch=master)](https://travis-ci.org/IBM-Swift/Kitura-WebSocket)
-![macOS](https://img.shields.io/badge/os-macOS-green.svg?style=flat)
-![Linux](https://img.shields.io/badge/os-linux-green.svg?style=flat)
-![Apache 2](https://img.shields.io/badge/license-Apache2-blue.svg?style=flat)
-&nbsp;[![Slack Status](http://swift-at-ibm-slack.mybluemix.net/badge.svg)](http://swift-at-ibm-slack.mybluemix.net/)
-[![codecov](https://codecov.io/gh/IBM-Swift/Kitura-WebSocket/branch/master/graph/badge.svg)](https://codecov.io/gh/IBM-Swift/Kitura-WebSocket)
+<p align="center">
+    <a href="http://kitura.io/">
+        <img src="https://raw.githubusercontent.com/IBM-Swift/Kitura/master/Sources/Kitura/resources/kitura-bird.svg?sanitize=true" height="100" alt="Kitura">
+    </a>
+</p>
+
+<p align="center">
+    <a href="http://www.kitura.io/">
+    <img src="https://img.shields.io/badge/docs-kitura.io-1FBCE4.svg" alt="Docs">
+    </a>
+    <a href="https://travis-ci.org/IBM-Swift/Kitura-WebSocket">
+    <img src="https://travis-ci.org/IBM-Swift/Kitura-WebSocket.svg?branch=master" alt="Build Status - Master">
+    </a>
+    <img src="https://img.shields.io/badge/os-macOS-green.svg?style=flat" alt="macOS">
+    <img src="https://img.shields.io/badge/os-linux-green.svg?style=flat" alt="Linux">
+    <img src="https://img.shields.io/badge/license-Apache2-blue.svg?style=flat" alt="Apache 2">
+    <a href="http://swift-at-ibm-slack.mybluemix.net/">
+    <img src="http://swift-at-ibm-slack.mybluemix.net/badge.svg" alt="Slack Status">
+    </a>
+</p>
+
+# Kitura-WebSocket
+**WebSocket support for Kitura based servers**
 
 ## Summary
 
@@ -110,9 +125,9 @@ WebSocket.unregister(path: String)
 This function is passed the path on which the `WebSocketService` being unregistered, was registered on.
 
 ## An example
-A simple example to better describe the APIs of Kitura-WebSocket. This example, a very simplistic chat service.
+A simple example to better describe the APIs of Kitura-WebSocket. This example is a very simplistic chat service.
 The server side is written in Swift using Kitura-WebSocket and the client side is written in JavaScript using
-Node.js and the websocket NPM package.
+Node.js and the websocket NPM package. The instructions below show you how to create the files for both the server and client and then how to compile and run the application.
 
 ### Pre-requisites
 In order to run the client one must have Node.js installed.
@@ -121,7 +136,7 @@ In order to run the client one must have Node.js installed.
 The server keeps track of the clients that have connected to it and echoes all text messages sent to it to all
 of the clients that have connected to it, with the exception of the client that sent the message.
 
-The server's directory setup is something like this:
+You will need to create the server's directory structure to be something like this:
 <pre>
 ServerDirectory
 ├── Package.swift
@@ -131,16 +146,17 @@ ServerDirectory
         └── main.swift
 </pre>
 
-The Package.swift file contains:
+Create a `Package.swift` file which contains:
 ```swift
+// swift-tools-version:4.0
 import PackageDescription
 
 let package = Package(
     name: "ChatServer",
     dependencies: [
          .package(url: "https://github.com/IBM-Swift/Kitura.git", .upToNextMinor(from: "2.2.0")),
-         .package(url: "https://github.com/IBM-Swift/HeliumLogger.git", from: "1.7.0")),
-         .package(url: "https://github.com/IBM-Swift/Kitura-WebSocket.git", from: "1.0.1"))
+         .package(url: "https://github.com/IBM-Swift/HeliumLogger.git", from: "1.7.0"),
+         .package(url: "https://github.com/IBM-Swift/Kitura-WebSocket.git", from: "1.0.1")
     ],
     targets: [
         .target(
@@ -151,7 +167,7 @@ let package = Package(
 ```
 The HeliumLogger package, while strictly not required, was added to enable logging.
 
-The ChatService.swift file contains:
+Create a `ChatService.swift` file which contains:
 ```swift
 // ChatServer is a very simple chat server
 
@@ -198,7 +214,7 @@ It should be noted that all of these functions can be invoked from many threads 
 one should add locking around the access of non-thread safe artifacts of the application such as the
 connections Dictionary in this very simplistic example.
 
-The main.swift file contains:
+Create a `main.swift` file which contains:
 ```swift
 // ChatServer is a very simple chat server
 
@@ -241,14 +257,14 @@ With this server set up clients should connect to the chat service as *ws://__ho
 The client has a simple command line interface. At startup one passes the host and port number. The client simply reads
 messages to be sent from the terminal and displays messages received on the terminal as well.
 
-The server's directory setup is something like this:
+You will need to create the client's directory structure to be something like this:
 <pre>
 ClientDirectory
 ├── package.json
 └── chat.js
 </pre>
 
-The package.json at a minimum contains:
+Create a `package.json` file which, at a minimum, contains:
 
 ```javascript
 {
@@ -264,7 +280,7 @@ The package.json at a minimum contains:
 }
 ```
 
-The chat.js file contains:
+Create a `chat.js` file which contains:
 
 ```javascript
 /* main file of Simple Chat Server Client */
@@ -320,17 +336,25 @@ client.connect("ws://" + host +"/chat", "chat");
 ```
 
 ### Building and running the example
-To build and run the server, in the server directory, simply:
+To build the server, in the server directory, type:
 ```
 swift build
+```
+To run the server, in the same directory, type:
+```
 .build/debug/ChatServer
 ```
-The server is now up and running.
+The server will now be up and running. The informational log message below will be displayed:
+
+``
+[INFO] [HTTPServer.swift:124 listen(on:)] Listening on port 8080
+``
+
 
 ### Setting up and running the client
 To setup the client, in the client directory, simply:
 ```
-npm installed
+npm install
 ```
 That will install the websocket package.
 
@@ -338,9 +362,12 @@ To run the client, again in the client directory, run:
 ```
 node chat.js host:8080
 ```
-Where **host** is the hostname of the host on which the server is running.
+Where **host** is the hostname of the host on which the server is running, e.g. if your server is running on the localhost run:
+```
+node chat.js localhost:8080
+```
 
-The client can be run in several terminal windows on the same computer.
+As described above, the server echoes all text messages sent to it to all of the clients that have connected to it, with the exception of the client that sent the message. Therefore, in order to see the example in action you will need to connect more than one client to the server. The client can be run in several terminal windows on the same computer. You can then enter a message on one client and see it appear on another client and vice versa.
 
 ## A more complete example
 For a more complete example please see [Kitura-Sample](https://github.com/IBM-Swift/Kitura-Sample)
@@ -350,4 +377,4 @@ For a more complete example please see [Kitura-Sample](https://github.com/IBM-Sw
 We love to talk server-side Swift, and Kitura. Join our [Slack](http://swift-at-ibm-slack.mybluemix.net/) to meet the team!
 
 ## License
-This library is licensed under Apache 2.0. Full license text is available in [LICENSE](https://github.com/IBM-Swift/Kitura-Sample/blob/master/LICENSE.txt).
+This library is licensed under Apache 2.0. Full license text is available in [LICENSE](https://github.com/IBM-Swift/Kitura-WebSocket/blob/master/LICENSE.txt).
