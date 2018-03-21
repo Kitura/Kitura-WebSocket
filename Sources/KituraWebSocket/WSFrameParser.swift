@@ -140,7 +140,7 @@ struct WSFrameParser {
         
         if bytesConsumed > 0 {
             if length - from - bytesConsumed >= maskSize {
-                UnsafeMutableRawPointer(mutating: mask).copyBytes(from: bytes+from+bytesConsumed, count: maskSize)
+                UnsafeMutableRawPointer(mutating: mask).copyMemory(from: bytes+from+bytesConsumed, byteCount: maskSize)
                 bytesConsumed += maskSize
             }
             else {
