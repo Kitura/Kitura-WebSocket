@@ -50,7 +50,11 @@ struct WSFrame {
                 payloadLengthUInt16 = CFSwapInt16HostToBig(tempPayloadLengh)
             #endif
             let asBytes = UnsafeMutablePointer(&payloadLengthUInt16)
-            (UnsafeMutableRawPointer(mutating: bytes)+length+1).copyMemory(from: asBytes, byteCount: 2)
+            #if swift(>=4.1)
+                (UnsafeMutableRawPointer(mutating: bytes)+length+1).copyMemory(from: asBytes, byteCount: 2)
+            #else
+                (UnsafeMutableRawPointer(mutating: bytes)+length+1).copyBytes(from: asBytes, count: 2)
+            #endif
             length += 3
         } else {
             bytes[1] = 127
@@ -62,7 +66,11 @@ struct WSFrame {
                 payloadLengthUInt32 = CFSwapInt32HostToBig(tempPayloadLengh)
             #endif
             let asBytes = UnsafeMutablePointer(&payloadLengthUInt32)
-            (UnsafeMutableRawPointer(mutating: bytes)+length+5).copyMemory(from: asBytes, byteCount: 4)
+            #if swift(>=4.1)
+                (UnsafeMutableRawPointer(mutating: bytes)+length+5).copyMemory(from: asBytes, byteCount: 4)
+            #else
+                (UnsafeMutableRawPointer(mutating: bytes)+length+5).copyBytes(from: asBytes, count: 4)
+            #endif
             length += 9
         }
         buffer.append(bytes, length: length)
