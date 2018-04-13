@@ -191,7 +191,9 @@ class ProtocolErrorTests: KituraTest {
         
         performServerTest() { expectation in
             let testString = "Testing, 1,2,3"
-            let textPayload = testString.data(using: String.Encoding.utf16)!
+            let dataPayload = testString.data(using: String.Encoding.utf16)!
+            let payload = NSMutableData()
+            payload.append(dataPayload)
             
             let expectedPayload = NSMutableData()
             var part = self.payload(closeReasonCode: .invalidDataContents)
@@ -199,7 +201,7 @@ class ProtocolErrorTests: KituraTest {
             part = self.payload(text: "Failed to convert received payload to UTF-8 String")
             expectedPayload.append(part.bytes, length: part.length)
             
-            self.performTest(framesToSend: [(true, self.opcodeText, textPayload as NSData)],
+            self.performTest(framesToSend: [(true, self.opcodeText, payload)],
                              expectedFrames: [(true, self.opcodeClose, expectedPayload)],
                              expectation: expectation)
         }
