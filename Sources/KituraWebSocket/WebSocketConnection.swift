@@ -172,7 +172,6 @@ public class WebSocketConnection {
     func connectionClosed(reason: WebSocketCloseReasonCode, description: String? = nil, reasonToSendBack: WebSocketCloseReasonCode? = nil) {
         if active {
             let reasonTosend = reasonToSendBack ?? reason
-            print("reasonTosend \(reasonTosend)")
             closeConnection(reason: reasonTosend, description: description, hard: true)
             
             callbackQueue.async { [weak self] in
