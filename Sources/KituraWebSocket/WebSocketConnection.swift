@@ -172,6 +172,7 @@ public class WebSocketConnection {
     func connectionClosed(reason: WebSocketCloseReasonCode, description: String? = nil, reasonToSendBack: WebSocketCloseReasonCode? = nil) {
         if active {
             let reasonTosend = reasonToSendBack ?? reason
+            print("reasonTosend \(reasonTosend)")
             closeConnection(reason: reasonTosend, description: description, hard: true)
             
             callbackQueue.async { [weak self] in
@@ -221,22 +222,21 @@ public class WebSocketConnection {
         case .close:
             if active {
                 let reasonCode: WebSocketCloseReasonCode
-                if frame.payload.length >= 2 {
+                if frame.payload.length >= 2 && frame.payload.length <= 125 {
                     let networkOrderedReasonCode = UnsafeRawPointer(frame.payload.bytes).assumingMemoryBound(to: UInt16.self)[0]
-                
                     let hostOrderedReasonCode: UInt16
                     #if os(Linux)
-                        hostOrderedReasonCode = UInt16(Glibc.ntohs(networkOrderedReasonCode))
+                    hostOrderedReasonCode = UInt16(Glibc.ntohs(networkOrderedReasonCode))
                     #else
-                        hostOrderedReasonCode = UInt16(CFSwapInt16BigToHost(networkOrderedReasonCode))
+                    hostOrderedReasonCode = UInt16(CFSwapInt16BigToHost(networkOrderedReasonCode))
                     #endif
-                    
-                    reasonCode = WebSocketCloseReasonCode.from(code: hostOrderedReasonCode)                }
-                else {
-                    reasonCode = .noReasonCodeSent
+                    reasonCode = WebSocketCloseReasonCode.from(code: hostOrderedReasonCode)
+                } else if frame.payload.length == 0 {
+                    reasonCode = .normal
+                } else {
+                    reasonCode = .protocolError
                 }
-                
-                connectionClosed(reason: reasonCode, reasonToSendBack: .normal)
+                connectionClosed(reason: reasonCode)
             }
             break
             
