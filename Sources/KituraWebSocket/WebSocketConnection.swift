@@ -297,7 +297,7 @@ public class WebSocketConnection {
     }
     
     private func fireReceivedString(from: NSMutableData) {
-        guard let text = String(data: from as Data, encoding: .utf8) else {
+        guard let text = String(data: Data(referencing: from), encoding: .utf8) else {
             closeConnection(reason: .invalidDataContents, description: "Failed to convert received payload to UTF-8 String", hard: true)
             return
         }
