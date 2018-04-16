@@ -31,6 +31,7 @@ class ProtocolErrorTests: KituraTest {
             ("testInvalidRSVCode", testInvalidRSVCode),
             ("testJustContinuationFrame", testJustContinuationFrame),
             ("testJustFinalContinuationFrame", testJustFinalContinuationFrame),
+            ("testInvalidUTF", testInvalidUTF),
             ("testTextAndBinaryFrames", testTextAndBinaryFrames),
             ("testUnmaskedFrame", testUnmaskedFrame)
         ]
@@ -180,6 +181,27 @@ class ProtocolErrorTests: KituraTest {
             expectedPayload.append(part.bytes, length: part.length)
             
             self.performTest(framesToSend: [(true, self.opcodeContinuation, payload)],
+                             expectedFrames: [(true, self.opcodeClose, expectedPayload)],
+                             expectation: expectation)
+        }
+    }
+    
+    func testInvalidUTF() {
+        register(closeReason: .noReasonCodeSent)
+        
+        performServerTest() { expectation in
+            let testString = "Testing, 1,2,3"
+            let dataPayload = testString.data(using: String.Encoding.utf16)!
+            let payload = NSMutableData()
+            payload.append(dataPayload)
+            
+            let expectedPayload = NSMutableData()
+            var part = self.payload(closeReasonCode: .invalidDataContents)
+            expectedPayload.append(part.bytes, length: part.length)
+            part = self.payload(text: "Failed to convert received payload to UTF-8 String")
+            expectedPayload.append(part.bytes, length: part.length)
+            
+            self.performTest(framesToSend: [(true, self.opcodeText, payload)],
                              expectedFrames: [(true, self.opcodeClose, expectedPayload)],
                              expectation: expectation)
         }

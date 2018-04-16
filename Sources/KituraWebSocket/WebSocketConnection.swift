@@ -308,7 +308,7 @@ public class WebSocketConnection {
             }
         }
         else {
-            // Error converting to String
+            closeConnection(reason: .invalidDataContents, description: "Failed to convert received payload to UTF-8 String", hard: true)
         }
         from.length -= 1
     }
