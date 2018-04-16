@@ -34,6 +34,7 @@ class ProtocolErrorTests: KituraTest {
             ("testJustContinuationFrame", testJustContinuationFrame),
             ("testJustFinalContinuationFrame", testJustFinalContinuationFrame),
             ("testInvalidUTF", testInvalidUTF),
+            ("testInvalidUTFCloseMessage", testInvalidUTFCloseMessage),
             ("testTextAndBinaryFrames", testTextAndBinaryFrames),
             ("testUnmaskedFrame", testUnmaskedFrame)
         ]
@@ -235,6 +236,29 @@ class ProtocolErrorTests: KituraTest {
             expectedPayload.append(part.bytes, length: part.length)
             
             self.performTest(framesToSend: [(true, self.opcodeText, payload)],
+                             expectedFrames: [(true, self.opcodeClose, expectedPayload)],
+                             expectation: expectation)
+        }
+    }
+    
+    func testInvalidUTFCloseMessage() {
+        register(closeReason: .noReasonCodeSent)
+        
+        performServerTest() { expectation in
+            let testString = "Testing, 1,2,3"
+            let dataPayload = testString.data(using: String.Encoding.utf16)!
+            let payload = NSMutableData()
+            let closeReasonCode = self.payload(closeReasonCode: .normal)
+            payload.append(closeReasonCode.bytes, length: closeReasonCode.length)
+            payload.append(dataPayload)
+            
+            let expectedPayload = NSMutableData()
+            var part = self.payload(closeReasonCode: .invalidDataContents)
+            expectedPayload.append(part.bytes, length: part.length)
+            part = self.payload(text: "Failed to convert received close message to UTF-8 String")
+            expectedPayload.append(part.bytes, length: part.length)
+            
+            self.performTest(framesToSend: [(true, self.opcodeClose, payload)],
                              expectedFrames: [(true, self.opcodeClose, expectedPayload)],
                              expectation: expectation)
         }
