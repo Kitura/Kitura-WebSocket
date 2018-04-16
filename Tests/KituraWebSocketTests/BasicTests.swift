@@ -317,7 +317,7 @@ class BasicTests: KituraTest {
         performServerTest() { expectation in
             
             let closePayload = self.payload(closeReasonCode: .userDefined(65535))
-            let returnPayload = self.payload(closeReasonCode: .normal)
+            let returnPayload = self.payload(closeReasonCode: .userDefined(65535))
             
             self.performTest(framesToSend: [(true, self.opcodeClose, closePayload)],
                              expectedFrames: [(true, self.opcodeClose, returnPayload)],

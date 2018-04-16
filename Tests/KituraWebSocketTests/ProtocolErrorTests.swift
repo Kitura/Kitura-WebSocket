@@ -29,6 +29,8 @@ class ProtocolErrorTests: KituraTest {
             ("testFragmentedPing", testFragmentedPing),
             ("testInvalidOpCode", testInvalidOpCode),
             ("testInvalidRSVCode", testInvalidRSVCode),
+            ("testInvalidUserCloseCode", testInvalidUserCloseCode),
+            ("testCloseWithOversizedPayload", testCloseWithOversizedPayload),
             ("testJustContinuationFrame", testJustContinuationFrame),
             ("testJustFinalContinuationFrame", testJustFinalContinuationFrame),
             ("testInvalidUTF", testInvalidUTF),
@@ -139,6 +141,37 @@ class ProtocolErrorTests: KituraTest {
             expectedPayload.append(part.bytes, length: part.length)
             // 25 becomes 0011001 which is a ping (op code 9) and rsv = 1
             self.performTest(framesToSend: [(true, 25, payload)],
+                             expectedFrames: [(true, self.opcodeClose, expectedPayload)],
+                             expectation: expectation)
+        }
+    }
+    
+    func testInvalidUserCloseCode() {
+        register(closeReason: .protocolError)
+        
+        performServerTest() { expectation in
+            
+            let closePayload = self.payload(closeReasonCode: .userDefined(2999))
+            let returnPayload = self.payload(closeReasonCode: .protocolError)
+            self.performTest(framesToSend: [(true, self.opcodeClose, closePayload)],
+                             expectedFrames: [(true, self.opcodeClose, returnPayload)],
+                             expectation: expectation)
+        }
+    }
+    
+    func testCloseWithOversizedPayload() {
+        register(closeReason: .protocolError)
+        
+        let expectedPayload = NSMutableData()
+        var part = self.payload(closeReasonCode: .protocolError)
+        expectedPayload.append(part.bytes, length: part.length)
+        part = self.payload(text: "Close frames, which contain a payload, must be between 2 and 125 octets inclusive")
+        expectedPayload.append(part.bytes, length: part.length)
+        
+        performServerTest() { expectation in
+            let oversizedPayload = NSMutableData()
+            oversizedPayload.append(Data(repeatElement(0, count: 126)))
+            self.performTest(framesToSend: [(true, self.opcodeClose, oversizedPayload)],
                              expectedFrames: [(true, self.opcodeClose, expectedPayload)],
                              expectation: expectation)
         }

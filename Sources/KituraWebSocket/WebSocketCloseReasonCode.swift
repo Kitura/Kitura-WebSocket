@@ -78,15 +78,17 @@ public enum WebSocketCloseReasonCode {
         case 1001: return .goingAway
         case 1002: return .protocolError
         case 1003: return .invalidDataType
-        case 1005: return .noReasonCodeSent
-        case 1006: return .closedAbnormally
         case 1007: return .invalidDataContents
         case 1008: return .policyViolation
         case 1009: return .messageTooLarge
         case 1010: return .extensionMissing
         case 1011: return .serverError
         default:
-            return .userDefined(reasonCode)
+            if reasonCode < 3000 {
+                return .protocolError
+            } else {
+                return .userDefined(reasonCode)
+            }
         }
     }
 }

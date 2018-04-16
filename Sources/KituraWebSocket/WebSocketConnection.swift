@@ -221,22 +221,22 @@ public class WebSocketConnection {
         case .close:
             if active {
                 let reasonCode: WebSocketCloseReasonCode
-                if frame.payload.length >= 2 {
+                if frame.payload.length >= 2 && frame.payload.length < 126 {
                     let networkOrderedReasonCode = UnsafeRawPointer(frame.payload.bytes).assumingMemoryBound(to: UInt16.self)[0]
-                
                     let hostOrderedReasonCode: UInt16
                     #if os(Linux)
                         hostOrderedReasonCode = UInt16(Glibc.ntohs(networkOrderedReasonCode))
                     #else
                         hostOrderedReasonCode = UInt16(CFSwapInt16BigToHost(networkOrderedReasonCode))
                     #endif
-                    
-                    reasonCode = WebSocketCloseReasonCode.from(code: hostOrderedReasonCode)                }
-                else {
-                    reasonCode = .noReasonCodeSent
+                    reasonCode = WebSocketCloseReasonCode.from(code: hostOrderedReasonCode)
+                } else if frame.payload.length == 0 {
+                    reasonCode = .normal
+                } else {
+                    connectionClosed(reason: .protocolError, description: "Close frames, which contain a payload, must be between 2 and 125 octets inclusive")
+                    return
                 }
-                
-                connectionClosed(reason: reasonCode, reasonToSendBack: .normal)
+                connectionClosed(reason: reasonCode)
             }
             break
             
