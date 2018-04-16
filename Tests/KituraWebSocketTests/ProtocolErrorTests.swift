@@ -165,7 +165,7 @@ class ProtocolErrorTests: KituraTest {
         let expectedPayload = NSMutableData()
         var part = self.payload(closeReasonCode: .protocolError)
         expectedPayload.append(part.bytes, length: part.length)
-        part = self.payload(text: "Close frames, which contain a payload, must be between 2 an 125 octets inclusive")
+        part = self.payload(text: "Close frames, which contain a payload, must be between 2 and 125 octets inclusive")
         expectedPayload.append(part.bytes, length: part.length)
         
         performServerTest() { expectation in

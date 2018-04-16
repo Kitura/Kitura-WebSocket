@@ -233,7 +233,7 @@ public class WebSocketConnection {
                 } else if frame.payload.length == 0 {
                     reasonCode = .normal
                 } else {
-                    connectionClosed(reason: .protocolError, description: "Close frames, which contain a payload, must be between 2 an 125 octets inclusive")
+                    connectionClosed(reason: .protocolError, description: "Close frames, which contain a payload, must be between 2 and 125 octets inclusive")
                     return
                 }
                 connectionClosed(reason: reasonCode)

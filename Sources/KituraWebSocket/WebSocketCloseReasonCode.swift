@@ -84,7 +84,7 @@ public enum WebSocketCloseReasonCode {
         case 1010: return .extensionMissing
         case 1011: return .serverError
         default:
-            if(reasonCode < 3000) {
+            if reasonCode < 3000 {
                 return .protocolError
             } else {
                 return .userDefined(reasonCode)
