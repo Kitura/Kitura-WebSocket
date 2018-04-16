@@ -297,20 +297,15 @@ public class WebSocketConnection {
     }
     
     private func fireReceivedString(from: NSMutableData) {
-        var zero: CChar = 0
-        from.append(&zero, length: 1)
-        let bytes = from.bytes.bindMemory(to: CChar.self, capacity: 1)
-        if let text = String(cString: bytes, encoding: .utf8) {
-            callbackQueue.async { [weak self] in
-                if let strongSelf = self {
-                    strongSelf.service?.received(message: text, from: strongSelf)
-                }
+        guard let text = String(data: Data(referencing: from), encoding: .utf8) else {
+            closeConnection(reason: .invalidDataContents, description: "Failed to convert received payload to UTF-8 String", hard: true)
+            return
+        }
+        callbackQueue.async { [weak self] in
+            if let strongSelf = self {
+                strongSelf.service?.received(message: text, from: strongSelf)
             }
         }
-        else {
-            closeConnection(reason: .invalidDataContents, description: "Failed to convert received payload to UTF-8 String", hard: true)
-        }
-        from.length -= 1
     }
     
     private func sendMessage(withOpCode: WSFrame.FrameOpcode, payload: UnsafeRawPointer?, payloadLength: Int) {

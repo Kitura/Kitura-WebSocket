@@ -311,6 +311,19 @@ class BasicTests: KituraTest {
         }
     }
     
+    func testNullCharacter() {
+        register(closeReason: .noReasonCodeSent)
+        
+        performServerTest() { expectation in
+            
+            let textPayload = self.payload(text: "\u{0}")
+            
+            self.performTest(framesToSend: [(true, self.opcodeText, textPayload)],
+                             expectedFrames: [(true, self.opcodeText, textPayload)],
+                             expectation: expectation)
+        }
+    }
+    
     func testUserDefinedCloseMessage() {
         register(closeReason: .userDefined(65535))
         
