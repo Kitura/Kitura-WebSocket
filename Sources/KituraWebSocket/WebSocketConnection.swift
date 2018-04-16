@@ -225,9 +225,9 @@ public class WebSocketConnection {
                     let networkOrderedReasonCode = UnsafeRawPointer(frame.payload.bytes).assumingMemoryBound(to: UInt16.self)[0]
                     let hostOrderedReasonCode: UInt16
                     #if os(Linux)
-                    hostOrderedReasonCode = UInt16(Glibc.ntohs(networkOrderedReasonCode))
+                        hostOrderedReasonCode = UInt16(Glibc.ntohs(networkOrderedReasonCode))
                     #else
-                    hostOrderedReasonCode = UInt16(CFSwapInt16BigToHost(networkOrderedReasonCode))
+                        hostOrderedReasonCode = UInt16(CFSwapInt16BigToHost(networkOrderedReasonCode))
                     #endif
                     reasonCode = WebSocketCloseReasonCode.from(code: hostOrderedReasonCode)
                 } else if frame.payload.length == 0 {

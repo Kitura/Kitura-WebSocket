@@ -312,12 +312,12 @@ class BasicTests: KituraTest {
     }
     
     func testUserDefinedCloseMessage() {
-        register(closeReason: .userDefined(5000))
+        register(closeReason: .userDefined(65535))
         
         performServerTest() { expectation in
             
-            let closePayload = self.payload(closeReasonCode: .userDefined(5000))
-            let returnPayload = self.payload(closeReasonCode: .userDefined(5000))
+            let closePayload = self.payload(closeReasonCode: .userDefined(65535))
+            let returnPayload = self.payload(closeReasonCode: .userDefined(65535))
             
             self.performTest(framesToSend: [(true, self.opcodeClose, closePayload)],
                              expectedFrames: [(true, self.opcodeClose, returnPayload)],
