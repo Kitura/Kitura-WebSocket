@@ -29,6 +29,7 @@ class ProtocolErrorTests: KituraTest {
             ("testFragmentedPing", testFragmentedPing),
             ("testInvalidOpCode", testInvalidOpCode),
             ("testInvalidRSVCode", testInvalidRSVCode),
+            ("testInvalidUserCloseCode", testInvalidUserCloseCode),
             ("testJustContinuationFrame", testJustContinuationFrame),
             ("testJustFinalContinuationFrame", testJustFinalContinuationFrame),
             ("testInvalidUTF", testInvalidUTF),
@@ -140,6 +141,19 @@ class ProtocolErrorTests: KituraTest {
             // 25 becomes 0011001 which is a ping (op code 9) and rsv = 1
             self.performTest(framesToSend: [(true, 25, payload)],
                              expectedFrames: [(true, self.opcodeClose, expectedPayload)],
+                             expectation: expectation)
+        }
+    }
+    
+    func testInvalidUserCloseCode() {
+        register(closeReason: .protocolError)
+        
+        performServerTest() { expectation in
+            
+            let closePayload = self.payload(closeReasonCode: .userDefined(2999))
+            let returnPayload = self.payload(closeReasonCode: .protocolError)
+            self.performTest(framesToSend: [(true, self.opcodeClose, closePayload)],
+                             expectedFrames: [(true, self.opcodeClose, returnPayload)],
                              expectation: expectation)
         }
     }
