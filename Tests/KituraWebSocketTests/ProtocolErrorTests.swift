@@ -30,6 +30,7 @@ class ProtocolErrorTests: KituraTest {
             ("testInvalidOpCode", testInvalidOpCode),
             ("testInvalidRSVCode", testInvalidRSVCode),
             ("testInvalidUserCloseCode", testInvalidUserCloseCode),
+            ("testCloseWithOversizedPayload", testCloseWithOversizedPayload),
             ("testJustContinuationFrame", testJustContinuationFrame),
             ("testJustFinalContinuationFrame", testJustFinalContinuationFrame),
             ("testInvalidUTF", testInvalidUTF),
@@ -154,6 +155,24 @@ class ProtocolErrorTests: KituraTest {
             let returnPayload = self.payload(closeReasonCode: .protocolError)
             self.performTest(framesToSend: [(true, self.opcodeClose, closePayload)],
                              expectedFrames: [(true, self.opcodeClose, returnPayload)],
+                             expectation: expectation)
+        }
+    }
+    
+    func testCloseWithOversizedPayload() {
+        register(closeReason: .protocolError)
+        
+        let expectedPayload = NSMutableData()
+        var part = self.payload(closeReasonCode: .protocolError)
+        expectedPayload.append(part.bytes, length: part.length)
+        part = self.payload(text: "Close frames, which contain a payload, must be between 2 an 125 octets inclusive")
+        expectedPayload.append(part.bytes, length: part.length)
+        
+        performServerTest() { expectation in
+            let oversizedPayload = NSMutableData()
+            oversizedPayload.append(Data(repeatElement(0, count: 126)))
+            self.performTest(framesToSend: [(true, self.opcodeClose, oversizedPayload)],
+                             expectedFrames: [(true, self.opcodeClose, expectedPayload)],
                              expectation: expectation)
         }
     }

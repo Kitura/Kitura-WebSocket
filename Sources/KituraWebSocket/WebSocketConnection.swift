@@ -221,7 +221,7 @@ public class WebSocketConnection {
         case .close:
             if active {
                 let reasonCode: WebSocketCloseReasonCode
-                if frame.payload.length >= 2 && frame.payload.length <= 125 {
+                if frame.payload.length >= 2 && frame.payload.length < 126 {
                     let networkOrderedReasonCode = UnsafeRawPointer(frame.payload.bytes).assumingMemoryBound(to: UInt16.self)[0]
                     let hostOrderedReasonCode: UInt16
                     #if os(Linux)
@@ -233,7 +233,8 @@ public class WebSocketConnection {
                 } else if frame.payload.length == 0 {
                     reasonCode = .normal
                 } else {
-                    reasonCode = .protocolError
+                    connectionClosed(reason: .protocolError, description: "Close frames, which contain a payload, must be between 2 an 125 octets inclusive")
+                    return
                 }
                 connectionClosed(reason: reasonCode)
             }
