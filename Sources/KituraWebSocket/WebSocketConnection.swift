@@ -221,6 +221,7 @@ public class WebSocketConnection {
         case .close:
             if active {
                 let reasonCode: WebSocketCloseReasonCode
+                var description: String?
                 if frame.payload.length >= 2 && frame.payload.length < 126 {
                     let networkOrderedReasonCode = UnsafeRawPointer(frame.payload.bytes).assumingMemoryBound(to: UInt16.self)[0]
                     let hostOrderedReasonCode: UInt16
@@ -230,13 +231,21 @@ public class WebSocketConnection {
                         hostOrderedReasonCode = UInt16(CFSwapInt16BigToHost(networkOrderedReasonCode))
                     #endif
                     reasonCode = WebSocketCloseReasonCode.from(code: hostOrderedReasonCode)
+                    
+                    var closeMessage = Data(referencing: frame.payload)
+                    _ = closeMessage.removeFirst(2)
+                    description = String(data: closeMessage, encoding: .utf8)
+                    if description == nil {
+                        closeConnection(reason: .invalidDataContents, description: "Failed to convert received close message to UTF-8 String", hard: true)
+                        return
+                    }
                 } else if frame.payload.length == 0 {
                     reasonCode = .normal
                 } else {
                     connectionClosed(reason: .protocolError, description: "Close frames, which contain a payload, must be between 2 and 125 octets inclusive")
                     return
                 }
-                connectionClosed(reason: reasonCode)
+                connectionClosed(reason: reasonCode, description: description)
             }
             break
             

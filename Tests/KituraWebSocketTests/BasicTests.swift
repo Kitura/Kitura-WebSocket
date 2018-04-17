@@ -39,7 +39,9 @@ class BasicTests: KituraTest {
             ("testTextLongMessage", testTextLongMessage),
             ("testTextMediumMessage", testTextMediumMessage),
             ("testTextShortMessage", testTextShortMessage),
-            ("testUserDefinedCloseMessage", testUserDefinedCloseMessage)
+//            ("testNullCharacter", testNullCharacter),
+            ("testUserDefinedCloseCode", testUserDefinedCloseCode),
+            ("testUserCloseMessage", testUserCloseMessage)
         ]
     }
     
@@ -316,7 +318,7 @@ class BasicTests: KituraTest {
         
         performServerTest() { expectation in
             
-            let textPayload = self.payload(text: "\u{0}")
+            let textPayload = self.payload(text: "\u{00}")
             
             self.performTest(framesToSend: [(true, self.opcodeText, textPayload)],
                              expectedFrames: [(true, self.opcodeText, textPayload)],
@@ -324,7 +326,7 @@ class BasicTests: KituraTest {
         }
     }
     
-    func testUserDefinedCloseMessage() {
+    func testUserDefinedCloseCode() {
         register(closeReason: .userDefined(65535))
         
         performServerTest() { expectation in
@@ -334,6 +336,23 @@ class BasicTests: KituraTest {
             
             self.performTest(framesToSend: [(true, self.opcodeClose, closePayload)],
                              expectedFrames: [(true, self.opcodeClose, returnPayload)],
+                             expectation: expectation)
+        }
+    }
+    
+    func testUserCloseMessage() {
+        register(closeReason: .normal)
+        
+        performServerTest() { expectation in
+            let testString = "Testing, 1,2,3"
+            let dataPayload = testString.data(using: String.Encoding.utf8)!
+            let payload = NSMutableData()
+            let closeReasonCode = self.payload(closeReasonCode: .normal)
+            payload.append(closeReasonCode.bytes, length: closeReasonCode.length)
+            payload.append(dataPayload)
+            
+            self.performTest(framesToSend: [(true, self.opcodeClose, payload)],
+                             expectedFrames: [(true, self.opcodeClose, payload)],
                              expectation: expectation)
         }
     }
