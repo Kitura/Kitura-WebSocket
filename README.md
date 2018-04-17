@@ -124,6 +124,9 @@ WebSocket.unregister(path: String)
 ```
 This function is passed the path on which the `WebSocketService` being unregistered, was registered on.
 
+## Autobahn-TestSuite
+Kitura-Websocket complies to the [autobahn-testsuite](https://github.com/crossbario/autobahn-testsuite) for web sockets. To create an echo server and run this test suite against it, follow the instructions [here](https://github.com/IBM-Swift/Kitura-WebSocket/blob/master/AutobahnTests.md)
+
 ## An example
 A simple example to better describe the APIs of Kitura-WebSocket. This example is a very simplistic chat service.
 The server side is written in Swift using Kitura-WebSocket and the client side is written in JavaScript using
