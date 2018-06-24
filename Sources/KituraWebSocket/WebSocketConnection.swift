@@ -47,7 +47,9 @@ public class WebSocketConnection {
     private let message = NSMutableData()
     
     private var active = true
-    
+
+    private(set) public var lastFrameReceivedAt: Date
+
     enum MessageStates {
         case binary, text, unknown
     }
@@ -63,6 +65,7 @@ public class WebSocketConnection {
     init(request: ServerRequest) {
         self.request = WSServerRequest(request: request)
         buffer = NSMutableData(capacity: WebSocketConnection.bufferSize) ?? NSMutableData()
+        lastFrameReceivedAt = Date()
     }
     
     /// Close a WebSocket connection by sending a close control command to the client optionally
@@ -196,7 +199,8 @@ public class WebSocketConnection {
     }
     
     func received(frame: WSFrame) {
-        
+        lastFrameReceivedAt = Date()
+
         switch frame.opCode {
         case .binary:
             guard messageState == .unknown else {
