@@ -1,5 +1,5 @@
 /*
- * Copyright IBM Corporation 2017
+ * Copyright IBM Corporation 2017, 2018
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,7 @@
  */
 
 import Foundation
-
-import KituraNet
+import KituraNIO
 
 /// An internal class used to retain information from the original request that
 /// was used to create the WebSocket connection. The ServerRequest from KituraNet
@@ -97,3 +96,4 @@ class WSServerRequest: ServerRequest {
         return 0
     }
 }
+
