@@ -6,8 +6,8 @@
 </p>
 
 <p align="center">
-    <a href="http://www.kitura.io/">
-    <img src="https://img.shields.io/badge/docs-kitura.io-1FBCE4.svg" alt="Docs">
+    <a href="https://ibm-swift.github.io/Kitura-WebSocket/index.html">
+    <img src="https://img.shields.io/badge/apidoc-KituraWebSocket-1FBCE4.svg?style=flat" alt="APIDoc">
     </a>
     <a href="https://travis-ci.org/IBM-Swift/Kitura-WebSocket">
     <img src="https://travis-ci.org/IBM-Swift/Kitura-WebSocket.svg?branch=master" alt="Build Status - Master">
@@ -21,62 +21,73 @@
 </p>
 
 # Kitura-WebSocket
-**WebSocket support for Kitura based servers**
-
-## Summary
 
 Kitura-WebSocket provides Kitura based servers the ability to receive and send messages to clients using the WebSocket
 protocol (RFC 6455). It is compatible with a variety of WebSocket clients, including:
-- The built-in WebSocket support in the Chrome, FireFox, and Safari browsers
+- The built-in WebSocket support in the Chrome, FireFox, and Safari browsers.
 - The NPM [websocket](https://www.npmjs.com/package/websocket) package.
 
 Kitura-WebSocket supports version thirteen of the WebSocket protocol.
 
 Both the WS and WSS (SSL/TLS secured WS) protocols are supported by Kitura-WebSocket.
-To enable WSS simply set up your Kitura based server for SSL/TLS support. See the tutorial
-[Enabling SSL/TLS on your Kitura server](http://www.kitura.io/en/resources/tutorials/ssl.html) on
-[www.kitura.io](http://www.kitura.io/en/starter/settingup.html) for details.  
+To enable WSS set up your Kitura based server for SSL/TLS support. See the tutorial
+[Enabling SSL/TLS on your Kitura server](https://www.kitura.io/guides/building/ssl.html) on
+[www.kitura.io](http://www.kitura.io) for details.
 
 ## Table of Contents
-* [Summary](#summary)
-* [Pre-requisites](#pre-requisites)
-* [APIs](#apis)
-* [An example](#an-example)
-* [A more complete example](a-more-complete-example)
+* [Usage](#usage)
+* [API Overview](#api-overview)
+* [Autobahn TestSuite](#Autobahn-TestSuite)
+* [Example - Simple](#example-simple)
+* [Example - Advanced](#example-advanced)
+* [API Documentation](#api-documentation)
 * [Community](#community)
 * [License](#license)
 
-## Pre-requisites
-Working with Kitura-WebSocket requires that you are set up to work with Kitura. See
-[www.kitura.io](http://www.kitura.io/en/starter/settingup.html) for details.
+## Usage
 
-## APIs
-The following is an overview of the Kitura-WebSocket APIs. For more details see http://ibm-swift.github.io/Kitura-WebSocket.
+#### Add dependencies
 
-When using the WebSocket protocol, clients connect to WebSocket Services running on a particular server. WebSocket Services are
-identified on a particular server via a path. This path is sent in the Upgrade request used to upgrade a connection from
-HTTP 1.1 to WebSocket.
+Add the `Kitura-WebSocket` package to the dependencies within your application’s `Package.swift` file. Substitute `"x.x.x"` with the latest `Kitura-WebSocket` [release](https://github.com/IBM-Swift/Kitura-WebSocket/releases).
 
-The Kitura-WebSocket API reflects that interaction using the class `WebSocketConnection` which represents a WebSocket client's
-connection to a service and the protocol `WebSocketService` which is implemented by classes that are WebSocket Services.
+```swift
+.package(url: "https://github.com/IBM-Swift/Kitura-WebSocket.git", from: "x.x.x")
+```
 
-A specific `WebSocketConnection` object is connected to a specific `WebSocketService` instance. On the other hand a specific
-`WebSocketService` instance is connected to many `WebSocketConnection` objects.
+Add `Kitura-WebSocket` to your target's dependencies:
+
+```swift
+.target(name: "example", dependencies: ["Kitura-WebSocket"]),
+```
+
+#### Import package
+
+  ```swift
+  import KituraWebSocket
+  ```
+
+## API Overview
+The following is an overview of the Kitura-WebSocket APIs, for more information see the [API reference](https://ibm-swift.github.io/Kitura-WebSocket/index.html).
+
+When using the WebSocket protocol, clients connect to WebSocket services running on a particular server. WebSocket services are identified on a particular server via a path. This path is sent in the upgrade request used to upgrade a connection from HTTP 1.1 to WebSocket.
+
+The Kitura-WebSocket API reflects that interaction using the class `WebSocketConnection` which represents a WebSocket client's connection to a service and the protocol `WebSocketService` which is implemented by classes that are WebSocket services.
+
+A specific `WebSocketConnection` object is connected to a specific `WebSocketService` instance. On the other hand a specific `WebSocketService` instance is connected to many `WebSocketConnection` objects.
 
 ### WebSocketConnection
 The WebSocketConnection class provides:
-- Functions to send text and binary messages to the client
+- Functions to send text and binary messages to the client.
   ```swift
   WebSocketConnection.send(message: Data)
   WebSocketConnection.send(message: String)
   ```
-- Functions to close the connection gracefully and forcefully
+- Functions to close the connection gracefully and forcefully.
   ```swift
   WebSocketConnection.close(reason: WebSocketCloseReasonCode?=nil, description: String?=nil)
   WebSocketConnection.drop(reason: WebSocketCloseReasonCode?=nil, description: String?=nil)
   ```
-  In both close() and drop(), the `WebSocketCloseReasonCode` enum provides the standard WebSocket Close Reason codes, with the ability
-  to specify application specific ones.
+  In both `close()` and `drop()`, the `WebSocketCloseReasonCode` enum provides the standard WebSocket close reason codes with the ability to specify application specific ones.
 
 - A unique identifier that can be used to help manage the collection of `WebSocketConnection` objects connected to a `WebSocketService`.
   ```swift
@@ -84,51 +95,51 @@ The WebSocketConnection class provides:
   ```
 
 ### WebSocketService
-The functions of the WebSocketService protocol enable Kitura-WebSocket to notify a WebSocket service of a set of events that
+The WebSocketService protocol enables Kitura-WebSocket to notify a WebSocket service about a set of events that
 occur. These events include:
-- A client has connected to the WebSocketService
+- A client has connected to the WebSocketService.
 ```swift
-func connected(connection: WebSocketConnection)
+connected(connection: WebSocketConnection)
 ```
 
-- A client has disconnected from the WebSocketService
+- A client has disconnected from the WebSocketService.
 ```swift
 disconnected(connection: WebSocketConnection, reason: WebSocketCloseReasonCode)
 ```
 The reason parameter contains the reason code associated with the client disconnecting. It may come from either
-a close command sent by the client or determined by Kitura-WebSocket if the connection's socket suddenly was closed.
+a close command sent by the client, or be determined by Kitura-WebSocket if the connection's socket suddenly was closed.
 
-- A binary message was received from a client
+- A binary message was received from a client.
 ```swift
-func received(message: Data, from: WebSocketConnection)
+received(message: Data, from: WebSocketConnection)
 ```
 The message parameter contains the bytes of the message in the form of a Data struct.
 
-- A text message was received from a client
+- A text message was received from a client.
 ```swift
-func received(message: String, from: WebSocketConnection)
+received(message: String, from: WebSocketConnection)
 ```
 The message parameter contains the message in the form of a String.
 
 ### WebSocket
 
-Classes which implement the `WebSocketService` protocol are registered with the server using the function:
+Classes which implement the `WebSocketService` protocol are registered with the server as follows:
 ```swift
 WebSocket.register(service: WebSocketService, onPath: String)
 ```
 This function is passed the `WebSocketService` being registered along with the path it is being registered on.
 
-A registered `WebSocketService` can be unregistered from the server by using the function:
+A registered `WebSocketService` can be unregistered from the server as follows:
 ```swift
 WebSocket.unregister(path: String)
 ```
-This function is passed the path on which the `WebSocketService` being unregistered, was registered on.
+This function is passed the path which the `WebSocketService` being unregistered was registered on.
 
-## Autobahn-TestSuite
-Kitura-Websocket complies to the [autobahn-testsuite](https://github.com/crossbario/autobahn-testsuite) for web sockets. To create an echo server and run this test suite against it, follow the instructions [here](https://github.com/IBM-Swift/Kitura-WebSocket/blob/master/AutobahnTests.md)
+## Autobahn TestSuite
+Kitura-WebSocket complies to the [Autobahn Testsuite](https://github.com/crossbario/autobahn-testsuite) for web sockets. To create an echo server and run this test suite against it, follow the instructions [here](https://github.com/IBM-Swift/Kitura-WebSocket/blob/master/AutobahnTests.md).
 
-## An example
-A simple example to better describe the APIs of Kitura-WebSocket. This example is a very simplistic chat service.
+## Example - Simple
+This example is a simplistic chat service to demonstrate how to use the Kitura-WebSocket APIs.
 The server side is written in Swift using Kitura-WebSocket and the client side is written in JavaScript using
 Node.js and the websocket NPM package. The instructions below show you how to create the files for both the server and client and then how to compile and run the application.
 
@@ -149,7 +160,7 @@ ServerDirectory
         └── main.swift
 </pre>
 
-Create a `Package.swift` file which contains:
+Create a `Package.swift` file with the following content, substituting `"x.x.x"` with the latest releases of Kitura, HeliumLogger and Kitura-WebSocket:
 ```swift
 // swift-tools-version:4.0
 import PackageDescription
@@ -157,9 +168,9 @@ import PackageDescription
 let package = Package(
     name: "ChatServer",
     dependencies: [
-         .package(url: "https://github.com/IBM-Swift/Kitura.git", .upToNextMinor(from: "2.2.0")),
-         .package(url: "https://github.com/IBM-Swift/HeliumLogger.git", from: "1.7.0"),
-         .package(url: "https://github.com/IBM-Swift/Kitura-WebSocket.git", from: "1.0.1")
+         .package(url: "https://github.com/IBM-Swift/Kitura.git", .upToNextMinor(from: "x.x.x")),
+         .package(url: "https://github.com/IBM-Swift/HeliumLogger.git", from: "x.x.x"),
+         .package(url: "https://github.com/IBM-Swift/Kitura-WebSocket.git", from: "x.x.x")
     ],
     targets: [
         .target(
@@ -372,8 +383,11 @@ node chat.js localhost:8080
 
 As described above, the server echoes all text messages sent to it to all of the clients that have connected to it, with the exception of the client that sent the message. Therefore, in order to see the example in action you will need to connect more than one client to the server. The client can be run in several terminal windows on the same computer. You can then enter a message on one client and see it appear on another client and vice versa.
 
-## A more complete example
-For a more complete example please see [Kitura-Sample](https://github.com/IBM-Swift/Kitura-Sample)
+## Example - Advanced
+For a more complete example please see [Kitura-Sample](https://github.com/IBM-Swift/Kitura-Sample).
+
+## API Documentation
+For more information visit our [API reference](https://ibm-swift.github.io/Kitura-WebSocket/index.html).
 
 ## Community
 
