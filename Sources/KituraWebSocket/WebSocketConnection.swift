@@ -48,6 +48,9 @@ public class WebSocketConnection {
     
     private var active = true
     
+    private var timer: DispatchSourceTimer = DispatchSource.makeTimerSource()
+    private var lastFrameReceivedAt: Date
+    
     enum MessageStates {
         case binary, text, unknown
     }
@@ -63,6 +66,8 @@ public class WebSocketConnection {
     init(request: ServerRequest) {
         self.request = WSServerRequest(request: request)
         buffer = NSMutableData(capacity: WebSocketConnection.bufferSize) ?? NSMutableData()
+        lastFrameReceivedAt = Date()
+        self.timerStart()
     }
     
     /// Close a WebSocket connection by sending a close control command to the client optionally
@@ -196,7 +201,7 @@ public class WebSocketConnection {
     }
     
     func received(frame: WSFrame) {
-        
+        lastFrameReceivedAt = Date()
         switch frame.opCode {
         case .binary:
             guard messageState == .unknown else {
@@ -349,5 +354,28 @@ public class WebSocketConnection {
     
     private func unlockWriteLock() {
         writeLock.signal()
+    }
+    
+    private func timerStart() {
+        guard let connectionTimeout = service?.connectionTimeout else {
+            return
+        }
+        let timeoutInterval: DispatchTimeInterval = DispatchTimeInterval.seconds(connectionTimeout)
+        timer.schedule(deadline: .now(), repeating: timeoutInterval, leeway: DispatchTimeInterval.milliseconds(connectionTimeout * 10))
+        timer.setEventHandler(handler: self.checkActive)
+        timer.resume()
+    }
+    
+    private func checkActive() {
+        guard let connectionTimeout = service?.connectionTimeout else {
+            return
+        }
+        if abs(lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout) * 0.98) {
+            if abs(lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout) * 1.96) {
+                self.drop(reason: .closedAbnormally, description: nil)
+                timer.cancel()
+            }
+            self.ping()
+        }
     }
 }
