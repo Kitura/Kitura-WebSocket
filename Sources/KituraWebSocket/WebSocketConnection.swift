@@ -48,7 +48,7 @@ public class WebSocketConnection {
     
     private var active = true
     
-    private var timer: DispatchSourceTimer = DispatchSource.makeTimerSource()
+    private lazy var timer: DispatchSourceTimer = DispatchSource.makeTimerSource()
     private var lastFrameReceivedAt: Date
     
     enum MessageStates {
@@ -63,10 +63,11 @@ public class WebSocketConnection {
     
     private var messageState: MessageStates = .unknown
     
-    init(request: ServerRequest) {
+    init(request: ServerRequest, service: WebSocketService? = nil) {
         self.request = WSServerRequest(request: request)
         buffer = NSMutableData(capacity: WebSocketConnection.bufferSize) ?? NSMutableData()
         lastFrameReceivedAt = Date()
+        self.service = service
         self.timerStart()
     }
     
@@ -361,21 +362,35 @@ public class WebSocketConnection {
             return
         }
         let timeoutInterval: DispatchTimeInterval = DispatchTimeInterval.seconds(connectionTimeout)
-        timer.schedule(deadline: .now(), repeating: timeoutInterval, leeway: DispatchTimeInterval.milliseconds(connectionTimeout * 10))
-        timer.setEventHandler(handler: self.checkActive)
+        timer.schedule(deadline: .now(), repeating: timeoutInterval, leeway: DispatchTimeInterval.milliseconds(connectionTimeout * 100))
+        timer.setEventHandler(handler: { [weak self] in
+            guard let strongSelf = self, let connectionTimeout = strongSelf.service?.connectionTimeout
+            else {
+                return
+            }
+            if abs(strongSelf.lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout) * 0.8) {
+                if abs(strongSelf.lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout) * 1.60) {
+                    strongSelf.drop(reason: .closedAbnormally, description: nil)
+                }
+                strongSelf.ping()
+            }
+        })
+        resumed = true
         timer.resume()
     }
+
+    private var resumed: Bool = false
     
-    private func checkActive() {
-        guard let connectionTimeout = service?.connectionTimeout else {
-            return
-        }
-        if abs(lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout) * 0.98) {
-            if abs(lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout) * 1.96) {
-                self.drop(reason: .closedAbnormally, description: nil)
-                timer.cancel()
-            }
-            self.ping()
+    deinit {
+        timer.setEventHandler {}
+        timer.cancel()
+        /*
+         If the timer is suspended, calling cancel without resuming
+         triggers a crash. This is documented here
+         https://forums.developer.apple.com/thread/15902
+         */
+        if !resumed {
+            timer.resume()
         }
     }
 }
