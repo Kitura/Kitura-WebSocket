@@ -370,7 +370,7 @@ public class WebSocketConnection {
             }
             if abs(strongSelf.lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout) * 0.8) {
                 if abs(strongSelf.lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout) * 1.60) {
-                    strongSelf.drop(reason: .closedAbnormally, description: nil)
+                    strongSelf.connectionClosed(reason: .closedAbnormally)
                 }
                 strongSelf.ping()
             }
