@@ -105,6 +105,12 @@ class KituraTest: XCTestCase {
         WebSocket.register(service: service, onPath: onPath ?? servicePath)
     }
     
+    func register(onPath: String? = nil, closeReason: WebSocketCloseReasonCode, testServerRequest: Bool = false, pingMessage: String? = nil, connectionTimeout: Int? = nil) -> TestWebSocketService {
+        let service = TestWebSocketService(closeReason: closeReason, testServerRequest: testServerRequest, pingMessage: pingMessage, connectionTimeout: connectionTimeout)
+        WebSocket.register(service: service, onPath: onPath ?? servicePath)
+        return service
+    }
+    
     func sendUpgradeRequest(forProtocolVersion: String? = "13", toPath: String, usingKey: String?) -> Socket? {
         var socket: Socket?
         do {
