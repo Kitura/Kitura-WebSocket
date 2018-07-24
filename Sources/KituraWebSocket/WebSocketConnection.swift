@@ -48,7 +48,7 @@ public class WebSocketConnection {
     
     private var active = true
     
-    private let timer: DispatchSourceTimer = DispatchSource.makeTimerSource()
+    private let timer: DispatchSourceTimer?
     private var lastFrameReceivedAt: Date
     
     enum MessageStates {
@@ -68,7 +68,12 @@ public class WebSocketConnection {
         buffer = NSMutableData(capacity: WebSocketConnection.bufferSize) ?? NSMutableData()
         lastFrameReceivedAt = Date()
         self.service = service
-        self.timerStart()
+        if let connectionTimeout = service?.connectionTimeout {
+            timer = DispatchSource.makeTimerSource()
+            self.timerStart(connectionTimeout: connectionTimeout)
+        } else {
+            self.timer = nil
+        }
     }
     
     /// Close a WebSocket connection by sending a close control command to the client optionally
@@ -357,8 +362,8 @@ public class WebSocketConnection {
         writeLock.signal()
     }
     
-    private func timerStart() {
-        guard let connectionTimeout = service?.connectionTimeout else {
+    private func timerStart(connectionTimeout: Int) {
+        guard let timer = self.timer else {
             return
         }
         let timeoutInterval: DispatchTimeInterval = DispatchTimeInterval.seconds(connectionTimeout)
@@ -375,22 +380,13 @@ public class WebSocketConnection {
                 strongSelf.ping()
             }
         })
-        resumed = true
         timer.resume()
     }
-
-    private var resumed: Bool = false
     
     deinit {
-        timer.setEventHandler {}
-        timer.cancel()
-        /*
-         If the timer is suspended, calling cancel without resuming
-         triggers a crash. This is documented here
-         https://forums.developer.apple.com/thread/15902
-         */
-        if !resumed {
-            timer.resume()
+        if let timer = self.timer {
+            timer.setEventHandler {}
+            timer.cancel()
         }
     }
 }
