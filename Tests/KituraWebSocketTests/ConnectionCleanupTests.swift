@@ -58,6 +58,8 @@ class ConnectionCleanupTests: KituraTest {
             XCTAssertEqual(service.connections.count, 1, "Failed to create connection to service")
             sleep(3)
             XCTAssertEqual(service.connections.count, 0, "Stale connection was not cleaned up")
+            socket.close()
+            usleep(150)
             expectation.fulfill()
         }
     }
@@ -101,6 +103,7 @@ class ConnectionCleanupTests: KituraTest {
             self.sendFrame(final: true, withOpcode: self.opcodePing, withPayload: NSData(), on: socket)
             XCTAssertEqual(service.connections.count, 1, "Stale connection was not cleaned up")
             socket.close()
+            socket2.close()
             usleep(150)
             expectation.fulfill()
         }

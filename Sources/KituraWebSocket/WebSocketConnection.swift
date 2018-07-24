@@ -70,9 +70,9 @@ public class WebSocketConnection {
         self.service = service
         if let connectionTimeout = service?.connectionTimeout {
             timer = DispatchSource.makeTimerSource()
-            self.timerStart(connectionTimeout: connectionTimeout)
+            timerStart(connectionTimeout: connectionTimeout)
         } else {
-            self.timer = nil
+            timer = nil
         }
     }
     
