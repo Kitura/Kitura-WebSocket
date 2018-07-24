@@ -49,7 +49,7 @@ public class WebSocketConnection {
     private var active = true
     
     private let timer: DispatchSourceTimer?
-    private var lastFrameReceivedAt: Date
+    private var lastFrameReceivedAt: Date?
     
     enum MessageStates {
         case binary, text, unknown
@@ -66,12 +66,13 @@ public class WebSocketConnection {
     init(request: ServerRequest, service: WebSocketService? = nil) {
         self.request = WSServerRequest(request: request)
         buffer = NSMutableData(capacity: WebSocketConnection.bufferSize) ?? NSMutableData()
-        lastFrameReceivedAt = Date()
         self.service = service
         if let connectionTimeout = service?.connectionTimeout {
+            lastFrameReceivedAt = Date()
             timer = DispatchSource.makeTimerSource()
             timerStart(connectionTimeout: connectionTimeout)
         } else {
+            lastFrameReceivedAt = nil
             timer = nil
         }
     }
@@ -207,7 +208,9 @@ public class WebSocketConnection {
     }
     
     func received(frame: WSFrame) {
-        lastFrameReceivedAt = Date()
+        if lastFrameReceivedAt != nil {
+            lastFrameReceivedAt = Date()
+        }
         switch frame.opCode {
         case .binary:
             guard messageState == .unknown else {
@@ -369,12 +372,14 @@ public class WebSocketConnection {
         let timeoutInterval: DispatchTimeInterval = DispatchTimeInterval.seconds(connectionTimeout)
         timer.schedule(deadline: .now(), repeating: timeoutInterval, leeway: DispatchTimeInterval.milliseconds(connectionTimeout * 100))
         timer.setEventHandler(handler: { [weak self] in
-            guard let strongSelf = self, let connectionTimeout = strongSelf.service?.connectionTimeout
+            guard let strongSelf = self,
+                  let connectionTimeout = strongSelf.service?.connectionTimeout,
+                  let lastFrameReceivedAt = strongSelf.lastFrameReceivedAt
             else {
                 return
             }
-            if abs(strongSelf.lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout) * 0.8) {
-                if abs(strongSelf.lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout) * 1.60) {
+            if abs(lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout) * 0.8) {
+                if abs(lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout) * 1.60) {
                     strongSelf.connectionClosed(reason: .closedAbnormally)
                 }
                 strongSelf.ping()
