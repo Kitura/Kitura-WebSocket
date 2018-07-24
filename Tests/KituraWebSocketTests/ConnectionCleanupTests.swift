@@ -63,7 +63,7 @@ class ConnectionCleanupTests: KituraTest {
     }
     
     func testPingKeepsConnectionAlive() {
-        let service = register(closeReason: .closedAbnormally, connectionTimeout: 1)
+        let service = register(closeReason: .noReasonCodeSent, connectionTimeout: 1)
         
         performServerTest() { expectation in
             XCTAssertEqual(service.connections.count, 0, "Connections left on service at start of test")
@@ -99,6 +99,8 @@ class ConnectionCleanupTests: KituraTest {
             self.sendFrame(final: true, withOpcode: self.opcodePing, withPayload: NSData(), on: socket)
             sleep(1)
             XCTAssertEqual(service.connections.count, 1, "Stale connection was not cleaned up")
+            socket.close()
+            usleep(150)
             expectation.fulfill()
         }
     }

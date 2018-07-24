@@ -48,7 +48,7 @@ public class WebSocketConnection {
     
     private var active = true
     
-    private lazy var timer: DispatchSourceTimer = DispatchSource.makeTimerSource()
+    private let timer: DispatchSourceTimer = DispatchSource.makeTimerSource()
     private var lastFrameReceivedAt: Date
     
     enum MessageStates {
