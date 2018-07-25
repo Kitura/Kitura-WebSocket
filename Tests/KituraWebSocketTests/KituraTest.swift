@@ -100,11 +100,7 @@ class KituraTest: XCTestCase {
         expectation.fulfill()
     }
     
-    func register(onPath: String? = nil, closeReason: WebSocketCloseReasonCode, testServerRequest: Bool = false, pingMessage: String? = nil) {
-        let service = TestWebSocketService(closeReason: closeReason, testServerRequest: testServerRequest, pingMessage: pingMessage)
-        WebSocket.register(service: service, onPath: onPath ?? servicePath)
-    }
-    
+    @discardableResult
     func register(onPath: String? = nil, closeReason: WebSocketCloseReasonCode, testServerRequest: Bool = false, pingMessage: String? = nil, connectionTimeout: Int? = nil) -> TestWebSocketService {
         let service = TestWebSocketService(closeReason: closeReason, testServerRequest: testServerRequest, pingMessage: pingMessage, connectionTimeout: connectionTimeout)
         WebSocket.register(service: service, onPath: onPath ?? servicePath)

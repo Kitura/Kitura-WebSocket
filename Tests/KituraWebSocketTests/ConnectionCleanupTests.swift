@@ -25,8 +25,8 @@ class ConnectionCleanupTests: KituraTest {
     
     static var allTests: [(String, (ConnectionCleanupTests) -> () throws -> Void)] {
         return [
-            ("testSingleConnectionTimeOut", testSingleConnectionTimeOut),
             ("testNilConnectionTimeOut", testNilConnectionTimeOut),
+            ("testSingleConnectionTimeOut", testSingleConnectionTimeOut),
             ("testPingKeepsConnectionAlive", testPingKeepsConnectionAlive),
             ("testMultiConnectionTimeOut", testMultiConnectionTimeOut),
         ]
@@ -42,7 +42,7 @@ class ConnectionCleanupTests: KituraTest {
             usleep(1500)
             XCTAssertEqual(service.connections.count, 1, "Failed to create connection to service")
             sleep(3)
-            XCTAssertEqual(service.connections.count, 1, "Stale connection was unexpectantly cleaned up")
+            XCTAssertEqual(service.connections.count, 1, "Stale connection was unexpectedly cleaned up")
             socket.close()
             usleep(150)
             expectation.fulfill()
@@ -80,7 +80,7 @@ class ConnectionCleanupTests: KituraTest {
             sleep(1)
             self.sendFrame(final: true, withOpcode: self.opcodePing, withPayload: NSData(), on: socket)
             sleep(1)
-            XCTAssertEqual(service.connections.count, 1, "Stale connection was unexpectantly cleaned up")
+            XCTAssertEqual(service.connections.count, 1, "Stale connection was unexpectedly cleaned up")
             socket.close()
             usleep(150)
             expectation.fulfill()

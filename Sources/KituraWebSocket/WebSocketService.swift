@@ -53,7 +53,9 @@ public protocol WebSocketService: class {
     /// The time in seconds after which, if a connection is has sent no messages, the WebSocket server will send a ping to the connection. If a pong is not received in response, the connection will be closed. If connectionTimeout is nil, no connection cleanup will take place.
     var connectionTimeout: Int? { get }
 }
+
 extension WebSocketService {
+    /// Default computed value for `connectionTimeout` that returns `nil`.
     var connectionTimeout: Int? {
         return nil
     }
