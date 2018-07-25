@@ -121,6 +121,13 @@ received(message: String, from: WebSocketConnection)
 ```
 The message parameter contains the message in the form of a String.
 
+#### Detect and close broken connections
+
+WebSocketService protocol has an optional Int variable called `connectionTimeout`. This is the time in seconds after which, if a connection is has sent no messages, the WebSocket server will send a ping to the connection. If a pong is not received in response, the connection will be closed. The `connectionTimeout` default value is `nil`, meaning no connection cleanup will take place.
+
+```swift
+connectionTimeout: Int? = 60
+```
 ### WebSocket
 
 Classes which implement the `WebSocketService` protocol are registered with the server as follows:
