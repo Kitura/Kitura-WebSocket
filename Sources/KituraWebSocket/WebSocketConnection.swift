@@ -379,8 +379,9 @@ public class WebSocketConnection {
                 return
             }
             if abs(lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout) * 0.8) {
-                if abs(lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout) * 1.60) {
+                if abs(lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout) * 2) {
                     strongSelf.connectionClosed(reason: .closedAbnormally)
+                    return
                 }
                 strongSelf.ping()
             }
