@@ -105,11 +105,12 @@ extension WebSocketConnection: ChannelInboundHandler {
                 }
                 
                 if frame.fin {
-                    var data = frame.unmaskedData
+                    var data = unmaskedData(frame: frame)
                     let text = data.readString(length: data.readableBytes) ?? ""
                     fireReceivedString(message: text)
                 } else {
-                    var buffer = frame.data
+                    var buffer = unmaskedData(frame: frame)
+                    message = ctx.channel.allocator.buffer(capacity: buffer.readableBytes)
                     messageState = .text
                     message.write(buffer: &buffer)
                 }
@@ -121,9 +122,11 @@ extension WebSocketConnection: ChannelInboundHandler {
                 }
 
                 if frame.fin {
-                    fireReceivedData(data: frame.data.getData(at: 0, length: frame.data.readableBytes) ?? Data())
+                    let data = unmaskedData(frame: frame)
+                    fireReceivedData(data: data.getData(at: 0, length: data.readableBytes) ?? Data())
                 } else {
-                    var buffer = frame.data
+                    var buffer = unmaskedData(frame: frame)
+                    message = ctx.channel.allocator.buffer(capacity: buffer.readableBytes)
                     messageState = .binary
                     message.write(buffer: &buffer)
                 }
@@ -134,7 +137,7 @@ extension WebSocketConnection: ChannelInboundHandler {
                     return
                 }
       
-                var buffer = frame.data 
+                var buffer = unmaskedData(frame: frame)
                 message.write(buffer: &buffer)
                 if frame.fin {
                     switch messageState {
@@ -153,12 +156,11 @@ extension WebSocketConnection: ChannelInboundHandler {
                     let reasonCode: WebSocketErrorCode
                     var description: String? = nil
                     if frame.length >= 2 && frame.length < 126 {
-                        var frameData = frame.data
+                        var frameData = unmaskedData(frame: frame)
                         reasonCode = frameData.readWebSocketErrorCode() ?? WebSocketErrorCode.unknown(0) //TODO: what's a default value for error code?
                         description = getDescription(from: frameData)
                         if description == nil {
-                            closeConnection(reason: .dataInconsistentWithMessage, 
-				description: "Failed to convert received close message to UTF-8 String", hard: true)
+                            closeConnection(reason: .dataInconsistentWithMessage, description: "Failed to convert received close message to UTF-8 String", hard: true)
                             return
                         }
                     } else if frame.length == 0 {
