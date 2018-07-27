@@ -117,9 +117,12 @@ extension WebSocketConnection: ChannelInboundHandler {
                 }
                 
                 if frame.fin {
-                    var data = unmaskedData(frame: frame)
-                    let text = data.readString(length: data.readableBytes) ?? ""
-                    fireReceivedString(message: text)
+                    let data = unmaskedData(frame: frame)
+                    if let text = data.getString(at: 0, length: data.readableBytes, encoding: .utf8) {
+                        fireReceivedString(message: text)
+                    } else {
+                        connectionClosed(reason: .dataInconsistentWithMessage, description: "Failed to convert received payload to UTF-8 String")
+                    }
                 } else {
                     var buffer = unmaskedData(frame: frame)
                     message = ctx.channel.allocator.buffer(capacity: buffer.readableBytes)
@@ -156,7 +159,11 @@ extension WebSocketConnection: ChannelInboundHandler {
                     case .binary:
                         fireReceivedData(data: frame.data.getData(at: 0, length: frame.data.readableBytes) ?? Data())
                     case .text:
-                        fireReceivedString(message: frame.data.getString(at: 0, length: frame.data.readableBytes) ?? "") 
+                        if let text = frame.unmaskedData.getString(at: 0, length: frame.unmaskedData.readableBytes, encoding: .utf8) {
+                            fireReceivedString(message: text)
+                        } else {
+                            connectionClosed(reason: .dataInconsistentWithMessage, description: "Failed to convert received payload to UTF-8 String")
+                        }
                     case .unknown: //not possible
                         break
                     }
@@ -220,7 +227,7 @@ extension WebSocketConnection: ChannelInboundHandler {
     private func getDescription(from buffer: ByteBuffer) -> String? {
         var _buffer = buffer
         let readableBytes = _buffer.readableBytes
-        guard readableBytes > 0 else { return nil }
+        guard readableBytes >= 0 else { return nil }
         return _buffer.readString(length: readableBytes)
     }
 
