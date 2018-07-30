@@ -370,7 +370,7 @@ public class WebSocketConnection {
             return
         }
         let timeoutInterval: DispatchTimeInterval = DispatchTimeInterval.seconds(connectionTimeout)
-        timer.schedule(deadline: .now(), repeating: timeoutInterval, leeway: DispatchTimeInterval.milliseconds(connectionTimeout * 100))
+        timer.schedule(deadline: .now(), repeating: timeoutInterval, leeway: DispatchTimeInterval.milliseconds(connectionTimeout * 50))
         timer.setEventHandler(handler: { [weak self] in
             guard let strongSelf = self,
                   let connectionTimeout = strongSelf.service?.connectionTimeout,
@@ -378,8 +378,8 @@ public class WebSocketConnection {
             else {
                 return
             }
-            if abs(lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout) * 0.8) {
-                if abs(lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout) * 2) {
+            if abs(lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout) * 0.4) {
+                if abs(lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout)) {
                     strongSelf.connectionClosed(reason: .closedAbnormally)
                     return
                 }

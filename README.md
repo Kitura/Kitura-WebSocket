@@ -78,31 +78,37 @@ A specific `WebSocketConnection` object is connected to a specific `WebSocketSer
 ### WebSocketConnection
 The WebSocketConnection class provides:
 - Functions to send text and binary messages to the client.
-  ```swift
-  WebSocketConnection.send(message: Data)
-  WebSocketConnection.send(message: String)
-  ```
+
+```swift
+WebSocketConnection.send(message: Data)
+WebSocketConnection.send(message: String)
+```
 - Functions to close the connection gracefully and forcefully.
-  ```swift
-  WebSocketConnection.close(reason: WebSocketCloseReasonCode?=nil, description: String?=nil)
-  WebSocketConnection.drop(reason: WebSocketCloseReasonCode?=nil, description: String?=nil)
-  ```
-  In both `close()` and `drop()`, the `WebSocketCloseReasonCode` enum provides the standard WebSocket close reason codes with the ability to specify application specific ones.
+
+```swift
+WebSocketConnection.close(reason: WebSocketCloseReasonCode?=nil, description: String?=nil)
+WebSocketConnection.drop(reason: WebSocketCloseReasonCode?=nil, description: String?=nil)
+```
+
+In both `close()` and `drop()`, the `WebSocketCloseReasonCode` enum provides the standard WebSocket close reason codes with the ability to specify application specific ones.
 
 - A unique identifier that can be used to help manage the collection of `WebSocketConnection` objects connected to a `WebSocketService`.
-  ```swift
-  id: String
-  ```
+
+```swift
+id: String
+```
 
 ### WebSocketService
 The WebSocketService protocol enables Kitura-WebSocket to notify a WebSocket service about a set of events that
 occur. These events include:
 - A client has connected to the WebSocketService.
+
 ```swift
 connected(connection: WebSocketConnection)
 ```
 
 - A client has disconnected from the WebSocketService.
+
 ```swift
 disconnected(connection: WebSocketConnection, reason: WebSocketCloseReasonCode)
 ```
@@ -110,12 +116,14 @@ The reason parameter contains the reason code associated with the client disconn
 a close command sent by the client, or be determined by Kitura-WebSocket if the connection's socket suddenly was closed.
 
 - A binary message was received from a client.
+
 ```swift
 received(message: Data, from: WebSocketConnection)
 ```
 The message parameter contains the bytes of the message in the form of a Data struct.
 
 - A text message was received from a client.
+
 ```swift
 received(message: String, from: WebSocketConnection)
 ```
@@ -123,20 +131,25 @@ The message parameter contains the message in the form of a String.
 
 #### Detect and close broken connections
 
-WebSocketService protocol has an optional Int variable called `connectionTimeout`. This is the time in seconds after which, if a connection is has sent no messages, the WebSocket server will send a ping to the connection. If a pong is not received in response, the connection will be closed. The `connectionTimeout` default value is `nil`, meaning no connection cleanup will take place.
+WebSocketService protocol has an optional Int property called `connectionTimeout`. This is the time in seconds that a connection must be unresponsive to be automatically closed by the server. If the WebSocket server has not received any messages in the first half of the timeout time it will ping the connection. If a pong is not received in the remaining half if the timeout, the connection will be closed with a 1006 (connection closed abnormally) status code. The `connectionTimeout` defaults to `nil`, meaning no connection cleanup will take place.  
+
+You can set the `connectionTimeout` by assigning a value to the property within your WebSocketService class:
 
 ```swift
 let connectionTimeout: Int? = 60
 ```
+
 ### WebSocket
 
 Classes which implement the `WebSocketService` protocol are registered with the server as follows:
+
 ```swift
 WebSocket.register(service: WebSocketService, onPath: String)
 ```
 This function is passed the `WebSocketService` being registered along with the path it is being registered on.
 
 A registered `WebSocketService` can be unregistered from the server as follows:
+
 ```swift
 WebSocket.unregister(path: String)
 ```
@@ -199,6 +212,8 @@ import KituraWebSocket
 class ChatService: WebSocketService {
 
     private var connections = [String: WebSocketConnection]()
+    
+    let connectionTimeout: Int? = 60
 
     public func connected(connection: WebSocketConnection) {
         connections[connection.id] = connection
