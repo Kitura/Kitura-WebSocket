@@ -131,7 +131,7 @@ The message parameter contains the message in the form of a String.
 
 #### Detect and close broken connections
 
-WebSocketService protocol has an optional Int property called `connectionTimeout`. This is the time in seconds that a connection must be unresponsive to be automatically closed by the server. If the WebSocket server has not received any messages in the first half of the timeout time it will ping the connection. If a pong is not received in the remaining half if the timeout, the connection will be closed with a 1006 (connection closed abnormally) status code. The `connectionTimeout` defaults to `nil`, meaning no connection cleanup will take place.  
+WebSocketService protocol has an optional Int property called `connectionTimeout`. This is the time in seconds that a connection must be unresponsive to be automatically closed by the server. If the WebSocket server has not received any messages in the first half of the timeout time it will ping the connection. If a pong is not received in the remaining half of the timeout, the connection will be closed with a 1006 (connection closed abnormally) status code. The `connectionTimeout` defaults to `nil`, meaning no connection cleanup will take place.  
 
 You can set the `connectionTimeout` by assigning a value to the property within your WebSocketService class:
 
@@ -181,6 +181,7 @@ ServerDirectory
 </pre>
 
 Create a `Package.swift` file with the following content, substituting `"x.x.x"` with the latest releases of Kitura, HeliumLogger and Kitura-WebSocket:
+
 ```swift
 // swift-tools-version:4.0
 import PackageDescription
