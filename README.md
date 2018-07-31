@@ -387,7 +387,6 @@ The server will now be up and running. The informational log message below will 
 [INFO] [HTTPServer.swift:124 listen(on:)] Listening on port 8080
 ``
 
-
 ### Setting up and running the client
 To setup the client, in the client directory, simply:
 ```
