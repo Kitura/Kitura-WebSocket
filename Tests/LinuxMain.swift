@@ -62,6 +62,7 @@ extension Sequence {
 XCTMain([
     testCase(BasicTests.allTests.shuffled()),
     testCase(ComplexTests.allTests.shuffled()),
+    testCase(ConnectionCleanupTests.allTests.shuffled()),
     testCase(ProtocolErrorTests.allTests.shuffled()),
     testCase(UpgradeErrors.allTests.shuffled())
 ].shuffled())

@@ -49,4 +49,14 @@ public protocol WebSocketService: class {
     /// - Parameter client: The `WebSocketConnection` object that represents the connection over which
     ///                     the client sent the message to this `WebSocketService`
     func received(message: String, from: WebSocketConnection)
+    
+    /// The time in seconds that a connection must be unresponsive to be automatically closed by the server. If the WebSocket server has not received any messages in the first half of the timeout time it will ping the connection. If a pong is not received in the remaining half of the timeout, the connection will be closed with a 1006 (connection closed abnormally) status code. The `connectionTimeout` defaults to `nil`, meaning no connection cleanup will take place.
+    var connectionTimeout: Int? { get }
+}
+
+extension WebSocketService {
+    /// Default computed value for `connectionTimeout` that returns `nil`.
+    var connectionTimeout: Int? {
+        return nil
+    }
 }

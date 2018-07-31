@@ -48,6 +48,9 @@ public class WebSocketConnection {
     
     private var active = true
     
+    private let timer: DispatchSourceTimer?
+    private var lastFrameReceivedAt: Date?
+    
     enum MessageStates {
         case binary, text, unknown
     }
@@ -60,9 +63,18 @@ public class WebSocketConnection {
     
     private var messageState: MessageStates = .unknown
     
-    init(request: ServerRequest) {
+    init(request: ServerRequest, service: WebSocketService? = nil) {
         self.request = WSServerRequest(request: request)
         buffer = NSMutableData(capacity: WebSocketConnection.bufferSize) ?? NSMutableData()
+        self.service = service
+        if let connectionTimeout = service?.connectionTimeout {
+            lastFrameReceivedAt = Date()
+            timer = DispatchSource.makeTimerSource()
+            timerStart(connectionTimeout: connectionTimeout)
+        } else {
+            lastFrameReceivedAt = nil
+            timer = nil
+        }
     }
     
     /// Close a WebSocket connection by sending a close control command to the client optionally
@@ -196,7 +208,9 @@ public class WebSocketConnection {
     }
     
     func received(frame: WSFrame) {
-        
+        if lastFrameReceivedAt != nil {
+            lastFrameReceivedAt = Date()
+        }
         switch frame.opCode {
         case .binary:
             guard messageState == .unknown else {
@@ -349,5 +363,36 @@ public class WebSocketConnection {
     
     private func unlockWriteLock() {
         writeLock.signal()
+    }
+    
+    private func timerStart(connectionTimeout: Int) {
+        guard let timer = self.timer else {
+            return
+        }
+        let timeoutInterval: DispatchTimeInterval = DispatchTimeInterval.seconds(connectionTimeout)
+        timer.schedule(deadline: .now(), repeating: timeoutInterval, leeway: DispatchTimeInterval.milliseconds(connectionTimeout * 50))
+        timer.setEventHandler(handler: { [weak self] in
+            guard let strongSelf = self,
+                  let connectionTimeout = strongSelf.service?.connectionTimeout,
+                  let lastFrameReceivedAt = strongSelf.lastFrameReceivedAt
+            else {
+                return
+            }
+            if abs(lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout) * 0.4) {
+                if abs(lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout)) {
+                    strongSelf.connectionClosed(reason: .closedAbnormally)
+                    return
+                }
+                strongSelf.ping()
+            }
+        })
+        timer.resume()
+    }
+    
+    deinit {
+        if let timer = self.timer {
+            timer.setEventHandler {}
+            timer.cancel()
+        }
     }
 }
