@@ -42,6 +42,8 @@ public class WebSocketConnection {
 
     var ctx: ChannelHandlerContext!
 
+    private var errors: [String] = []
+
     init(request: ServerRequest) {
         self.request = request
     }
@@ -96,6 +98,16 @@ extension WebSocketConnection: ChannelInboundHandler {
 
     public func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
         let frame = self.unwrapInboundIn(data)
+
+        do {
+            try validateRSV(frame: frame)
+            guard frame.extensionData == nil else {
+                connectionClosed(reason: .protocolError, description: "Extension data must be nil when no extension is negotiated")
+                return
+            }
+        } catch {
+            connectionClosed(reason: .protocolError, description: "\(errors.joined(separator: ",")) must be 0, when no extension defining RSV meaning has been negotiated")
+        }
 
         switch frame.opcode {
             case .text:
@@ -187,10 +199,12 @@ extension WebSocketConnection: ChannelInboundHandler {
 
             case .pong:
                 break
- 
-            default:
-                break
 
+            case .unknownNonControl(let code):
+                closeConnection(reason: .protocolError, description: "Parsed frame with an invalid operation code of \(code)", hard: true)
+
+            case .unknownControl(let code):
+                closeConnection(reason: .protocolError, description: "Parsed frame with an invalid operation code of \(code)", hard: true)
         } 
     }
 
@@ -207,6 +221,29 @@ extension WebSocketConnection: ChannelInboundHandler {
         let readableBytes = _buffer.readableBytes
         guard readableBytes > 0 else { return nil }
         return _buffer.readString(length: readableBytes)
+    }
+
+    private enum RSVError: Error {
+        case invalidRSV
+    }
+
+    private func validateRSV(frame: WebSocketFrame) throws {
+
+        if frame.rsv1 {
+           errors.append("RSV1")
+        }
+
+        if frame.rsv2 {
+           errors.append("RSV2")
+        }
+
+        if frame.rsv3  {
+            errors.append("RSV3")
+        }
+
+        guard errors.isEmpty else {
+            throw RSVError.invalidRSV
+        }
     }
 }
 
