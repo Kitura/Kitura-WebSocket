@@ -188,8 +188,11 @@ extension WebSocketConnection: ChannelInboundHandler {
             case .pong:
                 break
  
-            default:
-                break
+            case .unknownNonControl(let code):
+                closeConnection(reason: .protocolError, description: "Parsed frame with an invalid operation code of \(code)", hard: true)
+
+            case .unknownControl(let code):
+                closeConnection(reason: .protocolError, description: "Parsed frame with an invalid operation code of \(code)", hard: true)
 
         } 
     }
