@@ -117,9 +117,12 @@ extension WebSocketConnection: ChannelInboundHandler {
                 }
                 
                 if frame.fin {
-                    var data = unmaskedData(frame: frame)
-                    let text = data.readString(length: data.readableBytes) ?? ""
-                    fireReceivedString(message: text)
+                    let data = unmaskedData(frame: frame)
+                    if let text = data.getString(at: 0, length: data.readableBytes, encoding: .utf8) {
+                        fireReceivedString(message: text)
+                    } else {
+                        connectionClosed(reason: .dataInconsistentWithMessage, description: "Failed to convert received payload to UTF-8 String")
+                    }
                 } else {
                     var buffer = unmaskedData(frame: frame)
                     message = ctx.channel.allocator.buffer(capacity: buffer.readableBytes)
@@ -156,7 +159,11 @@ extension WebSocketConnection: ChannelInboundHandler {
                     case .binary:
                         fireReceivedData(data: frame.data.getData(at: 0, length: frame.data.readableBytes) ?? Data())
                     case .text:
-                        fireReceivedString(message: frame.data.getString(at: 0, length: frame.data.readableBytes) ?? "") 
+                        if let text = frame.unmaskedData.getString(at: 0, length: frame.unmaskedData.readableBytes, encoding: .utf8) {
+                            fireReceivedString(message: text)
+                        } else {
+                            connectionClosed(reason: .dataInconsistentWithMessage, description: "Failed to convert received payload to UTF-8 String")
+                        }
                     case .unknown: //not possible
                         break
                     }
@@ -170,11 +177,11 @@ extension WebSocketConnection: ChannelInboundHandler {
                     if frame.length >= 2 && frame.length < 126 {
                         var frameData = unmaskedData(frame: frame)
                         reasonCode = frameData.readWebSocketErrorCode() ?? WebSocketErrorCode.unknown(0) //TODO: what's a default value for error code?
-                        description = getDescription(from: frameData)
-                        if description == nil {
+                        guard let closeReason = frameData.getString(at: frameData.readerIndex, length: frameData.readableBytes, encoding: .utf8) else {
                             closeConnection(reason: .dataInconsistentWithMessage, description: "Failed to convert received close message to UTF-8 String", hard: true)
                             return
                         }
+                        description = closeReason
                     } else if frame.length == 0 {
                         reasonCode = .normalClosure
                     } else {
@@ -215,13 +222,6 @@ extension WebSocketConnection: ChannelInboundHandler {
            frameData.webSocketUnmask(maskingKey)
        }
        return frameData
-    }
-
-    private func getDescription(from buffer: ByteBuffer) -> String? {
-        var _buffer = buffer
-        let readableBytes = _buffer.readableBytes
-        guard readableBytes > 0 else { return nil }
-        return _buffer.readString(length: readableBytes)
     }
 
     private enum RSVError: Error {
