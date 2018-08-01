@@ -177,11 +177,11 @@ extension WebSocketConnection: ChannelInboundHandler {
                     if frame.length >= 2 && frame.length < 126 {
                         var frameData = unmaskedData(frame: frame)
                         reasonCode = frameData.readWebSocketErrorCode() ?? WebSocketErrorCode.unknown(0) //TODO: what's a default value for error code?
-                        description = getDescription(from: frameData)
-                        if description == nil {
+                        guard let closeReason = frameData.getString(at: frameData.readerIndex, length: frameData.readableBytes, encoding: .utf8) else {
                             closeConnection(reason: .dataInconsistentWithMessage, description: "Failed to convert received close message to UTF-8 String", hard: true)
                             return
                         }
+                        description = closeReason
                     } else if frame.length == 0 {
                         reasonCode = .normalClosure
                     } else {
@@ -222,13 +222,6 @@ extension WebSocketConnection: ChannelInboundHandler {
            frameData.webSocketUnmask(maskingKey)
        }
        return frameData
-    }
-
-    private func getDescription(from buffer: ByteBuffer) -> String? {
-        var _buffer = buffer
-        let readableBytes = _buffer.readableBytes
-        guard readableBytes >= 0 else { return nil }
-        return _buffer.readString(length: readableBytes)
     }
 
     private enum RSVError: Error {
