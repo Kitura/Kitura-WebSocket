@@ -32,7 +32,7 @@ public class WebSocketConnection {
     
     public let id = UUID().uuidString
 
-    public let request: ServerRequest? //TEMP
+    public let request: ServerRequest
 
     var awaitClose = false
 
