@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import KituraNIO
+import KituraNet
 import NIO
 import NIOWebSocket
 import Foundation
@@ -98,7 +98,7 @@ extension WebSocketConnection: ChannelInboundHandler {
 
     public func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
         let frame = self.unwrapInboundIn(data)
-
+        
         do {
             try validateRSV(frame: frame)
             guard frame.extensionData == nil else {
@@ -108,24 +108,34 @@ extension WebSocketConnection: ChannelInboundHandler {
         } catch {
             connectionClosed(reason: .protocolError, description: "\(errors.joined(separator: ",")) must be 0 unless an extension is negotiated that defines meanings for non-zero values")
         }
-
+        
+        var data = unmaskedData(frame: frame)
         switch frame.opcode {
             case .text:
                 guard messageState == .unknown else {
                     connectionClosed(reason: .protocolError, description: "A text frame must be the first in the message")
                     return
                 }
-                
+
+                guard frame.maskKey != nil else {
+                    connectionClosed(reason: .protocolError, description: "Received a frame from a client that wasn't masked")
+                    return
+                }
+
                 if frame.fin {
-                    let data = unmaskedData(frame: frame)
-                    if let text = data.getString(at: 0, length: data.readableBytes, encoding: .utf8) {
+                    if let utf8Text = data.getString(at: 0, length: data.readableBytes, encoding: .utf8) {
+                        //If text is an empty string, the client might have sent the null character u{00}
+                        var text = utf8Text
+                        if text == "" {
+                            text = data.getString(at: 0, length: data.readableBytes) ?? ""
+                        }
                         fireReceivedString(message: text)
                     } else {
-                        connectionClosed(reason: .dataInconsistentWithMessage, description: "Failed to convert received payload to UTF-8 String")
+                        closeConnection(reason: .dataInconsistentWithMessage, description: "Failed to convert received payload to UTF-8 String", hard: true)
                     }
                 } else {
-                    var buffer = unmaskedData(frame: frame)
-                    message = ctx.channel.allocator.buffer(capacity: buffer.readableBytes)
+                    message =  ctx.channel.allocator.buffer(capacity: data.readableBytes)
+                    var buffer = data
                     messageState = .text
                     message.write(buffer: &buffer)
                 }
@@ -136,14 +146,17 @@ extension WebSocketConnection: ChannelInboundHandler {
                     return
                 }
 
+                guard frame.maskKey != nil else {
+                    connectionClosed(reason: .protocolError, description: "Received a frame from a client that wasn't masked")
+                    return
+                }
+
                 if frame.fin {
-                    let data = unmaskedData(frame: frame)
                     fireReceivedData(data: data.getData(at: 0, length: data.readableBytes) ?? Data())
                 } else {
-                    var buffer = unmaskedData(frame: frame)
-                    message = ctx.channel.allocator.buffer(capacity: buffer.readableBytes)
+                    message =  ctx.channel.allocator.buffer(capacity: data.readableBytes)
+                    message.write(buffer: &data)
                     messageState = .binary
-                    message.write(buffer: &buffer)
                 }
   
             case .continuation:
@@ -152,19 +165,16 @@ extension WebSocketConnection: ChannelInboundHandler {
                     return
                 }
       
-                var buffer = unmaskedData(frame: frame)
-                message.write(buffer: &buffer)
+                message.write(buffer: &data)
                 if frame.fin {
                     switch messageState {
                         case .binary:
                             fireReceivedData(data: message.getData(at: 0, length: message.readableBytes) ?? Data())
                         case .text:
-                            if let data = message {
-                                guard let text = data.getString(at: 0, length: data.readableBytes, encoding: .utf8) else {
-                                    connectionClosed(reason: .dataInconsistentWithMessage, description: "Failed to convert received payload to UTF-8 String")
-                                    return
-                                }
+                            if let text = message.getString(at: 0, length: message.readableBytes, encoding: .utf8) {
                                 fireReceivedString(message: text)
+                            } else {
+                                connectionClosed(reason: .dataInconsistentWithMessage, description: "Failed to convert received payload to UTF-8 String")
                             }
                         case .unknown: //not possible
                             break
@@ -177,13 +187,12 @@ extension WebSocketConnection: ChannelInboundHandler {
                     let reasonCode: WebSocketErrorCode
                     var description: String? = nil
                     if frame.length >= 2 && frame.length < 126 {
-                        var frameData = unmaskedData(frame: frame)
-                        reasonCode = frameData.readWebSocketErrorCode() ?? WebSocketErrorCode.unknown(0) //TODO: what's a default value for error code?
-                        guard let closeReason = frameData.getString(at: frameData.readerIndex, length: frameData.readableBytes, encoding: .utf8) else {
+                        reasonCode = data.readWebSocketErrorCode()?.protocolErrorIfInvalid() ?? WebSocketErrorCode.unknown(0)
+                        description = data.getString(at: data.readerIndex, length: data.readableBytes, encoding: .utf8)
+                        if description == nil {
                             closeConnection(reason: .dataInconsistentWithMessage, description: "Failed to convert received close message to UTF-8 String", hard: true)
                             return
                         }
-                        description = closeReason
                     } else if frame.length == 0 {
                         reasonCode = .normalClosure
                     } else {
@@ -204,32 +213,27 @@ extension WebSocketConnection: ChannelInboundHandler {
                     connectionClosed(reason: .protocolError, description: "Control frames must not be fragmented")
                     return
                 }
-                sendMessage(with: .pong, data: unmaskedData(frame: frame))
+                sendMessage(with: .pong, data: data)
 
             case .pong:
                 break
  
             case .unknownNonControl(let code):
-                closeConnection(reason: .protocolError, description: "Parsed frame with an invalid operation code of \(code)", hard: true)
+                closeConnection(reason: .protocolError, description: "Parsed a frame with an invalid operation code of \(code)", hard: true)
 
             case .unknownControl(let code):
-                closeConnection(reason: .protocolError, description: "Parsed frame with an invalid operation code of \(code)", hard: true)
+                closeConnection(reason: .protocolError, description: "Parsed a frame with an invalid operation code of \(code)", hard: true)
 
         } 
     }
 
     public func errorCaught(ctx: ChannelHandlerContext, error: Error) {
-        guard let error = error as? NIOWebSocketError else {
-            fatalError("Can only handle NIOWebSocketErrors")
-        }
-
+        guard let error = error as? NIOWebSocketError else { return }
         switch error {
         case .multiByteControlFrameLength:
-            connectionClosed(reason: .protocolError, description: "Control frames must have a payload length of 125 bytes or less")
-
+            connectionClosed(reason: .protocolError, description: "Control frames are only allowed to have payload up to and including 125 octets")
         case .fragmentedControlFrame:
             connectionClosed(reason: .protocolError, description: "Control frames must not be fragmented")
-
         default: break
         }
     }
@@ -269,7 +273,7 @@ extension WebSocketConnection: ChannelInboundHandler {
 extension WebSocketConnection {
 
     func connectionClosed(reason: WebSocketErrorCode, description: String? = nil, reasonToSendBack: WebSocketErrorCode? = nil) {
-        if ctx.channel.isActive {
+        if ctx.channel.isWritable {
              closeConnection(reason: reasonToSendBack ?? reason, description: description, hard: true)
              fireDisconnected(reason: reason)
         } else {
@@ -278,7 +282,7 @@ extension WebSocketConnection {
     }
 
     func sendMessage(with opcode: WebSocketOpcode, data: ByteBuffer) {
-        guard ctx.channel.isActive else { 
+        guard ctx.channel.isWritable else {
             //TODO: Log an error
             return
         }
@@ -347,5 +351,15 @@ extension WebSocketCloseReasonCode {
         case .unexpectedServerError: return .serverError
         case .unknown(let code): return .userDefined(code)
         }
+    }
+}
+
+extension WebSocketErrorCode {
+    func protocolErrorIfInvalid() -> WebSocketErrorCode {
+        //https://github.com/IBM-Swift/Kitura-WebSocket/pull/36
+        if case .unknown(let code) = self, code < 3000 {
+            return .protocolError
+        }
+        return self
     }
 }
