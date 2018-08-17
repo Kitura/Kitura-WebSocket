@@ -218,6 +218,22 @@ extension WebSocketConnection: ChannelInboundHandler {
         } 
     }
 
+    public func errorCaught(ctx: ChannelHandlerContext, error: Error) {
+        guard let error = error as? NIOWebSocketError else {
+            fatalError("Can only handle NIOWebSocketErrors")
+        }
+
+        switch error {
+            case .multiByteControlFrameLength:
+                connectionClosed(reason: .protocolError, description: "Control frames must have a payload length of 125 bytes or less")
+
+            case .fragmentedControlFrame:
+                connectionClosed(reason: .protocolError, description: "Control frames must not be fragmented")
+
+            default: break
+        }
+    }
+
     private func unmaskedData(frame: WebSocketFrame) -> ByteBuffer {
        var frameData = frame.data
        if let maskingKey = frame.maskKey {
