@@ -224,13 +224,13 @@ extension WebSocketConnection: ChannelInboundHandler {
         }
 
         switch error {
-            case .multiByteControlFrameLength:
-                connectionClosed(reason: .protocolError, description: "Control frames must have a payload length of 125 bytes or less")
+        case .multiByteControlFrameLength:
+            connectionClosed(reason: .protocolError, description: "Control frames must have a payload length of 125 bytes or less")
 
-            case .fragmentedControlFrame:
-                connectionClosed(reason: .protocolError, description: "Control frames must not be fragmented")
+        case .fragmentedControlFrame:
+            connectionClosed(reason: .protocolError, description: "Control frames must not be fragmented")
 
-            default: break
+        default: break
         }
     }
 
