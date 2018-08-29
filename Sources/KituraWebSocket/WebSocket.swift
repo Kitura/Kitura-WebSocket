@@ -34,5 +34,6 @@ public class WebSocket {
     /// - Parameter path: The path on which the `WebSocketService` being unregistered,
     ///                  was registered on.
     public static func unregister(path: String) {
+        factory.unregister(path: path)
     }
 }

@@ -15,7 +15,7 @@
  */
 
 import Foundation
-import KituraNIO
+import KituraNet
 import NIO
 import NIOHTTP1
 
@@ -58,6 +58,10 @@ public class WSConnectionUpgradeFactory: ProtocolHandlerFactory {
             path = "/" + thePath
         }
         registry.removeValue(forKey: path)
+    }
+
+    public func isServiceRegistered(at path: String) -> Bool {
+        return registry[path] != nil
     }
 
     /// Clear the `WebSocketService` registry. Used in testing.

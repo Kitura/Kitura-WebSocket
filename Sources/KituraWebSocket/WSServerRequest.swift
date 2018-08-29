@@ -15,7 +15,7 @@
  */
 
 import Foundation
-import KituraNIO
+import KituraNet
 
 /// An internal class used to retain information from the original request that
 /// was used to create the WebSocket connection. The ServerRequest from KituraNet
