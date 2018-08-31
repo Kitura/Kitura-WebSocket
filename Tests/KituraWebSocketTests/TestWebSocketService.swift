@@ -83,7 +83,8 @@ class TestWebSocketService: WebSocketService {
     
     public func disconnected(connection: WebSocketConnection, reason: WebSocketCloseReasonCode) {
         XCTAssertNotNil(connections[connection.id], "Client ID from connect wasn't client ID from disconnect")
-        XCTAssertEqual(Int(closeReason.code()), Int(reason.code()), "Excpected close reason code of \(closeReason) received \(reason)")
+        XCTAssert((closeReason.code() == reason.code()), "Excpected close reason code of \(closeReason) received \(reason)")
+        //XCTAssertEqual was giving false success cases
         connections[connection.id] = nil
     }
     
