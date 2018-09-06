@@ -54,7 +54,7 @@ public protocol WebSocketService: class {
     var connectionTimeout: Int? { get }
 }
 
-extension WebSocketService {
+public extension WebSocketService {
     /// Default computed value for `connectionTimeout` that returns `nil`.
     var connectionTimeout: Int? {
         return nil
