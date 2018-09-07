@@ -29,6 +29,7 @@ class ConnectionCleanupTests: KituraTest {
             ("testSingleConnectionTimeOut", testSingleConnectionTimeOut),
             ("testPingKeepsConnectionAlive", testPingKeepsConnectionAlive),
             ("testMultiConnectionTimeOut", testMultiConnectionTimeOut),
+            ("testProccessorClose", testProccessorClose),
         ]
     }
     
@@ -112,6 +113,25 @@ class ConnectionCleanupTests: KituraTest {
             XCTAssertEqual(service.connections.count, 1, "Stale connection was not cleaned up")
             socket.close()
             socket2.close()
+            usleep(150)
+            expectation.fulfill()
+        }
+    }
+    
+    func testProccessorClose() {
+        let service = register(closeReason: .closedAbnormally, connectionTimeout: nil)
+        
+        performServerTest() { expectation in
+            XCTAssertEqual(service.connections.count, 0, "Connections left on service at start of test")
+            guard let socket = self.sendUpgradeRequest(toPath: self.servicePath, usingKey: self.secWebKey) else { return }
+            let _ = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey)
+            usleep(1500)
+            XCTAssertEqual(service.connections.count, 1, "Failed to create connection to service")
+            let connections = Array(service.connections.values)
+            connections[0].processor?.close()
+            usleep(1500)
+            XCTAssertEqual(service.connections.count, 0, "Service was not notified of connection disconnect")
+            socket.close()
             usleep(150)
             expectation.fulfill()
         }

@@ -46,7 +46,7 @@ public class WebSocketConnection {
 
     private let message = NSMutableData()
     
-    private var active = true
+    internal var active = true
     
     private let timer: DispatchSourceTimer?
     private var lastFrameReceivedAt: Date?
