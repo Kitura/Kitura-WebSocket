@@ -46,7 +46,7 @@ public class WebSocketConnection {
 
     private let message = NSMutableData()
     
-    private var active = true
+    internal var active = true
     
     private let timer: DispatchSourceTimer?
     private var lastFrameReceivedAt: Date?
@@ -254,7 +254,7 @@ public class WebSocketConnection {
                         return
                     }
                 } else if frame.payload.length == 0 {
-                    reasonCode = .normal
+                    reasonCode = .noReasonCodeSent
                 } else {
                     connectionClosed(reason: .protocolError, description: "Close frames, which contain a payload, must be between 2 and 125 octets inclusive")
                     return

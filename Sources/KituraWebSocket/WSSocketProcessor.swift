@@ -107,6 +107,9 @@ class WSSocketProcessor: IncomingSocketProcessor {
     
     /// Close the socket and mark this handler as no longer in progress.
     public func close() {
+        if connection.active {
+            connection.connectionClosed(reason: .closedAbnormally)
+        }
         handler?.prepareToClose()
     }
     
