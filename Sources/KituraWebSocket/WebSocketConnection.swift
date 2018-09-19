@@ -369,7 +369,7 @@ public class WebSocketConnection {
         guard let timer = self.timer else {
             return
         }
-        let timeoutInterval: DispatchTimeInterval = DispatchTimeInterval.seconds(connectionTimeout)
+        let timeoutInterval: DispatchTimeInterval = DispatchTimeInterval.milliseconds(connectionTimeout * 500)
         timer.schedule(deadline: .now(), repeating: timeoutInterval, leeway: DispatchTimeInterval.milliseconds(connectionTimeout * 50))
         timer.setEventHandler(handler: { [weak self] in
             guard let strongSelf = self,
