@@ -27,6 +27,8 @@ public class WebSocketConnection {
         case binary, text, unknown
     }
 
+    private static let closedAbnormallyErrorCode = WebSocketErrorCode(codeNumber: 1006)
+
     private var messageState: MessageState = .unknown
 
     weak var service: WebSocketService?
@@ -106,6 +108,10 @@ extension WebSocketConnection: ChannelInboundHandler {
         self.ctx = ctx
         guard ctx.channel.isActive else { return }
         self.fireConnected()
+    }
+
+    public func channelInactive(ctx: ChannelHandlerContext) {
+        connectionClosed(reason: WebSocketConnection.closedAbnormallyErrorCode)
     }
 
     public func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
@@ -232,10 +238,10 @@ extension WebSocketConnection: ChannelInboundHandler {
                 break
  
             case .unknownNonControl(let code):
-                closeConnection(reason: .protocolError, description: "Parsed a frame with an invalid operation code of \(code)", hard: true)
+                connectionClosed(reason: .protocolError, description: "Parsed a frame with an invalid operation code of \(code)")
 
             case .unknownControl(let code):
-                closeConnection(reason: .protocolError, description: "Parsed a frame with an invalid operation code of \(code)", hard: true)
+                connectionClosed(reason: .protocolError, description: "Parsed a frame with an invalid operation code of \(code)")
 
         } 
     }
@@ -290,12 +296,14 @@ extension WebSocketConnection {
              Log.error("ChannelHandlerContext unavailable")
              return
         }
+
+        guard !awaitClose else { return }
         if ctx.channel.isWritable {
              closeConnection(reason: reasonToSendBack ?? reason, description: description, hard: true)
-             fireDisconnected(reason: reason)
         } else {
-            ctx.close(promise: nil)
+           ctx.close(promise: nil)
         }
+        fireDisconnected(reason: reason)
     }
 
     func sendMessage(with opcode: WebSocketOpcode, data: ByteBuffer) {
@@ -322,6 +330,7 @@ extension WebSocketConnection {
              Log.error("ChannelHandlerContext unavailable")
              return
          }
+         guard !awaitClose else { return }
          var data = ctx.channel.allocator.buffer(capacity: 2)
          data.write(webSocketErrorCode: reason ?? .normalClosure)
          if let description = description {

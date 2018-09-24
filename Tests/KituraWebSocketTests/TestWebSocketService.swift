@@ -21,19 +21,20 @@ import Foundation
 import KituraNet
 
 class TestWebSocketService: WebSocketService {
-    var connectionId = ""
     let closeReason: WebSocketCloseReasonCode
     let pingMessage: String?
     let testServerRequest: Bool
+    var connections: [String: WebSocketConnection]
 
     public init(closeReason: WebSocketCloseReasonCode, testServerRequest: Bool, pingMessage: String?) {
         self.closeReason = closeReason
         self.testServerRequest = testServerRequest
         self.pingMessage = pingMessage
+        self.connections = [:]
     }
 
     public func connected(connection: WebSocketConnection) {
-        connectionId = connection.id
+        connections[connection.id] = connection
 
         if let pingMessage = pingMessage {
             if pingMessage.count > 0 {
@@ -79,8 +80,9 @@ class TestWebSocketService: WebSocketService {
     }
 
     public func disconnected(connection: WebSocketConnection, reason: WebSocketCloseReasonCode) {
-        XCTAssertEqual(connectionId, connection.id, "Client ID from connect wasn't client ID from disconnect")
-        XCTAssertEqual(Int(closeReason.code()), Int(reason.code()), "Expected close reason code of \(closeReason) received \(reason)")
+        XCTAssertNotNil(connections[connection.id], "Client ID from connect wasn't client ID from disconnect")
+        XCTAssert((closeReason.code() == reason.code()), "Excpected close reason code of \(closeReason) received \(reason)")
+        connections[connection.id] = nil
     }
 
     public func received(message: Data, from: WebSocketConnection) {
