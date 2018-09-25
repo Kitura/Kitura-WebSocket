@@ -25,6 +25,7 @@ import NIOHTTP1
 import NIOWebSocket
 import Foundation
 import Dispatch
+import LoggerAPI
 
 class KituraTest: XCTestCase {
 
@@ -84,10 +85,14 @@ class KituraTest: XCTestCase {
         let upgraded = DispatchSemaphore(value: 0)
         guard let channel = sendUpgradeRequest(toPath: servicePath, usingKey: secWebKey, semaphore: upgraded) else { return }
         upgraded.wait()
-        _ = try! channel.pipeline.remove(handler: httpRequestEncoder).wait()
-        _ = try! channel.pipeline.remove(handler: httpResponseDecoder).wait()
-        _ = try! channel.pipeline.remove(handler: httpHandler!).wait()
-        try! channel.pipeline.add(handler: WebSocketClientHandler(expectedFrames: expectedFrames, expectation: expectation), first: true).wait()
+        do {
+            _ = try channel.pipeline.remove(handler: httpRequestEncoder).wait()
+            _ = try channel.pipeline.remove(handler: httpResponseDecoder).wait()
+            _ = try channel.pipeline.remove(handler: httpHandler!).wait()
+            try channel.pipeline.add(handler: WebSocketClientHandler(expectedFrames: expectedFrames, expectation: expectation), first: true).wait()
+        } catch let error {
+           Log.error("Error: \(error)")
+        }
         for idx in 0..<framesToSend.count {
             let masked = masked.count == 0 ? true : masked[idx]
             let (finalToSend, opCodeToSend, payloadToSend) = framesToSend[idx]
@@ -127,9 +132,10 @@ class KituraTest: XCTestCase {
             }
             request.headers = headers
             channel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)
-            try! channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil))).wait()
+            try channel.writeAndFlush(NIOAny(HTTPClientRequestPart.end(nil))).wait()
             return channel
-        } catch {
+        } catch let error {
+            Log.error("Error: \(error)")
             XCTFail("Sending the upgrade request failed")
             return nil
         }
