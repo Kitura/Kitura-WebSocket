@@ -19,6 +19,7 @@ import NIO
 import NIOWebSocket
 import Foundation
 import NIOHTTP1
+import LoggerAPI
 
 public class WebSocketConnection {
 
@@ -38,9 +39,9 @@ public class WebSocketConnection {
 
     var active = true
 
-    var message: ByteBuffer!
+    var message: ByteBuffer?
 
-    var ctx: ChannelHandlerContext!
+    var ctx: ChannelHandlerContext?
 
     private var errors: [String] = []
 
@@ -58,7 +59,10 @@ public class WebSocketConnection {
 
     public func ping(withMessage: String? = nil) {
         guard active else { return }
-        
+        guard let ctx = ctx else {
+            Log.error("ChannelHandlerContext unavailable")
+            return
+        }
         if let message = withMessage {
             var buffer = ctx.channel.allocator.buffer(capacity: message.count)
             buffer.write(string: message)
@@ -71,6 +75,10 @@ public class WebSocketConnection {
 
     public func send(message: Data, asBinary: Bool = true) {
        guard active else { return }
+       guard let ctx = ctx else {
+           Log.error("ChannelHandlerContext unavailable")
+           return
+       }
        var buffer = ctx.channel.allocator.buffer(capacity: message.count)
        buffer.write(bytes: message)
        sendMessage(with: asBinary ? .binary : .text, data: buffer)
@@ -78,8 +86,12 @@ public class WebSocketConnection {
 
     public func send(message: String) {
         guard active else { return }
+        guard let ctx = ctx else {
+            Log.error("ChannelHandlerContext unavailable")
+            return
+        }
         ctx.eventLoop.execute {
-            var buffer = self.ctx.channel.allocator.buffer(capacity: message.count)
+            var buffer = ctx.channel.allocator.buffer(capacity: message.count)
             buffer.write(string: message)
             self.sendMessage(with: .text, data: buffer)
         }
@@ -137,7 +149,7 @@ extension WebSocketConnection: ChannelInboundHandler {
                     message =  ctx.channel.allocator.buffer(capacity: data.readableBytes)
                     var buffer = data
                     messageState = .text
-                    message.write(buffer: &buffer)
+                    message?.write(buffer: &buffer)
                 }
 
             case .binary:
@@ -155,7 +167,7 @@ extension WebSocketConnection: ChannelInboundHandler {
                     fireReceivedData(data: data.getData(at: 0, length: data.readableBytes) ?? Data())
                 } else {
                     message =  ctx.channel.allocator.buffer(capacity: data.readableBytes)
-                    message.write(buffer: &data)
+                    message?.write(buffer: &data)
                     messageState = .binary
                 }
   
@@ -164,7 +176,8 @@ extension WebSocketConnection: ChannelInboundHandler {
                     connectionClosed(reason: .protocolError, description: "Continuation sent with prior binary or text frame")
                     return
                 }
-      
+
+                guard var message = message else { return }
                 message.write(buffer: &data)
                 if frame.fin {
                     switch messageState {
@@ -273,6 +286,10 @@ extension WebSocketConnection: ChannelInboundHandler {
 extension WebSocketConnection {
 
     func connectionClosed(reason: WebSocketErrorCode, description: String? = nil, reasonToSendBack: WebSocketErrorCode? = nil) {
+        guard let ctx = ctx else {
+             Log.error("ChannelHandlerContext unavailable")
+             return
+        }
         if ctx.channel.isWritable {
              closeConnection(reason: reasonToSendBack ?? reason, description: description, hard: true)
              fireDisconnected(reason: reason)
@@ -282,6 +299,10 @@ extension WebSocketConnection {
     }
 
     func sendMessage(with opcode: WebSocketOpcode, data: ByteBuffer) {
+        guard let ctx = ctx else {
+            Log.error("ChannelHandlerContext unavailable")
+            return
+        }
         guard ctx.channel.isWritable else {
             //TODO: Log an error
             return
@@ -297,6 +318,10 @@ extension WebSocketConnection {
     }
 
     func closeConnection(reason: WebSocketErrorCode?, description: String?, hard: Bool) {
+         guard let ctx = ctx else {
+             Log.error("ChannelHandlerContext unavailable")
+             return
+         }
          var data = ctx.channel.allocator.buffer(capacity: 2)
          data.write(webSocketErrorCode: reason ?? .normalClosure)
          if let description = description {
@@ -306,7 +331,7 @@ extension WebSocketConnection {
          let frame = WebSocketFrame(fin: true, opcode: .connectionClose, data: data)
          ctx.writeAndFlush(self.wrapOutboundOut(frame)).whenComplete {
              if hard {
-                 _ = self.ctx.close(mode: .output)
+                 _ = ctx.close(mode: .output)
              }
          }
          awaitClose = true
