@@ -254,7 +254,8 @@ public class WebSocketConnection {
                         return
                     }
                 } else if frame.payload.length == 0 {
-                    reasonCode = .noReasonCodeSent
+                    connectionClosed(reason: .noReasonCodeSent, reasonToSendBack: .normal)
+                    return
                 } else {
                     connectionClosed(reason: .protocolError, description: "Close frames, which contain a payload, must be between 2 and 125 octets inclusive")
                     return
@@ -286,15 +287,17 @@ public class WebSocketConnection {
             }
             
         case .ping:
-            guard frame.payload.length < 126 else {
-                connectionClosed(reason: .protocolError, description: "Control frames are only allowed to have payload up to and including 125 octets")
-                return
+            if active {
+                guard frame.payload.length < 126 else {
+                    connectionClosed(reason: .protocolError, description: "Control frames are only allowed to have payload up to and including 125 octets")
+                    return
+                }
+                guard frame.finalFrame else {
+                    connectionClosed(reason: .protocolError, description: "Control frames must not be fragmented")
+                    return
+                }
+                sendMessage(withOpCode: .pong, payload: frame.payload.bytes, payloadLength: frame.payload.length)
             }
-            guard frame.finalFrame else {
-                connectionClosed(reason: .protocolError, description: "Control frames must not be fragmented")
-                return
-            }
-            sendMessage(withOpCode: .pong, payload: frame.payload.bytes, payloadLength: frame.payload.length)
             
         case .pong:
             break
@@ -380,7 +383,7 @@ public class WebSocketConnection {
             }
             if abs(lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout) * 0.4) {
                 if abs(lastFrameReceivedAt.timeIntervalSinceNow) > (Double(connectionTimeout)) {
-                    strongSelf.connectionClosed(reason: .closedAbnormally)
+                    strongSelf.connectionClosed(reason: .closedAbnormally, description: "Client failed to respond to a heartbeat ping with a pong", reasonToSendBack: .protocolError)
                     return
                 }
                 strongSelf.ping()
