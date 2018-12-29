@@ -33,7 +33,7 @@ class UpgradeErrors: KituraTest {
     func testNoSecWebSocketKey() {
         WebSocket.factory.clear()
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
             let upgradeFailed = DispatchSemaphore(value: 0)
             let message = "Sec-WebSocket-Key header missing in the upgrade request"
             guard let _ = self.sendUpgradeRequest(forProtocolVersion: "13", toPath: "/testing123", usingKey: nil, semaphore: upgradeFailed,
@@ -42,7 +42,6 @@ class UpgradeErrors: KituraTest {
             expectation.fulfill()
         }
     }
-
 
     func testNoSecWebSocketVersion() {
         WebSocket.factory.clear()
@@ -53,8 +52,7 @@ class UpgradeErrors: KituraTest {
             guard let _ = self.sendUpgradeRequest(forProtocolVersion: nil, toPath: "/testing123", usingKey: self.secWebKey, semaphore: upgradeFailed, errorMessage: message) else { return }
             upgradeFailed.wait()
             expectation.fulfill()
-        },
-        { expectation in
+        }, { expectation in
             let upgradeFailed = DispatchSemaphore(value: 0)
             let message = "Only WebSocket protocol version 13 is supported"
             guard let _ = self.sendUpgradeRequest(forProtocolVersion: "12", toPath: "/testing123", usingKey: self.secWebKey, semaphore: upgradeFailed, errorMessage: message) else { return }
@@ -66,7 +64,7 @@ class UpgradeErrors: KituraTest {
     func testNoService() {
         WebSocket.factory.clear()
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
             let upgradeFailed = DispatchSemaphore(value: 0)
             let errorMessage = "No service has been registered for the path /testing123"
             guard let _ = self.sendUpgradeRequest(forProtocolVersion: "13", toPath: "/testing123", usingKey: self.secWebKey, semaphore: upgradeFailed, errorMessage: errorMessage) else { return }

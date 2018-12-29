@@ -19,40 +19,40 @@
 public enum WebSocketCloseReasonCode {
     /// Closed abnormally (1006)
     case closedAbnormally
-    
+
     /// An extension was missing that was required (1010)
     case extensionMissing
-    
+
     /// Server is going away (1001)
     case goingAway
-    
+
     /// Data within a message was invalid (1007)
     case invalidDataContents
-    
+
     /// Message was of the incorrect type (binary/text) (1003)
     case invalidDataType
-    
+
     /// Message was too large (1009)
     case messageTooLarge
-    
+
     /// Closed normally (1000)
     case normal
-    
+
     /// No reason code sent with the close request (1005)
     case noReasonCodeSent
-    
+
     /// A policy violation occurred (1008)
     case policyViolation
-    
+
     /// A protocol error occurred (1002)
     case protocolError
-    
+
     /// The server had an error with the request (1011)
     case serverError
-    
+
     /// This reason code is used to send application defined reason codes.
     case userDefined(UInt16)
-    
+
     /// Get the sixteen bit integer code for a WebSocketCloseReasonCode instance
     public func code() -> UInt16 {
         switch self {
@@ -70,7 +70,7 @@ public enum WebSocketCloseReasonCode {
         case .userDefined(let userCode): return userCode
         }
     }
-    
+
     /// Convert a sixteen bit WebSocket close frame reason code to a WebSocketCloseReasonCode instance 
     public static func from(code reasonCode: UInt16) -> WebSocketCloseReasonCode {
         switch reasonCode {

@@ -38,8 +38,7 @@ class TestWebSocketService: WebSocketService {
         if let pingMessage = pingMessage {
             if pingMessage.count > 0 {
                 connection.ping(withMessage: pingMessage)
-            }
-            else {
+            } else {
                 connection.ping()
             }
         }
@@ -72,8 +71,7 @@ class TestWebSocketService: WebSocketService {
             XCTAssertEqual(count, 0, "Read of body into a Data should have returned 0, it returned \(count)")
             count = try request.readAllData(into: &body)
             XCTAssertEqual(count, 0, "Read of entire body into a Data should have returned 0, it returned \(count)")
-        }
-        catch {
+        } catch {
             XCTFail("Failed to read from the body. Error=\(error)")
         }
     }
@@ -92,11 +90,9 @@ class TestWebSocketService: WebSocketService {
 
         if message == "close" {
             from.close(reason: .goingAway, description: "Going away...")
-        }
-        else if message == "drop" {
+        } else if message == "drop" {
             from.drop(reason: .policyViolation, description: "Droping...")
-        }
-        else if message == "ping" {
+        } else if message == "ping" {
             from.ping(withMessage: "Hello")
         }
     }
