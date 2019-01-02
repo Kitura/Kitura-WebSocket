@@ -177,8 +177,9 @@ extension WebSocketConnection: ChannelInboundHandler {
                     return
                 }
 
+                message?.write(buffer: &data)
                 guard var message = message else { return }
-                message.write(buffer: &data)
+
                 if frame.fin {
                     switch messageState {
                         case .binary:
