@@ -1,0 +1,8 @@
+included:
+    - Sources
+    - Tests
+disabled_rules:
+  - identifier_name
+  - line_length
+  - function_body_length
+  - cyclomatic_complexity
