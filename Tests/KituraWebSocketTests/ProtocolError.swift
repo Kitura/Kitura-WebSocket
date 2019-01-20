@@ -36,14 +36,14 @@ class ProtocolErrorTests: KituraTest {
             ("testInvalidUTF", testInvalidUTF),
             ("testInvalidUTFCloseMessage", testInvalidUTFCloseMessage),
             ("testTextAndBinaryFrames", testTextAndBinaryFrames),
-            ("testUnmaskedFrame", testUnmaskedFrame),
+            ("testUnmaskedFrame", testUnmaskedFrame)
         ]
     }
 
     func testBinaryAndTextFrames() {
         register(closeReason: .protocolError)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             var bytes = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e]
 
@@ -73,7 +73,7 @@ class ProtocolErrorTests: KituraTest {
         part = self.payload(text: "Control frames are only allowed to have payload up to and including 125 octets")
         expectedPayload.append(part.bytes, length: part.length)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
             let oversizedPayload = NSMutableData()
             oversizedPayload.append(Data(repeatElement(0, count: 126)))
             self.performTest(framesToSend: [(true, self.opcodePing, oversizedPayload)],
@@ -85,7 +85,7 @@ class ProtocolErrorTests: KituraTest {
     func testFragmentedPing() {
         register(closeReason: .protocolError)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             let text = "Testing, testing 1, 2, 3. "
 
@@ -110,7 +110,7 @@ class ProtocolErrorTests: KituraTest {
     func testInvalidOpCode() {
         register(closeReason: .protocolError)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             var bytes = [0x00, 0x01]
             let payload = NSMutableData(bytes: &bytes, length: bytes.count)
@@ -130,7 +130,7 @@ class ProtocolErrorTests: KituraTest {
     func testInvalidRSVCode() {
         register(closeReason: .protocolError)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             var bytes = [0x00, 0x01]
             let payload = NSMutableData(bytes: &bytes, length: bytes.count)
@@ -150,7 +150,7 @@ class ProtocolErrorTests: KituraTest {
     func testInvalidUserCloseCode() {
         register(closeReason: .protocolError)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             let closePayload = self.payload(closeReasonCode: .userDefined(2999))
             let returnPayload = self.payload(closeReasonCode: .protocolError)
@@ -169,7 +169,7 @@ class ProtocolErrorTests: KituraTest {
         part = self.payload(text: "Control frames are only allowed to have payload up to and including 125 octets")
         expectedPayload.append(part.bytes, length: part.length)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
             let oversizedPayload = NSMutableData()
             oversizedPayload.append(Data(repeatElement(0, count: 126)))
             self.performTest(framesToSend: [(true, self.opcodeClose, oversizedPayload)],
@@ -181,7 +181,7 @@ class ProtocolErrorTests: KituraTest {
     func testJustContinuationFrame() {
         register(closeReason: .protocolError)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             var bytes = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e]
 
@@ -202,7 +202,7 @@ class ProtocolErrorTests: KituraTest {
     func testJustFinalContinuationFrame() {
         register(closeReason: .protocolError)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             var bytes = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e]
 
@@ -223,7 +223,7 @@ class ProtocolErrorTests: KituraTest {
     func testInvalidUTF() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
             let testString = "Testing, 1,2,3"
             let dataPayload = testString.data(using: String.Encoding.utf16)!
             let payload = NSMutableData()
@@ -244,7 +244,7 @@ class ProtocolErrorTests: KituraTest {
     func testInvalidUTFCloseMessage() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
             let testString = "Testing, 1,2,3"
             let dataPayload = testString.data(using: String.Encoding.utf16)!
             let payload = NSMutableData()
@@ -267,7 +267,7 @@ class ProtocolErrorTests: KituraTest {
     func testTextAndBinaryFrames() {
         register(closeReason: .protocolError)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             let textPayload = self.payload(text: "testing 1 2 3")
             var bytes = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e]
@@ -289,7 +289,7 @@ class ProtocolErrorTests: KituraTest {
     func testUnmaskedFrame() {
         register(closeReason: .protocolError)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             var bytes = [0x00, 0x01]
             let payload = NSMutableData(bytes: &bytes, length: bytes.count)

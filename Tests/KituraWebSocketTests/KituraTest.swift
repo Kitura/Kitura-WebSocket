@@ -50,7 +50,7 @@ class KituraTest: XCTestCase {
 
     let httpResponseDecoder = HTTPResponseDecoder()
 
-    var httpHandler: HTTPResponseHandler? = nil
+    var httpHandler: HTTPResponseHandler?
 
     func performServerTest(line: Int = #line,
                            asyncTasks: (XCTestExpectation) -> Void...) {
@@ -63,7 +63,7 @@ class KituraTest: XCTestCase {
 
             for (index, asyncTask) in asyncTasks.enumerated() {
                 let expectation = self.expectation(line: line, index: index)
-                requestQueue.async() {
+                requestQueue.async {
                     asyncTask(expectation)
                 }
             }
@@ -73,8 +73,7 @@ class KituraTest: XCTestCase {
                 server.stop()
                 XCTAssertNil(error)
             }
-        }
-        catch {
+        } catch {
             XCTFail("Test failed. Error=\(error)")
         }
     }
@@ -119,7 +118,7 @@ class KituraTest: XCTestCase {
 
         do {
             let channel = try clientBootstrap.connect(host: "localhost", port: 8080).wait()
-            var request = HTTPRequestHead(version: HTTPVersion(major: 1, minor:1), method: HTTPMethod.method(from: "GET"), uri: toPath)
+            var request = HTTPRequestHead(version: HTTPVersion(major: 1, minor: 1), method: HTTPMethod.method(from: "GET"), uri: toPath)
             var headers = HTTPHeaders()
             headers.add(name: "Host", value: "localhost:8080")
             headers.add(name: "Upgrade", value: "websocket")

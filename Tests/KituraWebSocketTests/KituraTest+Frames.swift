@@ -54,7 +54,7 @@ extension KituraTest {
         let result = NSMutableData()
 
         let utf8Length = text.lengthOfBytes(using: .utf8)
-        var utf8: [CChar] = Array<CChar>(repeating: 0, count: utf8Length + 10) // A little bit of padding
+        var utf8: [CChar] = [CChar](repeating: 0, count: utf8Length + 10) // A little bit of padding
         guard text.getCString(&utf8, maxLength: utf8Length + 10, encoding: .utf8)  else {
             return result
         }
@@ -100,15 +100,14 @@ extension KituraTest {
             } else {
                 _ = channel.write(buffer)
             }
-        }
-        catch {
+        } catch {
             XCTFail("Failed to send a frame. Error=\(error)")
         }
     }
 
     private func createFrameHeader(final: Bool, withOpcode: Int, withMasking: Bool, payloadLength: Int, channel: Channel) -> ByteBuffer {
         var buffer = channel.allocator.buffer(capacity: 8)
-        var bytes: [UInt8] = [(final ? 0x80 : 0x00) | UInt8(withOpcode), 0, 0,0,0,0,0,0,0,0]
+        var bytes: [UInt8] = [(final ? 0x80 : 0x00) | UInt8(withOpcode), 0, 0, 0, 0, 0, 0, 0, 0, 0]
         var length = 1
 
         if payloadLength < 126 {

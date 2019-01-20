@@ -39,14 +39,14 @@ class BasicTests: KituraTest {
             ("testTextShortMessage", testTextShortMessage),
             ("testNullCharacter", testNullCharacter),
             ("testUserDefinedCloseCode", testUserDefinedCloseCode),
-            ("testUserCloseMessage", testUserCloseMessage),
+            ("testUserCloseMessage", testUserCloseMessage)
         ]
     }
 
     func testBinaryLongMessage() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             var bytes = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e]
             let binaryPayload = NSMutableData(bytes: &bytes, length: bytes.count)
@@ -64,7 +64,7 @@ class BasicTests: KituraTest {
     func testBinaryMediumMessage() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             var bytes = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e]
             let binaryPayload = NSMutableData(bytes: &bytes, length: bytes.count)
@@ -81,7 +81,7 @@ class BasicTests: KituraTest {
     func testBinaryShortMessage() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             var bytes = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e]
             let binaryPayload = NSMutableData(bytes: &bytes, length: bytes.count)
@@ -95,7 +95,7 @@ class BasicTests: KituraTest {
     func testGracefullClose() {
         register(closeReason: .normal)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
             let sendPayload = self.payload(closeReasonCode: .normal)
             self.performTest(framesToSend: [(true, self.opcodeClose, sendPayload)],
                              expectedFrames: [(true, self.opcodeClose, sendPayload)],
@@ -106,7 +106,7 @@ class BasicTests: KituraTest {
     func testPing() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             let pingPayload = NSData()
 
@@ -119,7 +119,7 @@ class BasicTests: KituraTest {
     func testPingWithText() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             let pingPayload = self.payload(text: "Testing, testing 1,2,3")
 
@@ -132,7 +132,7 @@ class BasicTests: KituraTest {
     func testServerRequest() {
         register(closeReason: .noReasonCodeSent, testServerRequest: true)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
             let connected = DispatchSemaphore(value: 0)
             guard let _ = self.sendUpgradeRequest(toPath: self.servicePath, usingKey: self.secWebKey, semaphore: connected) else { return }
             connected.wait()
@@ -146,7 +146,7 @@ class BasicTests: KituraTest {
     func testSuccessfulRemove() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
             let upgraded = DispatchSemaphore(value: 0)
             guard let _ = self.sendUpgradeRequest(toPath: self.servicePath, usingKey: self.secWebKey, semaphore: upgraded) else { return }
             upgraded.wait()
@@ -166,8 +166,7 @@ class BasicTests: KituraTest {
             guard let _ = self.sendUpgradeRequest(toPath: self.servicePath, usingKey: self.secWebKey, semaphore: upgraded) else { return }
             upgraded.wait()
             expectation.fulfill()
-        },
-        { expectation in
+        }, { expectation in
             let upgraded = DispatchSemaphore(value: 0)
             WebSocket.unregister(path: self.servicePathNoSlash)
             self.register(onPath: self.servicePathNoSlash, closeReason: .noReasonCodeSent)
@@ -177,12 +176,10 @@ class BasicTests: KituraTest {
         })
     }
 
-
-
     func testTextLongMessage() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             var text = "Testing, testing 1, 2, 3."
             repeat {
@@ -199,7 +196,7 @@ class BasicTests: KituraTest {
     func testTextMediumMessage() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             var text = ""
             repeat {
@@ -216,7 +213,7 @@ class BasicTests: KituraTest {
     func testTextShortMessage() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             let textPayload = self.payload(text: "Testing, testing 1,2,3")
 
@@ -229,7 +226,7 @@ class BasicTests: KituraTest {
     func testUserDefinedCloseCode() {
         register(closeReason: .userDefined(65535))
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             let closePayload = self.payload(closeReasonCode: .userDefined(65535))
             let returnPayload = self.payload(closeReasonCode: .userDefined(65535))
@@ -243,7 +240,7 @@ class BasicTests: KituraTest {
     func testUserCloseMessage() {
         register(closeReason: .normal)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
             let testString = "Testing, 1,2,3"
             let dataPayload = testString.data(using: String.Encoding.utf8)!
             let payload = NSMutableData()
@@ -260,7 +257,7 @@ class BasicTests: KituraTest {
     func testNullCharacter() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             let textPayload = self.payload(text: "\u{00}")
 

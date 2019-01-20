@@ -20,7 +20,7 @@ import NIO
 import NIOHTTP1
 
 public class WSConnectionUpgradeFactory: ProtocolHandlerFactory {
-    private var registry = Dictionary<String, WebSocketService>()
+    private var registry: [String: WebSocketService] = [:]
 
     public let name = "websocket"
 
@@ -42,8 +42,7 @@ public class WSConnectionUpgradeFactory: ProtocolHandlerFactory {
         let path: String
         if onPath.hasPrefix("/") {
             path = onPath
-        }
-        else {
+        } else {
             path = "/" + onPath
         }
         registry[path] = service
@@ -53,8 +52,7 @@ public class WSConnectionUpgradeFactory: ProtocolHandlerFactory {
         let path: String
         if thePath.hasPrefix("/") {
             path = thePath
-        }
-        else {
+        } else {
             path = "/" + thePath
         }
         registry.removeValue(forKey: path)

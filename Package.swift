@@ -25,7 +25,7 @@ let package = Package(
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
             name: "Kitura-WebSocket",
-            targets: ["KituraWebSocket"]),
+            targets: ["KituraWebSocket"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -40,6 +40,6 @@ let package = Package(
             dependencies: ["KituraNet", "Cryptor"]),
         .testTarget(
             name: "KituraWebSocketTests",
-            dependencies: ["KituraWebSocket"]),
+            dependencies: ["KituraWebSocket"])
     ]
 )

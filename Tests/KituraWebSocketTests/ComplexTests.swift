@@ -36,7 +36,7 @@ class ComplexTests: KituraTest {
     func testBinaryShortAndMediumFrames() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             var bytes = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e]
 
@@ -60,7 +60,7 @@ class ComplexTests: KituraTest {
     func testBinaryTwoShortFrames() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             var bytes = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e]
 
@@ -78,7 +78,7 @@ class ComplexTests: KituraTest {
     func testPingBetweenBinaryFrames() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             var bytes = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e]
 
@@ -100,7 +100,7 @@ class ComplexTests: KituraTest {
     func testPingBetweenTextFrames() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             let text = "Testing, testing 1, 2, 3. "
 
@@ -121,7 +121,7 @@ class ComplexTests: KituraTest {
     func testTextShortAndMediumFrames() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             let shortText = "Testing, testing 1, 2, 3. "
             let shortTextPayload = self.payload(text: shortText)
@@ -143,7 +143,7 @@ class ComplexTests: KituraTest {
     func testTextTwoShortFrames() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest() { expectation in
+        performServerTest { expectation in
 
             let text = "Testing, testing 1, 2, 3. "
 
