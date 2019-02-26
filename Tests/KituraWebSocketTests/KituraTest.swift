@@ -79,23 +79,23 @@ class KituraTest: XCTestCase {
     }
 
     func performTest(framesToSend: [(Bool, Int, NSData)], masked: [Bool] = [],
-                     expectedFrames: [(Bool, Int, NSData)], expectation: XCTestExpectation) {
+                     expectedFrames: [(Bool, Int, NSData)], expectation: XCTestExpectation, compressed: Bool = false) {
         precondition(masked.count == 0 || framesToSend.count == masked.count)
         let upgraded = DispatchSemaphore(value: 0)
-        guard let channel = sendUpgradeRequest(toPath: servicePath, usingKey: secWebKey, semaphore: upgraded) else { return }
+        guard let channel = sendUpgradeRequest(toPath: servicePath, usingKey: secWebKey, semaphore: upgraded, compressed: compressed) else { return }
         upgraded.wait()
         do {
             _ = try channel.pipeline.remove(handler: httpRequestEncoder).wait()
             _ = try channel.pipeline.remove(handler: httpResponseDecoder).wait()
             _ = try channel.pipeline.remove(handler: httpHandler!).wait()
-            try channel.pipeline.add(handler: WebSocketClientHandler(expectedFrames: expectedFrames, expectation: expectation), first: true).wait()
+            try channel.pipeline.add(handler: WebSocketClientHandler(expectedFrames: expectedFrames, expectation: expectation, compressed: compressed), first: true).wait()
         } catch let error {
            Log.error("Error: \(error)")
         }
         for idx in 0..<framesToSend.count {
             let masked = masked.count == 0 ? true : masked[idx]
             let (finalToSend, opCodeToSend, payloadToSend) = framesToSend[idx]
-            self.sendFrame(final: finalToSend, withOpcode: opCodeToSend, withMasking: masked, withPayload: payloadToSend, on: channel, lastFrame: idx == framesToSend.count-1)
+            self.sendFrame(final: finalToSend, withOpcode: opCodeToSend, withMasking: masked, withPayload: payloadToSend, on: channel, lastFrame: idx == framesToSend.count-1, compressed: compressed)
         }
     }
 
@@ -104,7 +104,7 @@ class KituraTest: XCTestCase {
         WebSocket.register(service: service, onPath: onPath ?? servicePath)
     }
 
-    func sendUpgradeRequest(forProtocolVersion: String? = "13", toPath: String, usingKey: String?, semaphore: DispatchSemaphore, errorMessage: String? = nil) -> Channel? {
+    func sendUpgradeRequest(forProtocolVersion: String? = "13", toPath: String, usingKey: String?, semaphore: DispatchSemaphore, errorMessage: String? = nil, compressed: Bool = false) -> Channel? {
         self.httpHandler = HTTPResponseHandler(key: usingKey ?? "", semaphore: semaphore, errorMessage: errorMessage)
         let clientBootstrap = ClientBootstrap(group: MultiThreadedEventLoopGroup(numberOfThreads: 1))
             .channelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEPORT), value: 1)
@@ -128,6 +128,9 @@ class KituraTest: XCTestCase {
             }
             if let key = usingKey {
                 headers.add(name: "Sec-WebSocket-Key", value: key)
+            }
+            if compressed {
+                headers.add(name: "Sec-WebSocket-Extensions", value: "permessage-deflate")
             }
             request.headers = headers
             channel.write(NIOAny(HTTPClientRequestPart.head(request)), promise: nil)

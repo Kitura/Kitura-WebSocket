@@ -36,43 +36,50 @@ class ComplexTests: KituraTest {
     func testBinaryShortAndMediumFrames() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest { expectation in
 
-            var bytes = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e]
+        var bytes = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e]
 
-            let shortBinaryPayload = NSMutableData(bytes: &bytes, length: bytes.count)
+        let shortBinaryPayload = NSMutableData(bytes: &bytes, length: bytes.count)
 
-            let mediumBinaryPayload = NSMutableData(bytes: &bytes, length: bytes.count)
-            repeat {
-                mediumBinaryPayload.append(mediumBinaryPayload.bytes, length: mediumBinaryPayload.length)
-            } while mediumBinaryPayload.length < 1000
+        let mediumBinaryPayload = NSMutableData(bytes: &bytes, length: bytes.count)
+        repeat {
+            mediumBinaryPayload.append(mediumBinaryPayload.bytes, length: mediumBinaryPayload.length)
+        } while mediumBinaryPayload.length < 1000
 
-            let expectedBinaryPayload = NSMutableData()
-            expectedBinaryPayload.append(shortBinaryPayload.bytes, length: shortBinaryPayload.length)
-            expectedBinaryPayload.append(mediumBinaryPayload.bytes, length: mediumBinaryPayload.length)
+        let expectedBinaryPayload = NSMutableData()
+        expectedBinaryPayload.append(shortBinaryPayload.bytes, length: shortBinaryPayload.length)
+        expectedBinaryPayload.append(mediumBinaryPayload.bytes, length: mediumBinaryPayload.length)
 
+        performServerTest(asyncTasks: { expectation in
             self.performTest(framesToSend: [(false, self.opcodeBinary, shortBinaryPayload), (true, self.opcodeContinuation, mediumBinaryPayload)],
                              expectedFrames: [(true, self.opcodeBinary, expectedBinaryPayload)],
                              expectation: expectation)
-        }
+            }, { expectation in
+                self.performTest(framesToSend: [(false, self.opcodeBinary, shortBinaryPayload), (true, self.opcodeContinuation, mediumBinaryPayload)],
+                                 expectedFrames: [(true, self.opcodeBinary, expectedBinaryPayload)],
+                                 expectation: expectation, compressed: true)
+        })
     }
 
     func testBinaryTwoShortFrames() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest { expectation in
+        var bytes = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e]
 
-            var bytes = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e]
+        let binaryPayload = NSMutableData(bytes: &bytes, length: bytes.count)
 
-            let binaryPayload = NSMutableData(bytes: &bytes, length: bytes.count)
+        let expectedBinaryPayload = NSMutableData(bytes: &bytes, length: bytes.count)
+        expectedBinaryPayload.append(&bytes, length: bytes.count)
 
-            let expectedBinaryPayload = NSMutableData(bytes: &bytes, length: bytes.count)
-            expectedBinaryPayload.append(&bytes, length: bytes.count)
-
+        performServerTest(asyncTasks: { expectation in
             self.performTest(framesToSend: [(false, self.opcodeBinary, binaryPayload), (true, self.opcodeContinuation, binaryPayload)],
                              expectedFrames: [(true, self.opcodeBinary, expectedBinaryPayload)],
                              expectation: expectation)
-        }
+            }, { expectation in
+                self.performTest(framesToSend: [(false, self.opcodeBinary, binaryPayload), (true, self.opcodeContinuation, binaryPayload)],
+                                 expectedFrames: [(true, self.opcodeBinary, expectedBinaryPayload)],
+                                 expectation: expectation, compressed: true)
+        })
     }
 
     func testPingBetweenBinaryFrames() {
@@ -121,39 +128,43 @@ class ComplexTests: KituraTest {
     func testTextShortAndMediumFrames() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest { expectation in
+        let shortText = "Testing, testing 1, 2, 3. "
+        let shortTextPayload = self.payload(text: shortText)
 
-            let shortText = "Testing, testing 1, 2, 3. "
-            let shortTextPayload = self.payload(text: shortText)
+        var mediumText = ""
+        repeat {
+            mediumText += "Testing, testing 1,2,3. "
+        } while mediumText.count < 1000
+        let mediumTextPayload = self.payload(text: mediumText)
 
-            var mediumText = ""
-            repeat {
-                mediumText += "Testing, testing 1,2,3. "
-            } while mediumText.count < 1000
-            let mediumTextPayload = self.payload(text: mediumText)
-
-            let textExpectedPayload = self.payload(text: shortText + mediumText)
-
+        let textExpectedPayload = self.payload(text: shortText + mediumText)
+        performServerTest(asyncTasks: { expectation in
             self.performTest(framesToSend: [(false, self.opcodeText, shortTextPayload), (true, self.opcodeContinuation, mediumTextPayload)],
                              expectedFrames: [(true, self.opcodeText, textExpectedPayload)],
                              expectation: expectation)
-        }
+        }, { expectation in
+            self.performTest(framesToSend: [(false, self.opcodeText, shortTextPayload), (true, self.opcodeContinuation, mediumTextPayload)],
+                             expectedFrames: [(true, self.opcodeText, textExpectedPayload)],
+                             expectation: expectation, compressed: true)
+        })
     }
 
     func testTextTwoShortFrames() {
         register(closeReason: .noReasonCodeSent)
 
-        performServerTest { expectation in
+        let text = "Testing, testing 1, 2, 3. "
 
-            let text = "Testing, testing 1, 2, 3. "
+        let textPayload = self.payload(text: text)
 
-            let textPayload = self.payload(text: text)
-
-            let textExpectedPayload = self.payload(text: text + text)
-
+        let textExpectedPayload = self.payload(text: text + text)
+        performServerTest(asyncTasks: { expectation in
             self.performTest(framesToSend: [(false, self.opcodeText, textPayload), (true, self.opcodeContinuation, textPayload)],
                              expectedFrames: [(true, self.opcodeText, textExpectedPayload)],
                              expectation: expectation)
-        }
+            }, { expectation in
+                self.performTest(framesToSend: [(false, self.opcodeText, textPayload), (true, self.opcodeContinuation, textPayload)],
+                                 expectedFrames: [(true, self.opcodeText, textExpectedPayload)],
+                                 expectation: expectation, compressed: true)
+        })
     }
 }

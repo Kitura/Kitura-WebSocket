@@ -65,15 +65,22 @@ extension KituraTest {
     }
 
     //Sometimes, we may have a non-final frame as the last frame
-    func sendFrame(final: Bool, withOpcode: Int, withMasking: Bool=true, withPayload: NSData, on channel: Channel, lastFrame: Bool = false) {
+    func sendFrame(final: Bool, withOpcode: Int, withMasking: Bool=true, withPayload: NSData, on channel: Channel, lastFrame: Bool = false, compressed: Bool = false) {
         var buffer = channel.allocator.buffer(capacity: 8)
+        var payloadLength = withPayload.length
 
-        var header = createFrameHeader(final: final, withOpcode: withOpcode, withMasking: withMasking,
-                          payloadLength: withPayload.length, channel: channel)
+        let payloadBytes = withPayload.bytes.bindMemory(to: UInt8.self, capacity: withPayload.length)
+        var payloadBuffer = ByteBufferAllocator().buffer(capacity: 16)
+        for i in 0..<withPayload.length {
+            payloadBuffer.write(bytes: [payloadBytes[i]])
+        }
 
-        buffer.write(buffer: &header)
+        if compressed {
+            payloadBuffer = PermessageDeflateCompressor().deflatePayload(in: payloadBuffer, allocator: ByteBufferAllocator(), dropFourTrailingOctets: final)
+            payloadLength = payloadBuffer.readableBytes
+        }
+
         var intMask: UInt32
-
         #if os(Linux)
             intMask = UInt32(random())
         #else
@@ -85,14 +92,19 @@ extension KituraTest {
         #else
         UnsafeMutableRawPointer(mutating: mask).copyBytes(from: &intMask, count: mask.count)
         #endif
-        buffer.write(bytes: mask)
-        let payloadBytes = withPayload.bytes.bindMemory(to: UInt8.self, capacity: withPayload.length)
 
-        for i in 0 ..< withPayload.length {
-            var bytes = [UInt8](repeating: 0, count: 1)
-            bytes[0] = payloadBytes[i] ^ mask[i % 4]
-            buffer.write(bytes: bytes)
+        for i in 0 ..< payloadBuffer.readableBytes {
+            var bytes = payloadBuffer.getBytes(at: i, length: 1)!
+            bytes[0] = bytes[0] ^ mask[i % 4]
+            payloadBuffer.set(bytes: bytes, at: i)
         }
+
+        var header = createFrameHeader(final: final, withOpcode: withOpcode, withMasking: withMasking,
+                          payloadLength: payloadLength, channel: channel, compressed: compressed)
+
+        buffer.write(buffer: &header)
+        buffer.write(bytes: mask)
+        buffer.write(buffer: &payloadBuffer)
 
         do {
             if lastFrame {
@@ -105,7 +117,7 @@ extension KituraTest {
         }
     }
 
-    private func createFrameHeader(final: Bool, withOpcode: Int, withMasking: Bool, payloadLength: Int, channel: Channel) -> ByteBuffer {
+    private func createFrameHeader(final: Bool, withOpcode: Int, withMasking: Bool, payloadLength: Int, channel: Channel, compressed: Bool = false) -> ByteBuffer {
         var buffer = channel.allocator.buffer(capacity: 8)
         var bytes: [UInt8] = [(final ? 0x80 : 0x00) | UInt8(withOpcode), 0, 0, 0, 0, 0, 0, 0, 0, 0]
         var length = 1
@@ -149,6 +161,10 @@ extension KituraTest {
         if withMasking {
             bytes[1] |= 0x80
         }
+
+        if compressed {
+            bytes[0] |= 0x40
+        }
         buffer.write(bytes: Array(bytes[0..<length]))
         return buffer
     }
@@ -176,10 +192,13 @@ class WebSocketClientHandler: ChannelInboundHandler {
 
     var expectation: XCTestExpectation
 
-    init(expectedFrames: [(Bool, Int, NSData)], expectation: XCTestExpectation) {
+    var compressed: Bool = false
+
+    init(expectedFrames: [(Bool, Int, NSData)], expectation: XCTestExpectation, compressed: Bool = false) {
         self.numberOfFramesExpected = expectedFrames.count
         self.expectedFrames = expectedFrames
         self.expectation = expectation
+        self.compressed = compressed
     }
 
     func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
@@ -204,6 +223,13 @@ class WebSocketClientHandler: ChannelInboundHandler {
             currentFramePayload += buffer.readBytes(length: buffer.readableBytes) ?? []
         }
         if currentFramePayload.count == currentFrameLength {
+            if self.compressed {
+                currentFramePayload += [0, 0, 0xff, 0xff]
+                var payloadBuffer = ByteBufferAllocator().buffer(capacity: 8)
+                payloadBuffer.write(bytes: currentFramePayload)
+                let inflatedBuffer = PermessageDeflateDecompressor().inflatePayload(in: payloadBuffer, allocator: ByteBufferAllocator())
+                currentFramePayload = inflatedBuffer.getBytes(at: 0, length: inflatedBuffer.readableBytes) ?? []
+            }
             let currentFramePayloadPtr = UnsafeBufferPointer(start: &currentFramePayload, count: currentFramePayload.count)
             let currentPayloadData = NSData(data: Data(buffer: currentFramePayloadPtr))
 
@@ -220,7 +246,7 @@ class WebSocketClientHandler: ChannelInboundHandler {
     }
 
     func getFrameFinalAndOpcode(from byte: UInt8) -> (Bool, Int) {
-        return (byte & 0x80 != 0, Int(byte & 0x7f))
+        return (byte & 0x80 != 0, Int(byte & 0x0f))
     }
 
     func getFrameLength(from buffer: ByteBuffer) -> (Int, Int) {
@@ -266,6 +292,6 @@ class WebSocketClientHandler: ChannelInboundHandler {
         let (expectedFinal, expectedOpCode, expectedPayload) = expectedFrames[frameNumber]
         XCTAssertEqual(currentFrameFinal, expectedFinal, "Expected message was\(expectedFinal ? "n't" : "") final")
         XCTAssertEqual(currentFrameOpcode, expectedOpCode, "Opcode wasn't \(expectedOpCode). It was \(currentFrameOpcode)")
-        XCTAssertEqual(currentFramePayload, expectedPayload, "The payload [\(currentFramePayload)] doesn't equal the expected [\(expectedPayload)]")
+        XCTAssertEqual(currentFramePayload, expectedPayload, "The payload \(currentFramePayload) doesn't equal the expected \(expectedPayload)")
     }
 }

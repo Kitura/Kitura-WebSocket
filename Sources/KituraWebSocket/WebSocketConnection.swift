@@ -312,7 +312,7 @@ extension WebSocketConnection {
         }
 
         let frame = WebSocketFrame(fin: true, opcode: opcode, data: data)
-        _ = ctx.writeAndFlush(self.wrapOutboundOut(frame))
+        ctx.writeAndFlush(self.wrapOutboundOut(frame), promise: nil)
     }
 
     func closeConnection(reason: WebSocketErrorCode?, description: String?, hard: Bool) {
@@ -327,7 +327,9 @@ extension WebSocketConnection {
          }
 
          let frame = WebSocketFrame(fin: true, opcode: .connectionClose, data: data)
-         ctx.writeAndFlush(self.wrapOutboundOut(frame)).whenComplete {
+         let promise = ctx.eventLoop.newPromise(of: Void.self)
+         ctx.writeAndFlush(self.wrapOutboundOut(frame), promise: promise)
+         promise.futureResult.whenComplete {
              if hard {
                  _ = ctx.close(mode: .output)
              }
