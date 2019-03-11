@@ -29,7 +29,11 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
+<<<<<<< HEAD
         .package(url: "https://github.com/IBM-Swift/Kitura-NIO.git", .branch("master")),
+=======
+        .package(url: "https://github.com/IBM-Swift/Kitura-NIO.git", .branch("development")),
+>>>>>>> Rebase websocket-nio upon NIO2
         .package(url: "https://github.com/IBM-Swift/BlueCryptor.git", from: "1.0.0"),
     ],
     targets: [

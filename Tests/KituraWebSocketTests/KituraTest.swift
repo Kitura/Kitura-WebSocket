@@ -46,9 +46,9 @@ class KituraTest: XCTestCase {
     let servicePathNoSlash = "wstester"
     let servicePath = "/wstester"
 
-    let httpRequestEncoder = HTTPRequestEncoder()
+    var httpRequestEncoder: HTTPRequestEncoder?
 
-    let httpResponseDecoder = HTTPResponseDecoder()
+    var httpResponseDecoder: ByteToMessageHandler<HTTPResponseDecoder>?
 
     var httpHandler: HTTPResponseHandler?
 
@@ -85,10 +85,10 @@ class KituraTest: XCTestCase {
         guard let channel = sendUpgradeRequest(toPath: servicePath, usingKey: secWebKey, semaphore: upgraded, compressed: compressed) else { return }
         upgraded.wait()
         do {
-            _ = try channel.pipeline.remove(handler: httpRequestEncoder).wait()
-            _ = try channel.pipeline.remove(handler: httpResponseDecoder).wait()
-            _ = try channel.pipeline.remove(handler: httpHandler!).wait()
-            try channel.pipeline.add(handler: WebSocketClientHandler(expectedFrames: expectedFrames, expectation: expectation, compressed: compressed), first: true).wait()
+            _ = try channel.pipeline.removeHandler(httpRequestEncoder!).wait()
+            _ = try channel.pipeline.removeHandler(httpResponseDecoder!).wait()
+            _ = try channel.pipeline.removeHandler(httpHandler!).wait()
+            try channel.pipeline.addHandler(WebSocketClientHandler(expectedFrames: expectedFrames, expectation: expectation), position: .first).wait()
         } catch let error {
            Log.error("Error: \(error)")
         }
@@ -104,17 +104,18 @@ class KituraTest: XCTestCase {
         WebSocket.register(service: service, onPath: onPath ?? servicePath)
     }
 
-    func sendUpgradeRequest(forProtocolVersion: String? = "13", toPath: String, usingKey: String?, semaphore: DispatchSemaphore, errorMessage: String? = nil, compressed: Bool = false) -> Channel? {
+    func clientChannelInitializer(channel: Channel) -> EventLoopFuture<Void> {
+        self.httpRequestEncoder = HTTPRequestEncoder()
+        self.httpResponseDecoder =  ByteToMessageHandler(HTTPResponseDecoder(leftOverBytesStrategy: .dropBytes))
+        return channel.pipeline.addHandlers(self.httpRequestEncoder!, self.httpResponseDecoder!, position: .last).flatMap {
+            channel.pipeline.addHandler(self.httpHandler!)
+        }
+    }
+    func sendUpgradeRequest(forProtocolVersion: String? = "13", toPath: String, usingKey: String?, semaphore: DispatchSemaphore, errorMessage: String? = nil) -> Channel? {
         self.httpHandler = HTTPResponseHandler(key: usingKey ?? "", semaphore: semaphore, errorMessage: errorMessage)
         let clientBootstrap = ClientBootstrap(group: MultiThreadedEventLoopGroup(numberOfThreads: 1))
             .channelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEPORT), value: 1)
-            .channelInitializer { channel in
-                channel.pipeline.add(handler: self.httpRequestEncoder).then {
-                    channel.pipeline.add(handler: self.httpResponseDecoder).then {
-                        channel.pipeline.add(handler: self.httpHandler!)
-                    }
-                }
-            }
+            .channelInitializer(clientChannelInitializer)
 
         do {
             let channel = try clientBootstrap.connect(host: "localhost", port: 8080).wait()
@@ -183,7 +184,7 @@ class HTTPResponseHandler: ChannelInboundHandler {
         self.errorMessage = errorMessage
     }
 
-    func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
+    func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let response = self.unwrapInboundIn(data)
         switch response {
         case .head(let header):
@@ -208,3 +209,7 @@ extension Bool {
         self = !self
     }
 }
+
+// We'd want to able to remove HTTPRequestEncoder and HTTPResponseHandler by hand, following a successful upgrade to WebSocket
+extension HTTPRequestEncoder: RemovableChannelHandler { }
+extension HTTPResponseHandler: RemovableChannelHandler { }

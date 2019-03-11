@@ -80,7 +80,13 @@ extension KituraTest {
             payloadLength = payloadBuffer.readableBytes
         }
 
+        var header = createFrameHeader(final: final, withOpcode: withOpcode, withMasking: withMasking,
+                          payloadLength: payloadLength, channel: channel, compressed: compressed)
+
+        buffer.writeBuffer(&header)
+
         var intMask: UInt32
+
         #if os(Linux)
             intMask = UInt32(random())
         #else
@@ -93,14 +99,14 @@ extension KituraTest {
         UnsafeMutableRawPointer(mutating: mask).copyBytes(from: &intMask, count: mask.count)
         #endif
 
-        for i in 0 ..< payloadBuffer.readableBytes {
-            var bytes = payloadBuffer.getBytes(at: i, length: 1)!
-            bytes[0] = bytes[0] ^ mask[i % 4]
-            payloadBuffer.set(bytes: bytes, at: i)
-        }
+        buffer.writeBytes(mask)
+        let payloadBytes = withPayload.bytes.bindMemory(to: UInt8.self, capacity: withPayload.length)
 
-        var header = createFrameHeader(final: final, withOpcode: withOpcode, withMasking: withMasking,
-                          payloadLength: payloadLength, channel: channel, compressed: compressed)
+        for i in 0 ..< payloadBuffer.readableBytes {
+            var bytes = [UInt8](repeating: 0, count: 1)
+            bytes[0] = payloadBuffer.getBytes(at: i, length: 1)?[0] ^ mask[i % 4]
+            buffer.writeBytes(bytes)
+        }
 
         buffer.write(buffer: &header)
         buffer.write(bytes: mask)
@@ -161,11 +167,10 @@ extension KituraTest {
         if withMasking {
             bytes[1] |= 0x80
         }
-
         if compressed {
             bytes[0] |= 0x40
         }
-        buffer.write(bytes: Array(bytes[0..<length]))
+        buffer.writeBytes(Array(bytes[0..<length]))
         return buffer
     }
 }
@@ -201,7 +206,7 @@ class WebSocketClientHandler: ChannelInboundHandler {
         self.compressed = compressed
     }
 
-    func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
+    func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let buffer = self.unwrapInboundIn(data)
         decodeFrame(from: buffer)
     }
@@ -284,7 +289,7 @@ class WebSocketClientHandler: ChannelInboundHandler {
         return (length, numberOfBytesConsumed)
     }
 
-    public func errorCaught(ctx: ChannelHandlerContext, error: Error) {
+    public func errorCaught(context: ChannelHandlerContext, error: Error) {
         print(error)
     }
 
