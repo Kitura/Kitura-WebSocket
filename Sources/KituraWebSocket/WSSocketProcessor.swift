@@ -56,9 +56,11 @@ class WSSocketProcessor: IncomingSocketProcessor {
     /// - Returns: true if the data was processed, false if it needs to be processed later.
     public func process(_ buffer: NSData) -> Bool {
         let length = buffer.length
-        
+        Log.debug("Processing buffer of size \(buffer.length), socket=\(self.handler?.socketfd ?? -666666)")
+
         while byteIndex < length {
             let (completed, error, bytesConsumed) = parser.parse(buffer, from: byteIndex)
+            Log.debug("Parse result: completed=\(completed), error=\(error?.description ?? "none"), bytesConsumed=\(bytesConsumed), socket=\(self.handler?.socketfd ?? -666666)")
         
             guard error == nil else {
                 // What should be done if there is an error?
@@ -74,6 +76,7 @@ class WSSocketProcessor: IncomingSocketProcessor {
             byteIndex += bytesConsumed
         
             if completed {
+                Log.debug("Completed frame: final=\(parser.frame.finalFrame), payload=\(parser.frame.payload.length) bytes, socket=\(self.handler?.socketfd ?? -666666)")
                 connection.received(frame: parser.frame)
                 parser.reset()
             }
@@ -81,6 +84,7 @@ class WSSocketProcessor: IncomingSocketProcessor {
         
         let finishedBuffer: Bool
         if byteIndex >= length {
+            Log.debug("Finished buffer, socket=\(self.handler?.socketfd ?? -666666)")
             finishedBuffer = true
             byteIndex = 0
         }
