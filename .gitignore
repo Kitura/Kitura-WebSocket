@@ -1,7 +1,7 @@
 .build
 build
 .vagrant
-Package*
+Package.resolved
 *.pkg
 Kitura-WebSocket.xcodeproj
 *.DS_Store

@@ -22,12 +22,16 @@ import NIOHTTP1
 public class WSConnectionUpgradeFactory: ProtocolHandlerFactory {
     private var registry: [String: WebSocketService] = [:]
 
+    private var extensions: [String: WebSocketProtocolExtension] = [:]
     public let name = "websocket"
 
     init() {
         ConnectionUpgrader.register(handlerFactory: self)
+        //We configure the default `permessage-deflate` extension here.
+        self.registerExtension(name: "permessage-deflate", impl: PermessageDeflate())
     }
 
+    /// Return a WebSocketConnection channel handler for the given request
     public func handler(for request: ServerRequest) -> ChannelHandler {
         let wsRequest = WSServerRequest(request: request)
         let service = registry[wsRequest.urlURL.path]
@@ -36,6 +40,26 @@ public class WSConnectionUpgradeFactory: ProtocolHandlerFactory {
         connection.service = service
 
         return connection
+    }
+
+    /// Return all the extension handlers enabled for this connection
+    public func extensionHandlers(header: String) -> [ChannelHandler] {
+        var handlers: [ChannelHandler] = []
+        for _extension in header.split(separator: ",") {
+            guard let name = _extension.split(separator: ";").first, let impl = extensions[String(name)] else { continue }
+            handlers += impl.handlers(header: String(_extension))
+        }
+        return handlers
+    }
+
+    /// Let all the configured extensions negotiate for themselves, build a response header and send it back
+    public func negotiate(header: String) -> String {
+        var response = ""
+        for _extension in header.split(separator: ",") {
+            guard let name = _extension.split(separator: ";").first, let impl = extensions[String(name)] else { continue }
+            response += impl.negotiate(header: String(_extension))
+        }
+        return response
     }
 
     func register(service: WebSocketService, onPath: String) {
@@ -66,4 +90,19 @@ public class WSConnectionUpgradeFactory: ProtocolHandlerFactory {
     func clear() {
         registry.removeAll()
     }
+
+    /// Register an extension implementation with a given name
+    func registerExtension(name: String, impl: WebSocketProtocolExtension) {
+        extensions[name] = impl
+    }
+}
+
+// A protocol to define WebSocket protocol extensions.
+// In future, if we wish to support user-defined WebSocket extensions, we'd make this protocol public.
+protocol WebSocketProtocolExtension {
+    // Return the extension handlers related to this extension. Most extensions may have an input handler and an output handler.
+    func handlers(header: String) -> [ChannelHandler]
+
+    // Negotiate for all enabled extensions. This method will be invoked during the initial handshake.
+    func negotiate(header: String) -> String
 }
