@@ -16,6 +16,7 @@
 
 import XCTest
 import Foundation
+import Dispatch
 
 @testable import KituraWebSocket
 @testable import KituraNet
