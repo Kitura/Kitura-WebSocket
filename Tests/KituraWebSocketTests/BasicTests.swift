@@ -16,6 +16,7 @@
 
 import XCTest
 import Foundation
+import Dispatch
 
 import LoggerAPI
 @testable import KituraWebSocket
