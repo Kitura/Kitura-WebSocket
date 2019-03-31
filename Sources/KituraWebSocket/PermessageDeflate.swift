@@ -76,10 +76,6 @@ class PermessageDeflate: WebSocketProtocolExtension {
         guard header.hasPrefix("permessage-deflate") else { return response }
 
         for parameter in header.components(separatedBy: "; ") {
-            if parameter.hasPrefix("client_max_window_bits") {
-                response.append("; client_max_window_bits")
-            }
-
             if parameter == "client_no_context_takeover" {
                 response.append("; \(parameter)")
             }
