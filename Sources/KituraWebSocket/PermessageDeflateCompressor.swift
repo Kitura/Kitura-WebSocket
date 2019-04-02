@@ -68,7 +68,7 @@ class PermessageDeflateCompressor : ChannelOutboundHandler {
         guard frame.fin, let payload = payload else { return }
 
         // Compress the payload
-        let deflatedPayload = deflatePayload(in: payload, allocator: ctx.channel.allocator)
+        let deflatedPayload = deflatePayload(in: payload, allocator: ctx.channel.allocator, dropFourTrailingOctets: true)
 
         // Create a new frame with the compressed payload, the rsv1 bit must be set to indicate compression
         let deflatedFrame = WebSocketFrame(fin: frame.fin, rsv1: true, opcode: self.messageType!, maskKey: frame.maskKey, data: deflatedPayload)
