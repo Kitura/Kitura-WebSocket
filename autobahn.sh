@@ -17,7 +17,7 @@ wstest -m fuzzingclient
 # Check if all tests passed
 OUTPUT = `grep behavior reports/servers/index.json | cut -d':' -f2 | cut -d'"' -f2 | sort -u | xargs`
 
-echo $OUTPUT
+echo "Behaviors output by tests: $OUTPUT"
 
 if [ $OUTPUT -ne "OK" ]; then
     return 1
