@@ -34,12 +34,12 @@ matrix:
       dist: xenial
       sudo: required
       services: docker
-      env: DOCKER_IMAGE=swift:4.2.3 SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT
+      env: DOCKER_IMAGE=swift:4.2.3 SWIFT_SNAPSHOT=$SWIFT_DEVELOPMENT_SNAPSHOT CUSTOM_TEST_SCRIPT=autobahn.sh
     - os: linux
       dist: xenial
       sudo: required
       services: docker
-      env: DOCKER_IMAGE=ubuntu:18.04 CUSTOM_TEST_SCRIPT=autobahn.sh
+      env: DOCKER_IMAGE=ubuntu:18.04
     - os: osx
       osx_image: xcode9.2
       sudo: required
