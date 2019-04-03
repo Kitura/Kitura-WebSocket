@@ -24,8 +24,8 @@ FUZZING_CLIENT_JSON="{ \
          \"url\": \"ws://127.0.0.1:9001\" \
       } \
    ], \
-   \"cases\": [\"*\"], \
-   \"exclude-cases\": [\"9.*\", \"7.*\"], \
+   \"cases\": [\"1.*\", \"2.*\", \"3.*\", \"4.*\", \"5.*\"], \
+   \"exclude-cases\": [], \
    \"exclude-agent-cases\": {} \
 }"
 
