@@ -5,8 +5,8 @@ if [ $? -ne 0 ]; then
     return $?
 fi
 
-# Build the TestWebSocketService
-swift run TestWebSocketService &
+# Build and run the TestWebSocketService
+swift run -c release TestWebSocketService &
 
 # Install python, pip and autobahn
 apt-get update \
