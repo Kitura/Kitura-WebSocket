@@ -6,13 +6,14 @@ if [ $? -ne 0 ]; then
 fi
 
 # Build the TestWebSocketService
-swift build -c release TestWebSocketService
+swift run TestWebSocketService &
 
-# Run the TestWebSocketService
-swift 
-
-# Install autobahn
-pip install autobahntestsuite
+# Install python, pip and autobahn
+apt-get update \
+    && apt-get -y upgrade \
+    && apt-get -y install sudo \
+    && sudo apt-get -y install python-pip \
+    && pip install autobahntestsuite
 
 # Run autobahn
 wstest -m fuzzingclient
