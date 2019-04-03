@@ -25,7 +25,7 @@ FUZZING_CLIENT_JSON="{ \
       } \
    ], \
    \"cases\": [\"*\"], \
-   \"exclude-cases\": [\"9.6.*\"], \
+   \"exclude-cases\": [\"9.*\"], \
    \"exclude-agent-cases\": {} \
 }"
 
