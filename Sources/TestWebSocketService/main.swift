@@ -20,6 +20,11 @@ class EchoService: WebSocketService {
 
 WebSocket.register(service: EchoService(), onPath: "/")
 let port = 9001
-_ = try! HTTPServer.listen(on: port, delegate: nil)
+
+do {
+    _ = try HTTPServer.listen(on: port, delegate: nil)
+} catch {
+    print("Unable to start server")
+}
 
 dispatchMain()

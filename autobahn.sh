@@ -5,8 +5,11 @@ if [ $? -ne 0 ]; then
     return $?
 fi
 
-# Run the server in the background
-swift run TestWebSocketService &
+# Build the TestWebSocketService
+swift build -c release TestWebSocketService
+
+# Run the TestWebSocketService
+swift 
 
 # Install autobahn
 pip install autobahntestsuite
