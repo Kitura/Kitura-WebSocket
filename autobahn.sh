@@ -6,7 +6,8 @@ if [ $? -ne 0 ]; then
 fi
 
 # Build and run the TestWebSocketService
-swift run -c release TestWebSocketService &
+swift build -c release
+swift run TestWebSocketService &
 
 # Install python, pip and autobahn
 apt-get update \
