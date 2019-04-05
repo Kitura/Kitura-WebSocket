@@ -25,7 +25,7 @@ run_autobahn()
 
     # Count the number of failed tests or unclean connection closures
     FAILED_OR_UNCLEAN=`grep behavior reports/servers/index.json | cut -d':' -f2 | cut -d'"' -f2 | sort -u | xargs | grep -E "FAILED|UNCLEAN" | wc -l`
-    if [ $FAILED_OR_UNCLEAN -ne "0"]; then
+    if [ $FAILED_OR_UNCLEAN -ne "0" ]; then
         return 1
     fi
 
