@@ -72,7 +72,7 @@ extension KituraTest {
         let payloadBytes = withPayload.bytes.bindMemory(to: UInt8.self, capacity: withPayload.length)
         var payloadBuffer = ByteBufferAllocator().buffer(capacity: 16)
         for i in 0..<withPayload.length {
-            payloadBuffer.write(bytes: [payloadBytes[i]])
+            payloadBuffer.writeBytes([payloadBytes[i]])
         }
 
         if compressed {
@@ -100,17 +100,12 @@ extension KituraTest {
         #endif
 
         buffer.writeBytes(mask)
-        let payloadBytes = withPayload.bytes.bindMemory(to: UInt8.self, capacity: withPayload.length)
 
         for i in 0 ..< payloadBuffer.readableBytes {
-            var bytes = [UInt8](repeating: 0, count: 1)
-            bytes[0] = payloadBuffer.getBytes(at: i, length: 1)?[0] ^ mask[i % 4]
-            buffer.writeBytes(bytes)
+            var payloadBytes = payloadBuffer.getBytes(at: i, length: 1)!
+            payloadBytes[0] = payloadBytes[0] ^ mask[i % 4]
+            buffer.writeBytes(payloadBytes)
         }
-
-        buffer.write(buffer: &header)
-        buffer.write(bytes: mask)
-        buffer.write(buffer: &payloadBuffer)
 
         do {
             if lastFrame {
@@ -231,7 +226,7 @@ class WebSocketClientHandler: ChannelInboundHandler {
             if self.compressed {
                 currentFramePayload += [0, 0, 0xff, 0xff]
                 var payloadBuffer = ByteBufferAllocator().buffer(capacity: 8)
-                payloadBuffer.write(bytes: currentFramePayload)
+                payloadBuffer.writeBytes(currentFramePayload)
                 let inflatedBuffer = PermessageDeflateDecompressor().inflatePayload(in: payloadBuffer, allocator: ByteBufferAllocator())
                 currentFramePayload = inflatedBuffer.getBytes(at: 0, length: inflatedBuffer.readableBytes) ?? []
             }

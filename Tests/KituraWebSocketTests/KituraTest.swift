@@ -88,7 +88,7 @@ class KituraTest: XCTestCase {
             _ = try channel.pipeline.removeHandler(httpRequestEncoder!).wait()
             _ = try channel.pipeline.removeHandler(httpResponseDecoder!).wait()
             _ = try channel.pipeline.removeHandler(httpHandler!).wait()
-            try channel.pipeline.addHandler(WebSocketClientHandler(expectedFrames: expectedFrames, expectation: expectation), position: .first).wait()
+            try channel.pipeline.addHandler(WebSocketClientHandler(expectedFrames: expectedFrames, expectation: expectation, compressed: compressed), position: .first).wait()
         } catch let error {
            Log.error("Error: \(error)")
         }
@@ -111,7 +111,7 @@ class KituraTest: XCTestCase {
             channel.pipeline.addHandler(self.httpHandler!)
         }
     }
-    func sendUpgradeRequest(forProtocolVersion: String? = "13", toPath: String, usingKey: String?, semaphore: DispatchSemaphore, errorMessage: String? = nil) -> Channel? {
+    func sendUpgradeRequest(forProtocolVersion: String? = "13", toPath: String, usingKey: String?, semaphore: DispatchSemaphore, errorMessage: String? = nil, compressed: Bool = false) -> Channel? {
         self.httpHandler = HTTPResponseHandler(key: usingKey ?? "", semaphore: semaphore, errorMessage: errorMessage)
         let clientBootstrap = ClientBootstrap(group: MultiThreadedEventLoopGroup(numberOfThreads: 1))
             .channelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEPORT), value: 1)

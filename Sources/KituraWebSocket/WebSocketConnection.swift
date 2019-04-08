@@ -314,7 +314,7 @@ extension WebSocketConnection {
         }
 
         let frame = WebSocketFrame(fin: true, opcode: opcode, data: data)
-        _ = context.writeAndFlush(self.wrapOutboundOut(frame))
+        context.writeAndFlush(self.wrapOutboundOut(frame), promise: nil)
     }
 
     func closeConnection(reason: WebSocketErrorCode?, description: String?, hard: Bool) {

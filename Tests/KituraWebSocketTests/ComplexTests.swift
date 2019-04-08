@@ -50,11 +50,11 @@ class ComplexTests: KituraTest {
         expectedBinaryPayload.append(shortBinaryPayload.bytes, length: shortBinaryPayload.length)
         expectedBinaryPayload.append(mediumBinaryPayload.bytes, length: mediumBinaryPayload.length)
 
-        performServerTest(asyncTasks: { expectation in
+        performServerTest(asyncTasks: /*{ expectation in
             self.performTest(framesToSend: [(false, self.opcodeBinary, shortBinaryPayload), (true, self.opcodeContinuation, mediumBinaryPayload)],
                              expectedFrames: [(true, self.opcodeBinary, expectedBinaryPayload)],
                              expectation: expectation)
-            }, { expectation in
+            },*/ { expectation in
                 self.performTest(framesToSend: [(false, self.opcodeBinary, shortBinaryPayload), (true, self.opcodeContinuation, mediumBinaryPayload)],
                                  expectedFrames: [(true, self.opcodeBinary, expectedBinaryPayload)],
                                  expectation: expectation, compressed: true)

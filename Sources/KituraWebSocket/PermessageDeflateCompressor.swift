@@ -45,20 +45,20 @@ class PermessageDeflateCompressor : ChannelOutboundHandler {
     private var stream: z_stream = z_stream()
 
     // PermessageDeflateCompressor is an outbound handler, this function gets called when a frame is written to the channel by WebSocketConnection.
-    func write(ctx: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
+    func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         var frame = unwrapOutboundIn(data)
 
         // If this is a control frame, do not attempt compression.
         guard frame.opcode == .text || frame.opcode == .binary || frame.opcode == .continuation else {
-             ctx.writeAndFlush(self.wrapOutboundOut(frame)).whenComplete {
-                 promise?.succeed(result: ())
+             context.writeAndFlush(self.wrapOutboundOut(frame)).whenComplete { _ in
+                 promise?.succeed(())
              }
              return
         }
 
         // If this is a continuation frame, have the frame data appended to `payload`, else set payload to frame data.
         if frame.opcode == .continuation {
-            self.payload?.write(buffer: &frame.data)
+            self.payload?.writeBuffer(&frame.data)
         } else {
             self.payload = frame.data
             self.messageType = frame.opcode
@@ -68,13 +68,13 @@ class PermessageDeflateCompressor : ChannelOutboundHandler {
         guard frame.fin, let payload = payload else { return }
 
         // Compress the payload
-        let deflatedPayload = deflatePayload(in: payload, allocator: ctx.channel.allocator, dropFourTrailingOctets: true)
+        let deflatedPayload = deflatePayload(in: payload, allocator: context.channel.allocator, dropFourTrailingOctets: true)
 
         // Create a new frame with the compressed payload, the rsv1 bit must be set to indicate compression
         let deflatedFrame = WebSocketFrame(fin: frame.fin, rsv1: true, opcode: self.messageType!, maskKey: frame.maskKey, data: deflatedPayload)
 
         // Write the new frame onto the pipeline
-        _ = ctx.writeAndFlush(self.wrapOutboundOut(deflatedFrame))
+        _ = context.writeAndFlush(self.wrapOutboundOut(deflatedFrame))
     }
 
     func deflatePayload(in buffer: ByteBuffer, allocator: ByteBufferAllocator, dropFourTrailingOctets: Bool = false) -> ByteBuffer {
