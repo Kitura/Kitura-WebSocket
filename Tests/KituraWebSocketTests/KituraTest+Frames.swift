@@ -72,13 +72,17 @@ extension KituraTest {
         let payloadBytes = withPayload.bytes.bindMemory(to: UInt8.self, capacity: withPayload.length)
         var payloadBuffer = ByteBufferAllocator().buffer(capacity: 16)
         for i in 0..<withPayload.length {
-            payloadBuffer.write(bytes: [payloadBytes[i]])
+            payloadBuffer.writeBytes([payloadBytes[i]])
         }
 
         if compressed {
             payloadBuffer = PermessageDeflateCompressor().deflatePayload(in: payloadBuffer, allocator: ByteBufferAllocator(), dropFourTrailingOctets: final)
             payloadLength = payloadBuffer.readableBytes
         }
+
+        var header = createFrameHeader(final: final, withOpcode: withOpcode, withMasking: withMasking,
+                          payloadLength: payloadLength, channel: channel, compressed: compressed)
+        buffer.writeBuffer(&header)
 
         var intMask: UInt32
         #if os(Linux)
@@ -92,19 +96,13 @@ extension KituraTest {
         #else
         UnsafeMutableRawPointer(mutating: mask).copyBytes(from: &intMask, count: mask.count)
         #endif
+        buffer.writeBytes(mask)
 
         for i in 0 ..< payloadBuffer.readableBytes {
-            var bytes = payloadBuffer.getBytes(at: i, length: 1)!
-            bytes[0] = bytes[0] ^ mask[i % 4]
-            payloadBuffer.set(bytes: bytes, at: i)
+            var payloadBytes = payloadBuffer.getBytes(at: i, length: 1)!
+            payloadBytes[0] = payloadBytes[0] ^ mask[i % 4]
+            buffer.writeBytes(payloadBytes)
         }
-
-        var header = createFrameHeader(final: final, withOpcode: withOpcode, withMasking: withMasking,
-                          payloadLength: payloadLength, channel: channel, compressed: compressed)
-
-        buffer.write(buffer: &header)
-        buffer.write(bytes: mask)
-        buffer.write(buffer: &payloadBuffer)
 
         do {
             if lastFrame {
@@ -165,7 +163,7 @@ extension KituraTest {
         if compressed {
             bytes[0] |= 0x40
         }
-        buffer.write(bytes: Array(bytes[0..<length]))
+        buffer.writeBytes(Array(bytes[0..<length]))
         return buffer
     }
 }
@@ -201,7 +199,7 @@ class WebSocketClientHandler: ChannelInboundHandler {
         self.compressed = compressed
     }
 
-    func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
+    func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let buffer = self.unwrapInboundIn(data)
         decodeFrame(from: buffer)
     }
@@ -226,7 +224,7 @@ class WebSocketClientHandler: ChannelInboundHandler {
             if self.compressed {
                 currentFramePayload += [0, 0, 0xff, 0xff]
                 var payloadBuffer = ByteBufferAllocator().buffer(capacity: 8)
-                payloadBuffer.write(bytes: currentFramePayload)
+                payloadBuffer.writeBytes(currentFramePayload)
                 let inflatedBuffer = PermessageDeflateDecompressor().inflatePayload(in: payloadBuffer, allocator: ByteBufferAllocator())
                 currentFramePayload = inflatedBuffer.getBytes(at: 0, length: inflatedBuffer.readableBytes) ?? []
             }
@@ -284,7 +282,7 @@ class WebSocketClientHandler: ChannelInboundHandler {
         return (length, numberOfBytesConsumed)
     }
 
-    public func errorCaught(ctx: ChannelHandlerContext, error: Error) {
+    public func errorCaught(context: ChannelHandlerContext, error: Error) {
         print(error)
     }
 

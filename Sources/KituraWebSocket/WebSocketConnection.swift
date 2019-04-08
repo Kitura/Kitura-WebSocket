@@ -41,7 +41,7 @@ public class WebSocketConnection {
 
     var message: ByteBuffer?
 
-    var ctx: ChannelHandlerContext?
+    var context: ChannelHandlerContext?
 
     private var errors: [String] = []
 
@@ -59,40 +59,40 @@ public class WebSocketConnection {
 
     public func ping(withMessage: String? = nil) {
         guard active else { return }
-        guard let ctx = ctx else {
+        guard let context = context else {
             Log.error("ChannelHandlerContext unavailable")
             return
         }
         if let message = withMessage {
-            var buffer = ctx.channel.allocator.buffer(capacity: message.count)
-            buffer.write(string: message)
+            var buffer = context.channel.allocator.buffer(capacity: message.count)
+            buffer.writeString(message)
             sendMessage(with: .ping, data: buffer)
         } else {
-            let emptyBuffer = ctx.channel.allocator.buffer(capacity: 1)
+            let emptyBuffer = context.channel.allocator.buffer(capacity: 1)
             sendMessage(with: .ping, data: emptyBuffer)
         }
     }
 
     public func send(message: Data, asBinary: Bool = true) {
        guard active else { return }
-       guard let ctx = ctx else {
+       guard let context = context else {
            Log.error("ChannelHandlerContext unavailable")
            return
        }
-       var buffer = ctx.channel.allocator.buffer(capacity: message.count)
-       buffer.write(bytes: message)
+       var buffer = context.channel.allocator.buffer(capacity: message.count)
+       buffer.writeBytes(message)
        sendMessage(with: asBinary ? .binary : .text, data: buffer)
     }
 
     public func send(message: String) {
         guard active else { return }
-        guard let ctx = ctx else {
+        guard let context = context else {
             Log.error("ChannelHandlerContext unavailable")
             return
         }
-        ctx.eventLoop.execute {
-            var buffer = ctx.channel.allocator.buffer(capacity: message.count)
-            buffer.write(string: message)
+        context.eventLoop.execute {
+            var buffer = context.channel.allocator.buffer(capacity: message.count)
+            buffer.writeString(message)
             self.sendMessage(with: .text, data: buffer)
         }
     }
@@ -102,13 +102,13 @@ extension WebSocketConnection: ChannelInboundHandler {
     public typealias InboundIn = WebSocketFrame
     public typealias OutboundOut = WebSocketFrame
 
-    public func handlerAdded(ctx: ChannelHandlerContext) {
-        self.ctx = ctx
-        guard ctx.channel.isActive else { return }
+    public func handlerAdded(context: ChannelHandlerContext) {
+        self.context = context
+        guard context.channel.isActive else { return }
         self.fireConnected()
     }
 
-    public func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
+    public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         let frame = self.unwrapInboundIn(data)
 
         do {
@@ -146,10 +146,10 @@ extension WebSocketConnection: ChannelInboundHandler {
                         closeConnection(reason: .dataInconsistentWithMessage, description: "Failed to convert received payload to UTF-8 String", hard: true)
                     }
             } else {
-                message =  ctx.channel.allocator.buffer(capacity: data.readableBytes)
+                message =  context.channel.allocator.buffer(capacity: data.readableBytes)
                 var buffer = data
                 messageState = .text
-                message?.write(buffer: &buffer)
+                message?.writeBuffer(&buffer)
             }
 
         case .binary:
@@ -166,8 +166,8 @@ extension WebSocketConnection: ChannelInboundHandler {
             if frame.fin {
                 fireReceivedData(data: data.getData(at: 0, length: data.readableBytes) ?? Data())
             } else {
-                message =  ctx.channel.allocator.buffer(capacity: data.readableBytes)
-                message?.write(buffer: &data)
+                message =  context.channel.allocator.buffer(capacity: data.readableBytes)
+                message?.writeBuffer(&data)
                 messageState = .binary
             }
 
@@ -177,7 +177,7 @@ extension WebSocketConnection: ChannelInboundHandler {
                 return
             }
 
-            message?.write(buffer: &data)
+            message?.writeBuffer(&data)
             guard let message = message else { return }
 
             if frame.fin {
@@ -230,15 +230,17 @@ extension WebSocketConnection: ChannelInboundHandler {
 
         case .pong: break
 
-        case .unknownNonControl(let code):
-            closeConnection(reason: .protocolError, description: "Parsed a frame with an invalid operation code of \(code)", hard: true)
+        case let code where code.isControlOpcode:
+            let intCode = Int(webSocketOpcode: code)
+            closeConnection(reason: .protocolError, description: "Parsed a frame with an invalid operation code of \(intCode)", hard: true)
 
-        case .unknownControl(let code):
-            closeConnection(reason: .protocolError, description: "Parsed a frame with an invalid operation code of \(code)", hard: true)
+        case let code:
+            let intCode = Int(webSocketOpcode: code)
+            closeConnection(reason: .protocolError, description: "Parsed a frame with an invalid operation code of \(intCode)", hard: true)
         }
     }
 
-    public func errorCaught(ctx: ChannelHandlerContext, error: Error) {
+    public func errorCaught(context: ChannelHandlerContext, error: Error) {
         guard let error = error as? NIOWebSocketError else { return }
         switch error {
         case .multiByteControlFrameLength:
@@ -284,24 +286,24 @@ extension WebSocketConnection: ChannelInboundHandler {
 extension WebSocketConnection {
 
     func connectionClosed(reason: WebSocketErrorCode, description: String? = nil, reasonToSendBack: WebSocketErrorCode? = nil) {
-        guard let ctx = ctx else {
+        guard let context = context else {
              Log.error("ChannelHandlerContext unavailable")
              return
         }
-        if ctx.channel.isWritable {
+        if context.channel.isWritable {
              closeConnection(reason: reasonToSendBack ?? reason, description: description, hard: true)
              fireDisconnected(reason: reason)
         } else {
-            ctx.close(promise: nil)
+            context.close(promise: nil)
         }
     }
 
     func sendMessage(with opcode: WebSocketOpcode, data: ByteBuffer) {
-        guard let ctx = ctx else {
+        guard let context = context else {
             Log.error("ChannelHandlerContext unavailable")
             return
         }
-        guard ctx.channel.isWritable else {
+        guard context.channel.isWritable else {
             //TODO: Log an error
             return
         }
@@ -312,26 +314,26 @@ extension WebSocketConnection {
         }
 
         let frame = WebSocketFrame(fin: true, opcode: opcode, data: data)
-        ctx.writeAndFlush(self.wrapOutboundOut(frame), promise: nil)
+        context.writeAndFlush(self.wrapOutboundOut(frame), promise: nil)
     }
 
     func closeConnection(reason: WebSocketErrorCode?, description: String?, hard: Bool) {
-         guard let ctx = ctx else {
+         guard let context = context else {
              Log.error("ChannelHandlerContext unavailable")
              return
          }
-         var data = ctx.channel.allocator.buffer(capacity: 2)
+         var data = context.channel.allocator.buffer(capacity: 2)
          data.write(webSocketErrorCode: reason ?? .normalClosure)
          if let description = description {
-             data.write(string: description)
+             data.writeString(description)
          }
 
          let frame = WebSocketFrame(fin: true, opcode: .connectionClose, data: data)
-         let promise = ctx.eventLoop.newPromise(of: Void.self)
-         ctx.writeAndFlush(self.wrapOutboundOut(frame), promise: promise)
-         promise.futureResult.whenComplete {
+         let promise = context.eventLoop.makePromise(of: Void.self)
+         context.writeAndFlush(self.wrapOutboundOut(frame), promise: promise)
+         promise.futureResult.whenComplete { _ in
              if hard {
-                 _ = ctx.close(mode: .output)
+                 _ = context.close(mode: .output)
              }
          }
          awaitClose = true

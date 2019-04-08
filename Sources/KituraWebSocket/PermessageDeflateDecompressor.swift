@@ -48,18 +48,18 @@ class PermessageDeflateDecompressor : ChannelInboundHandler {
     // PermessageDeflateDecompressor is a `ChannelInboundHandler`, this function gets called when the previous inbound handler fires a channel read event.
     // Here, we intercept incoming compressed frames, decompress the payload across multiple continuation frame and write a fire a channel read event
     // with the entire frame data decompressed.
-    func channelRead(ctx: ChannelHandlerContext, data: NIOAny) {
+    func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         var frame = unwrapInboundIn(data)
         // If this is a control frame, there's nothing to do.
         guard frame.opcode == .text || frame.opcode == .binary || frame.opcode == .continuation else {
-            ctx.fireChannelRead(self.wrapInboundOut(frame))
+            context.fireChannelRead(self.wrapInboundOut(frame))
             return
         }
 
         // If this is a continuation frame, have the payload appended to `payload`, else set `payload` and store the messageType
         var receivedPayload = frame.unmaskedData
         if frame.opcode == .continuation {
-            self.payload?.write(buffer: &receivedPayload)
+            self.payload?.writeBuffer(&receivedPayload)
         } else {
             self.messageType = frame.opcode
             self.payload = receivedPayload
@@ -69,15 +69,15 @@ class PermessageDeflateDecompressor : ChannelInboundHandler {
         guard frame.fin, var inputBuffer = self.payload else { return }
 
         // Append the trailer 0, 0, ff, ff before decompressing
-        inputBuffer.write(bytes: [0x00, 0x00, 0xff, 0xff])
-        var inflatedPayload = inflatePayload(in: inputBuffer, allocator: ctx.channel.allocator)
+        inputBuffer.writeBytes([0x00, 0x00, 0xff, 0xff])
+        var inflatedPayload = inflatePayload(in: inputBuffer, allocator: context.channel.allocator)
 
         // Apply the WebSocket mask on the inflated payload
         inflatedPayload.webSocketMask(frame.maskKey!)
 
         // Create a new frame with the inflated payload and pass it on to the next inbound handler, mostly WebSocketConnection
         let inflatedFrame = WebSocketFrame(fin: true, rsv1: false, opcode: self.messageType!, maskKey: frame.maskKey!, data: inflatedPayload)
-        ctx.fireChannelRead(self.wrapInboundOut(inflatedFrame))
+        context.fireChannelRead(self.wrapInboundOut(inflatedFrame))
     }
 
     func inflatePayload(in buffer: ByteBuffer, allocator: ByteBufferAllocator) -> ByteBuffer {
@@ -117,7 +117,7 @@ class PermessageDeflateDecompressor : ChannelInboundHandler {
             // move the reader index
             inputBuffer.moveReaderIndex(to: processedBytes)
             // append partial output to the ouput buffer
-            outputBuffer.write(buffer: &partialOutputBuffer)
+            outputBuffer.writeBuffer(&partialOutputBuffer)
         } while stream.avail_in > 0
         return outputBuffer 
     }

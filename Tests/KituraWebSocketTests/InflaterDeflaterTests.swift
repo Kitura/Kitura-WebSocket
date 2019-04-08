@@ -48,7 +48,7 @@ class InflaterDeflaterTests: KituraTest {
          var buffer = ByteBufferAllocator().buffer(capacity: 1)
          var count = 0
          repeat {
-             buffer.write(bytes: bytes)
+             buffer.writeBytes(bytes)
              count += 1
          } while count < 100000
 
@@ -67,7 +67,7 @@ class InflaterDeflaterTests: KituraTest {
 
     func testWithString(_ input: String) {
         var buffer = ByteBufferAllocator().buffer(capacity: 1)
-        buffer.write(string: input)
+        buffer.writeString(input)
 
         //deflate
         let deflater = PermessageDeflateCompressor()
