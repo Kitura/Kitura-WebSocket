@@ -48,35 +48,31 @@ if [ $SWIFT_TEST_STATUS -ne 0 ]; then
     return $SWIFT_TEST_STATUS
 fi
 
-set -e
 # Build and run the TestWebSocketService
 echo "Building in release mode for autobahn testing"
 swift build -c release
 
-set +e
 # Install python, pip and autobahn
+travis_start "autobahn_install"
 apt-get update \
     && apt-get -y upgrade \
     && apt-get -y install sudo \
     && sudo apt-get -y install python-pip \
     && pip install autobahntestsuite
-
-# Run tests 1-4
-travis_start "Running autobahn tests 1-4"
-run_autobahn \"1.*\",\"2.*\",\"3.*\",\"4.*\"
 travis_end
+
+travis_start "autobahn_run"
+# Run tests 1-4
+run_autobahn \"1.*\",\"2.*\",\"3.*\",\"4.*\"
 
 # Run tests 5-8
-travis_start "Running autobahn tests 5-8"
 run_autobahn \"5.*\",\"6.*\",\"7.*\",\"8.*\"
-travis_end
 
 # Run tests 9-10
-travis_start "Running autobahn tests 9,10"
 run_autobahn \"9.*\",\"10.*\"
-travis_end
 
 # Run tests 12-13, disabled due to a hang that happens only in the CI
 # run_autobahn \"12.*\",\"13.*\"
+travis_end
 
 # All tests have passed
