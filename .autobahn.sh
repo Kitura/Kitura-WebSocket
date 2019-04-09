@@ -14,7 +14,7 @@ run_autobahn()
     TESTS=$1
 
     # Launch the WebSocketService, save its PID
-    swift run TestWebSocketService &
+    $PWD/.build/x86_64-unknown-linux/release/TestWebSocketService &
     PID=$!
 
     # Make sure the server has enough time to be up and running
