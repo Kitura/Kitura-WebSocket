@@ -45,6 +45,9 @@ let package = Package(
         .target(
             name: "KituraWebSocket",
             dependencies: ["CZlib", "KituraNet", "Cryptor"]),
+        .target(
+            name: "TestWebSocketService",
+            dependencies: ["KituraNet", "KituraWebSocket"]),
         .testTarget(
             name: "KituraWebSocketTests",
             dependencies: ["KituraWebSocket"])
