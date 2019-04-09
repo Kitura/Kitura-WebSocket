@@ -38,9 +38,9 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
             name: "KituraWebSocket",
-            dependencies: ["CZlib", "KituraNet", "Cryptor"]),
+            dependencies: ["CZlib", "KituraNet"]),
         .testTarget(
             name: "KituraWebSocketTests",
-            dependencies: ["KituraWebSocket"])
+            dependencies: ["KituraWebSocket", "Cryptor"])
     ]
 )
