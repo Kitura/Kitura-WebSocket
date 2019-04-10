@@ -45,7 +45,7 @@ class ConnectionCleanupTests: KituraTest {
             usleep(1500000)
             XCTAssertEqual(service.connections.count, 1, "Stale connection was unexpectedly cleaned up")
             socket.close()
-            usleep(150)
+            usleep(1000)
             expectation.fulfill()
         }
     }
@@ -62,7 +62,7 @@ class ConnectionCleanupTests: KituraTest {
             usleep(1500000)
             XCTAssertEqual(service.connections.count, 0, "Stale connection was not cleaned up")
             socket.close()
-            usleep(150)
+            usleep(1000)
             expectation.fulfill()
         }
     }
@@ -86,7 +86,7 @@ class ConnectionCleanupTests: KituraTest {
             usleep(500000)
             XCTAssertEqual(service.connections.count, 0, "Connection was not removed even after getting a close opcode")
             socket.close()
-            usleep(150)
+            usleep(1000)
             expectation.fulfill()
         }
     }
@@ -113,7 +113,7 @@ class ConnectionCleanupTests: KituraTest {
             XCTAssertEqual(service.connections.count, 1, "Stale connection was not cleaned up")
             socket.close()
             socket2.close()
-            usleep(150)
+            usleep(1000)
             expectation.fulfill()
         }
     }
@@ -132,7 +132,7 @@ class ConnectionCleanupTests: KituraTest {
             usleep(5000)
             XCTAssertEqual(service.connections.count, 0, "Service was not notified of connection disconnect")
             socket.close()
-            usleep(150)
+            usleep(1000)
             expectation.fulfill()
         }
     }
