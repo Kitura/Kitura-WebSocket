@@ -40,7 +40,7 @@ class ConnectionCleanupTests: KituraTest {
             XCTAssertEqual(service.connections.count, 0, "Connections left on service at start of test")
             guard let socket = self.sendUpgradeRequest(toPath: self.servicePath, usingKey: self.secWebKey) else { return }
             let _ = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey)
-            usleep(1500)
+            usleep(2500)
             XCTAssertEqual(service.connections.count, 1, "Failed to create connection to service")
             usleep(1500000)
             XCTAssertEqual(service.connections.count, 1, "Stale connection was unexpectedly cleaned up")
@@ -57,7 +57,7 @@ class ConnectionCleanupTests: KituraTest {
             XCTAssertEqual(service.connections.count, 0, "Connections left on service at start of test")
             guard let socket = self.sendUpgradeRequest(toPath: self.servicePath, usingKey: self.secWebKey) else { return }
             let _ = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey)
-            usleep(1500)
+            usleep(2500)
             XCTAssertEqual(service.connections.count, 1, "Failed to create connection to service")
             usleep(1500000)
             XCTAssertEqual(service.connections.count, 0, "Stale connection was not cleaned up")
@@ -74,7 +74,7 @@ class ConnectionCleanupTests: KituraTest {
             XCTAssertEqual(service.connections.count, 0, "Connections left on service at start of test")
             guard let socket = self.sendUpgradeRequest(toPath: self.servicePath, usingKey: self.secWebKey) else { return }
             let _ = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey)
-            usleep(1500)
+            usleep(2500)
             XCTAssertEqual(service.connections.count, 1, "Failed to create connection to service")
             usleep(500000)
             self.sendFrame(final: true, withOpcode: self.opcodePing, withPayload: NSData(), on: socket)
@@ -98,11 +98,11 @@ class ConnectionCleanupTests: KituraTest {
             XCTAssertEqual(service.connections.count, 0, "Connections left on service at start of test")
             guard let socket = self.sendUpgradeRequest(toPath: self.servicePath, usingKey: self.secWebKey) else { return }
             let _ = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey)
-            usleep(1500)
+            usleep(2500)
             XCTAssertEqual(service.connections.count, 1, "Failed to create connection to service")
             guard let socket2 = self.sendUpgradeRequest(toPath: self.servicePath, usingKey: self.secWebKey) else { return }
             let _ = self.checkUpgradeResponse(from: socket2, forKey: self.secWebKey)
-            usleep(1500)
+            usleep(2500)
             XCTAssertEqual(service.connections.count, 2, "Failed to create second connection to service")
             usleep(500000)
             self.sendFrame(final: true, withOpcode: self.opcodePing, withPayload: NSData(), on: socket)
@@ -125,11 +125,11 @@ class ConnectionCleanupTests: KituraTest {
             XCTAssertEqual(service.connections.count, 0, "Connections left on service at start of test")
             guard let socket = self.sendUpgradeRequest(toPath: self.servicePath, usingKey: self.secWebKey) else { return }
             let _ = self.checkUpgradeResponse(from: socket, forKey: self.secWebKey)
-            usleep(1500)
+            usleep(2500)
             XCTAssertEqual(service.connections.count, 1, "Failed to create connection to service")
             let connections = Array(service.connections.values)
             connections[0].processor?.close()
-            usleep(1500)
+            usleep(2500)
             XCTAssertEqual(service.connections.count, 0, "Service was not notified of connection disconnect")
             socket.close()
             usleep(150)

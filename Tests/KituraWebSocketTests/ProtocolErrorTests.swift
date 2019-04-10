@@ -87,10 +87,6 @@ class ProtocolErrorTests: KituraTest {
         
         performServerTest() { expectation in
             
-            let text = "Testing, testing 1, 2, 3. "
-            
-            let textPayload = self.payload(text: text)
-            
             let expectedPayload = NSMutableData()
             var part = self.payload(closeReasonCode: .protocolError)
             expectedPayload.append(part.bytes, length: part.length)
@@ -99,9 +95,7 @@ class ProtocolErrorTests: KituraTest {
             
             let pingPayload = self.payload(text: "Testing, testing 1,2,3")
             
-            self.performTest(framesToSend: [(false, self.opcodePing, pingPayload),
-                                            (false, self.opcodeContinuation, textPayload),
-                                            (true, self.opcodeContinuation, textPayload)],
+            self.performTest(framesToSend: [(false, self.opcodePing, pingPayload)],
                              expectedFrames: [(true, self.opcodeClose, expectedPayload)],
                              expectation: expectation)
         }
