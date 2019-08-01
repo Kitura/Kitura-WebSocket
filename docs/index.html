@@ -7,7 +7,7 @@
     <meta charset="utf-8">
     <script src="js/jquery.min.js" defer></script>
     <script src="js/jazzy.js" defer></script>
-    
+
     <script src="js/lunr.min.js" defer></script>
     <script src="js/typeahead.jquery.js" defer></script>
     <script src="js/jazzy.search.js" defer></script>
@@ -24,20 +24,20 @@
         </a>
          (100% documented)
       </p>
-    
+
       <p class="header-col--secondary">
         <form role="search" action="search.json">
           <input type="text" placeholder="Search documentation" data-typeahead>
         </form>
       </p>
-    
+
         <p class="header-col header-col--secondary">
           <a class="header-link" href="https://github.com/IBM-Swift/Kitura-WebSocket/">
             <img class="header-icon" src="img/gh.png"/>
             View on GitHub
           </a>
         </p>
-    
+
     </header>
 
     <p class="breadcrumbs">
@@ -88,7 +88,7 @@
 
         <section class="section">
           <div class="section-content">
-            
+
             <a href='#kitura-websocket' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h1 id='kitura-websocket'>Kitura-WebSocket</h1>
 
 <p><strong>WebSocket support for Kitura base servers</strong></p>
@@ -108,8 +108,8 @@ protocol (RFC 6455). It is compatible with a variety of WebSocket clients, inclu
 
 <p>Kitura-WebSocket supports version thirteen of the WebSocket protocol.</p>
 
-<p>Both the WS and WSS (SSL/TLS secured WS) protocols are supported by Kitura-WebSocket. 
-To enable WSS simply set up your Kitura based server for SSL/TLS support. See the tutorial 
+<p>Both the WS and WSS (SSL/TLS secured WS) protocols are supported by Kitura-WebSocket.
+To enable WSS simply set up your Kitura based server for SSL/TLS support. See the tutorial
 <a href="http://www.kitura.io/en/resources/tutorials/ssl.html">Enabling SSL/TLS on your Kitura server</a> on
 <a href="http://www.kitura.io/en/starter/settingup.html">www.kitura.io</a> for details.  </p>
 <a href='#table-of-contents' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='table-of-contents'>Table of Contents</h2>
@@ -126,7 +126,7 @@ To enable WSS simply set up your Kitura based server for SSL/TLS support. See th
 <a href='#pre-requisites' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='pre-requisites'>Pre-requisites</h2>
 
 <p>Working with Kitura-WebSocket requires that you are set up to work with Kitura. See
-<a href="http://www.kitura.io/en/starter/settingup.html">www.kitura.io</a> for details.</p>
+<a href="https://www.kitura.io/learn.html">www.kitura.io</a> for details.</p>
 <a href='#apis' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='apis'>APIs</h2>
 
 <p>The following is an overview of the Kitura-WebSocket APIs. For more details see <a href="http://ibm-swift.github.io/Kitura-WebSocket">http://ibm-swift.github.io/Kitura-WebSocket</a>.</p>
@@ -384,7 +384,7 @@ ClientDirectory
         <span class="k">if</span> <span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nx">type</span> <span class="o">===</span> <span class="s1">'utf8'</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'\r=&gt; '</span> <span class="o">+</span> <span class="nx">message</span><span class="p">.</span><span class="nx">utf8Data</span><span class="p">);</span>
             <span class="nx">rl</span><span class="p">.</span><span class="nx">prompt</span><span class="p">();</span>
-        <span class="p">}</span>   
+        <span class="p">}</span>
     <span class="p">});</span>
 
     <span class="nx">rl</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'line'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">line</span><span class="p">)</span> <span class="p">{</span>
