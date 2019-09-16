@@ -113,7 +113,7 @@ extension KituraTest {
     private func parseFrameOpcode(using: NSMutableData, position: Int) -> (Bool, Int, Int) {
         guard using.length > position else { return (false, -1, position) }
         
-        let byte = (using.bytes.bindMemory(to: UInt8.self, capacity: 1)+position)[0]
+        let byte = using.bytes.load(fromByteOffset: position, as: UInt8.self)
         return ((byte & 0x80) != 0, Int(byte & 0x7f), position+1)
     }
     
@@ -122,7 +122,7 @@ extension KituraTest {
             return (-1, position)
         }
         
-        let byte = (using.bytes.bindMemory(to: UInt8.self, capacity: 1)+position)[0]
+        let byte = using.bytes.load(fromByteOffset: position, as: UInt8.self)
         if byte & 0x80 != 0 {
             XCTFail("The server isn't suppose to send masked frames")
         }
@@ -177,7 +177,7 @@ extension KituraTest {
         #endif
         buffer.append(&mask, length: mask.count)
         
-        let payloadBytes = withPayload.bytes.bindMemory(to: UInt8.self, capacity: withPayload.length)
+        let payloadBytes = UnsafeRawBufferPointer(start: withPayload.bytes, count: withPayload.length)
         
         for i in 0 ..< withPayload.length {
             var byte = payloadBytes[i] ^ mask[i % 4]
