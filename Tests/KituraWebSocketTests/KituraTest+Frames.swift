@@ -149,7 +149,12 @@ extension KituraTest {
             withUnsafeMutableBytes(of: &networkOrderedUInt32) { ptr in
                 let unalignedUInt32Start = using.bytes.advanced(by: position+5)
                 let unalignedUInt32 = UnsafeRawBufferPointer(start: unalignedUInt32Start, count: 4)
-                ptr.copyMemory(from: unalignedUInt32)
+                
+                #if swift(>=4.1)
+                    ptr.copyMemory(from: unalignedUInt32)
+                #else
+                    ptr.copyBytes(from: unalignedUInt32)
+                #endif
             }
             
             #if os(Linux)
