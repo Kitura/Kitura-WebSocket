@@ -131,7 +131,7 @@ extension KituraTest {
         if length == 126 {
             guard position+2 < using.length else { return (-1, position+1) }
             
-            let networkOrderedUInt16 = UnsafeRawPointer(using.bytes+position+1).assumingMemoryBound(to: UInt16.self)[0]
+            let networkOrderedUInt16 = using.bytes.load(fromByteOffset: position+1, as: UInt16.self)
             
             #if os(Linux)
                 length = Int(Glibc.ntohs(networkOrderedUInt16))
@@ -142,8 +142,15 @@ extension KituraTest {
         }
         else if length == 127 {
             guard position+8 < using.length else { return (-1, position+1) }
-            
-            let networkOrderedUInt32 = UnsafeRawPointer(using.bytes+position+5).assumingMemoryBound(to: UInt32.self)[0]
+            // We cannot perform an unaligned load of a 32-bit value from the buffer.
+            // Instead, create correctly aligned storage for a 32-bit value and copy
+            // the bytes from the buffer into its storage.
+            var networkOrderedUInt32 = UInt32(0)
+            withUnsafeMutableBytes(of: &networkOrderedUInt32) { ptr in
+                let unalignedUInt32Start = using.bytes.advanced(by: position+5)
+                let unalignedUInt32 = UnsafeRawBufferPointer(start: unalignedUInt32Start, count: 4)
+                ptr.copyMemory(from: unalignedUInt32)
+            }
             
             #if os(Linux)
                 length = Int(Glibc.ntohl(networkOrderedUInt32))
