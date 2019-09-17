@@ -112,7 +112,18 @@ struct WSFrameParser {
         switch lengthByte {
         case 126:
             if length - from >= 3 {
-                 let networkOrderedUInt16 = bytes.load(fromByteOffset: from+1, as: UInt16.self)
+                // We cannot perform an unaligned load of a 16-bit value from the buffer.
+                // Instead, create correctly aligned storage for a 16-bit value and copy
+                // the bytes from the buffer into its storage.
+                var networkOrderedUInt16 = UInt16(0)
+                withUnsafeMutableBytes(of: &networkOrderedUInt16) { ptr in
+                    let unalignedUInt16 = UnsafeRawBufferPointer(rebasing: bytes[from+1 ..< from+3])
+                    #if swift(>=4.1)
+                        ptr.copyMemory(from: unalignedUInt16)
+                    #else
+                        ptr.copyBytes(from: unalignedUInt16)
+                    #endif
+                }
                 #if os(Linux)
                     payloadLength = Int(Glibc.ntohs(networkOrderedUInt16))
                 #else
@@ -127,14 +138,13 @@ struct WSFrameParser {
                 // the bytes from the buffer into its storage.
                 var networkOrderedUInt32 = UInt32(0)
                 withUnsafeMutableBytes(of: &networkOrderedUInt32) { ptr in
-                    let unalignedUInt32Start = bytes.baseAddress?.advanced(by: from+5)
-                    let unalignedUInt32 = UnsafeRawBufferPointer(start: unalignedUInt32Start, count: 4)
+                    let unalignedUInt32 = UnsafeRawBufferPointer(rebasing: bytes[from+5 ..< from+9])
                     #if swift(>=4.1)
                         ptr.copyMemory(from: unalignedUInt32)
                     #else
                         ptr.copyBytes(from: unalignedUInt32)
                     #endif
-                    }
+                }
                 #if os(Linux)
                     payloadLength = Int(Glibc.ntohl(networkOrderedUInt32))
                 #else
