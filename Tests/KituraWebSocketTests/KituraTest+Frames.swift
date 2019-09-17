@@ -131,7 +131,19 @@ extension KituraTest {
         if length == 126 {
             guard position+2 < using.length else { return (-1, position+1) }
             
-            let networkOrderedUInt16 = using.bytes.load(fromByteOffset: position+1, as: UInt16.self)
+            // We cannot perform an unaligned load of a 16-bit value from the buffer.
+            // Instead, create correctly aligned storage for a 16-bit value and copy
+            // the bytes from the buffer into its storage.
+            let bytes = UnsafeRawBufferPointer(start: using.bytes, count: using.length)
+            var networkOrderedUInt16 = UInt16(0)
+            withUnsafeMutableBytes(of: &networkOrderedUInt16) { ptr in
+                let unalignedUInt16 = UnsafeRawBufferPointer(rebasing: bytes[position+1 ..< position+3])
+                #if swift(>=4.1)
+                    ptr.copyMemory(from: unalignedUInt16)
+                #else
+                    ptr.copyBytes(from: unalignedUInt16)
+                #endif
+            }
             
             #if os(Linux)
                 length = Int(Glibc.ntohs(networkOrderedUInt16))
@@ -142,14 +154,14 @@ extension KituraTest {
         }
         else if length == 127 {
             guard position+8 < using.length else { return (-1, position+1) }
+
             // We cannot perform an unaligned load of a 32-bit value from the buffer.
             // Instead, create correctly aligned storage for a 32-bit value and copy
             // the bytes from the buffer into its storage.
+            let bytes = UnsafeRawBufferPointer(start: using.bytes, count: using.length)
             var networkOrderedUInt32 = UInt32(0)
             withUnsafeMutableBytes(of: &networkOrderedUInt32) { ptr in
-                let unalignedUInt32Start = using.bytes.advanced(by: position+5)
-                let unalignedUInt32 = UnsafeRawBufferPointer(start: unalignedUInt32Start, count: 4)
-                
+                let unalignedUInt32 = UnsafeRawBufferPointer(rebasing: bytes[position+5 ..< position+9])
                 #if swift(>=4.1)
                     ptr.copyMemory(from: unalignedUInt32)
                 #else
