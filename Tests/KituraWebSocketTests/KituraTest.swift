@@ -237,7 +237,7 @@ class KituraTest: XCTestCase {
         XCTAssertEqual(payload.length, MemoryLayout<UInt16>.stride, "The payload wasn't \(MemoryLayout<UInt16>.stride) bytes long. It was \(payload.length) bytes long")
         
         let reasonCode: UInt16
-        let networkOrderedUInt16 = UnsafeRawPointer(payload.bytes).assumingMemoryBound(to: UInt16.self)[0]
+        let networkOrderedUInt16 = payload.bytes.load(fromByteOffset: 0, as: UInt16.self)
         
         #if os(Linux)
             reasonCode = Glibc.ntohs(networkOrderedUInt16)
