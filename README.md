@@ -406,14 +406,14 @@ node chat.js localhost:8080
 As described above, the server echoes all text messages sent to it to all of the clients that have connected to it, with the exception of the client that sent the message. Therefore, in order to see the example in action you will need to connect more than one client to the server. The client can be run in several terminal windows on the same computer. You can then enter a message on one client and see it appear on another client and vice versa.
 
 ## Example - Advanced
-For a more complete example please see [Kitura-Sample](https://github.com/IBM-Swift/Kitura-Sample).
+For a more complete example please see [Kitura-Sample](https://github.com/Kitura/Kitura-Sample).
 
 ## API Documentation
-For more information visit our [API reference](https://ibm-swift.github.io/Kitura-WebSocket/index.html).
+For more information visit our [API reference](https://kitura.github.io/Kitura-WebSocket/index.html).
 
 ## Community
 
 We love to talk server-side Swift, and Kitura. Join our [Slack](http://swift-at-ibm-slack.mybluemix.net/) to meet the team!
 
 ## License
-This library is licensed under Apache 2.0. Full license text is available in [LICENSE](https://github.com/IBM-Swift/Kitura-WebSocket/blob/master/LICENSE.txt).
+This library is licensed under Apache 2.0. Full license text is available in [LICENSE](https://github.com/Kitura/Kitura-WebSocket/blob/master/LICENSE.txt).
