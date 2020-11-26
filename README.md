@@ -1,16 +1,16 @@
 
 <p align="center">
     <a href="http://kitura.io/">
-        <img src="https://raw.githubusercontent.com/IBM-Swift/Kitura/master/Sources/Kitura/resources/kitura-bird.svg?sanitize=true" height="100" alt="Kitura">
+        <img src="https://raw.githubusercontent.com/Kitura/Kitura/master/Sources/Kitura/resources/kitura-bird.svg?sanitize=true" height="100" alt="Kitura">
     </a>
 </p>
 
 <p align="center">
-    <a href="https://ibm-swift.github.io/Kitura-WebSocket/index.html">
+    <a href="https://kitura.github.io/Kitura-WebSocket/index.html">
     <img src="https://img.shields.io/badge/apidoc-KituraWebSocket-1FBCE4.svg?style=flat" alt="APIDoc">
     </a>
-    <a href="https://travis-ci.org/IBM-Swift/Kitura-WebSocket">
-    <img src="https://travis-ci.org/IBM-Swift/Kitura-WebSocket.svg?branch=master" alt="Build Status - Master">
+    <a href="https://travis-ci.org/Kitura/Kitura-WebSocket">
+    <img src="https://travis-ci.org/Kitura/Kitura-WebSocket.svg?branch=master" alt="Build Status - Master">
     </a>
     <img src="https://img.shields.io/badge/os-macOS-green.svg?style=flat" alt="macOS">
     <img src="https://img.shields.io/badge/os-linux-green.svg?style=flat" alt="Linux">
@@ -48,10 +48,10 @@ To enable WSS set up your Kitura based server for SSL/TLS support. See the tutor
 
 #### Add dependencies
 
-Add the `Kitura-WebSocket` package to the dependencies within your application’s `Package.swift` file. Substitute `"x.x.x"` with the latest `Kitura-WebSocket` [release](https://github.com/IBM-Swift/Kitura-WebSocket/releases).
+Add the `Kitura-WebSocket` package to the dependencies within your application’s `Package.swift` file. Substitute `"x.x.x"` with the latest `Kitura-WebSocket` [release](https://github.com/Kitura/Kitura-WebSocket/releases).
 
 ```swift
-.package(url: "https://github.com/IBM-Swift/Kitura-WebSocket.git", from: "x.x.x")
+.package(url: "https://github.com/Kitura/Kitura-WebSocket.git", from: "x.x.x")
 ```
 
 Add `Kitura-WebSocket` to your target's dependencies:
@@ -67,7 +67,7 @@ Add `Kitura-WebSocket` to your target's dependencies:
   ```
 
 ## API Overview
-The following is an overview of the Kitura-WebSocket APIs, for more information see the [API reference](https://ibm-swift.github.io/Kitura-WebSocket/index.html).
+The following is an overview of the Kitura-WebSocket APIs, for more information see the [API reference](https://kitura.github.io/Kitura-WebSocket/index.html).
 
 When using the WebSocket protocol, clients connect to WebSocket services running on a particular server. WebSocket services are identified on a particular server via a path. This path is sent in the upgrade request used to upgrade a connection from HTTP 1.1 to WebSocket.
 
@@ -156,7 +156,7 @@ WebSocket.unregister(path: String)
 This function is passed the path which the `WebSocketService` being unregistered was registered on.
 
 ## Autobahn TestSuite
-Kitura-WebSocket complies to the [Autobahn Testsuite](https://github.com/crossbario/autobahn-testsuite) for web sockets. To create an echo server and run this test suite against it, follow the instructions [here](https://github.com/IBM-Swift/Kitura-WebSocket/blob/master/AutobahnTests.md).
+Kitura-WebSocket complies to the [Autobahn Testsuite](https://github.com/crossbario/autobahn-testsuite) for web sockets. To create an echo server and run this test suite against it, follow the instructions [here](https://github.com/Kitura/Kitura-WebSocket/blob/master/AutobahnTests.md).
 
 ## Example - Simple
 This example is a simplistic chat service to demonstrate how to use the Kitura-WebSocket APIs.
@@ -189,9 +189,9 @@ import PackageDescription
 let package = Package(
     name: "ChatServer",
     dependencies: [
-         .package(url: "https://github.com/IBM-Swift/Kitura.git", .upToNextMinor(from: "x.x.x")),
-         .package(url: "https://github.com/IBM-Swift/HeliumLogger.git", from: "x.x.x"),
-         .package(url: "https://github.com/IBM-Swift/Kitura-WebSocket.git", from: "x.x.x")
+         .package(url: "https://github.com/Kitura/Kitura.git", .upToNextMinor(from: "x.x.x")),
+         .package(url: "https://github.com/Kitura/HeliumLogger.git", from: "x.x.x"),
+         .package(url: "https://github.com/Kitura/Kitura-WebSocket.git", from: "x.x.x")
     ],
     targets: [
         .target(
