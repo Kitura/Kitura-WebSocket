@@ -32,7 +32,7 @@
       </p>
     
         <p class="header-col header-col--secondary">
-          <a class="header-link" href="https://github.com/IBM-Swift/Kitura-WebSocket/">
+          <a class="header-link" href="https://github.com/Kitura/Kitura-WebSocket/">
             <img class="header-icon" src="img/gh.png"/>
             View on GitHub
           </a>
@@ -64,7 +64,7 @@
             </ul>
           </li>
           <li class="nav-group-name">
-            <a class="nav-group-name-link" href="Enums.html">Enums</a>
+            <a class="nav-group-name-link" href="Enums.html">Enumerations</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
                 <a class="nav-group-task-link" href="Enums/WebSocketCloseReasonCode.html">WebSocketCloseReasonCode</a>
@@ -87,135 +87,176 @@
       <article class="main-content">
 
         <section class="section">
-          <div class="section-content">
+          <div class="section-content top-matter">
             
-            <a href='#kitura-websocket' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h1 id='kitura-websocket'>Kitura-WebSocket</h1>
+            <p align="center">
+    <a href="http://kitura.io/">
+        <img src="https://raw.githubusercontent.com/Kitura/Kitura/master/Sources/Kitura/resources/kitura-bird.svg?sanitize=true" height="100" alt="Kitura">
+    </a>
+</p>
 
-<p><strong>WebSocket support for Kitura base servers</strong></p>
-
-<p><a href="https://travis-ci.org/IBM-Swift/Kitura-WebSocket"><img src="https://travis-ci.org/IBM-Swift/Kitura-WebSocket.svg?branch=master" alt="Build Status - Master"></a>
-<img src="https://img.shields.io/badge/os-macOS-green.svg?style=flat" alt="macOS">
-<img src="https://img.shields.io/badge/os-linux-green.svg?style=flat" alt="Linux">
-<img src="https://img.shields.io/badge/license-Apache2-blue.svg?style=flat" alt="Apache 2">
-&nbsp;<a href="http://swift-at-ibm-slack.mybluemix.net/"><img src="http://swift-at-ibm-slack.mybluemix.net/badge.svg" alt="Slack Status"></a>
-<a href="https://codecov.io/gh/IBM-Swift/Kitura-WebSocket"><img src="https://codecov.io/gh/IBM-Swift/Kitura-WebSocket/branch/master/graph/badge.svg" alt="codecov"></a></p>
-<a href='#summary' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='summary'>Summary</h2>
+<p align="center">
+    <a href="https://kitura.github.io/Kitura-WebSocket/index.html">
+    <img src="https://img.shields.io/badge/apidoc-KituraWebSocket-1FBCE4.svg?style=flat" alt="APIDoc">
+    </a>
+    <a href="https://travis-ci.org/Kitura/Kitura-WebSocket">
+    <img src="https://travis-ci.org/Kitura/Kitura-WebSocket.svg?branch=master" alt="Build Status - Master">
+    </a>
+    <img src="https://img.shields.io/badge/os-macOS-green.svg?style=flat" alt="macOS">
+    <img src="https://img.shields.io/badge/os-linux-green.svg?style=flat" alt="Linux">
+    <img src="https://img.shields.io/badge/license-Apache2-blue.svg?style=flat" alt="Apache 2">
+    <a href="http://swift-at-ibm-slack.mybluemix.net/">
+    <img src="http://swift-at-ibm-slack.mybluemix.net/badge.svg" alt="Slack Status">
+    </a>
+</p>
+<h1 id='kitura-websocket' class='heading'>Kitura-WebSocket</h1>
 
 <p>Kitura-WebSocket provides Kitura based servers the ability to receive and send messages to clients using the WebSocket
-protocol (RFC 6455). It is compatible with a variety of WebSocket clients, including:
-- The built-in WebSocket support in the Chrome, FireFox, and Safari browsers
-- The NPM <a href="https://www.npmjs.com/package/websocket">websocket</a> package.</p>
+protocol (RFC 6455). It is compatible with a variety of WebSocket clients, including:</p>
+
+<ul>
+<li>The built-in WebSocket support in the Chrome, FireFox, and Safari browsers.</li>
+<li>The NPM <a href="https://www.npmjs.com/package/websocket">websocket</a> package.</li>
+</ul>
 
 <p>Kitura-WebSocket supports version thirteen of the WebSocket protocol.</p>
 
-<p>Both the WS and WSS (SSL/TLS secured WS) protocols are supported by Kitura-WebSocket. 
-To enable WSS simply set up your Kitura based server for SSL/TLS support. See the tutorial 
-<a href="http://www.kitura.io/en/resources/tutorials/ssl.html">Enabling SSL/TLS on your Kitura server</a> on
-<a href="http://www.kitura.io/en/starter/settingup.html">www.kitura.io</a> for details.  </p>
-<a href='#table-of-contents' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='table-of-contents'>Table of Contents</h2>
+<p>Both the WS and WSS (SSL/TLS secured WS) protocols are supported by Kitura-WebSocket.
+To enable WSS set up your Kitura based server for SSL/TLS support. See the tutorial
+<a href="https://www.kitura.io/guides/building/ssl.html">Enabling SSL/TLS on your Kitura server</a> on
+<a href="http://www.kitura.io">www.kitura.io</a> for details.</p>
+<h2 id='table-of-contents' class='heading'>Table of Contents</h2>
 
 <ul>
-<li><a href="#summary">Summary</a></li>
-<li><a href="#pre-requisites">Pre-requisites</a></li>
-<li><a href="#apis">APIs</a></li>
-<li><a href="#an-example">An example</a></li>
-<li><a href="a-more-complete-example">A more complete example</a></li>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#api-overview">API Overview</a></li>
+<li><a href="#Autobahn-TestSuite">Autobahn TestSuite</a></li>
+<li><a href="#example-simple">Example - Simple</a></li>
+<li><a href="#example-advanced">Example - Advanced</a></li>
+<li><a href="#api-documentation">API Documentation</a></li>
 <li><a href="#community">Community</a></li>
 <li><a href="#license">License</a></li>
 </ul>
-<a href='#pre-requisites' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='pre-requisites'>Pre-requisites</h2>
+<h2 id='usage' class='heading'>Usage</h2>
+<h4 id='add-dependencies' class='heading'>Add dependencies</h4>
 
-<p>Working with Kitura-WebSocket requires that you are set up to work with Kitura. See
-<a href="http://www.kitura.io/en/starter/settingup.html">www.kitura.io</a> for details.</p>
-<a href='#apis' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='apis'>APIs</h2>
+<p>Add the <code>Kitura-WebSocket</code> package to the dependencies within your application’s <code>Package.swift</code> file. Substitute <code>&quot;x.x.x&quot;</code> with the latest <code>Kitura-WebSocket</code> <a href="https://github.com/Kitura/Kitura-WebSocket/releases">release</a>.</p>
+<pre class="highlight swift"><code><span class="o">.</span><span class="nf">package</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="s">"https://github.com/Kitura/Kitura-WebSocket.git"</span><span class="p">,</span> <span class="nv">from</span><span class="p">:</span> <span class="s">"x.x.x"</span><span class="p">)</span>
+</code></pre>
 
-<p>The following is an overview of the Kitura-WebSocket APIs. For more details see <a href="http://ibm-swift.github.io/Kitura-WebSocket">http://ibm-swift.github.io/Kitura-WebSocket</a>.</p>
+<p>Add <code>Kitura-WebSocket</code> to your target&rsquo;s dependencies:</p>
+<pre class="highlight swift"><code><span class="o">.</span><span class="nf">target</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="s">"example"</span><span class="p">,</span> <span class="nv">dependencies</span><span class="p">:</span> <span class="p">[</span><span class="s">"Kitura-WebSocket"</span><span class="p">]),</span>
+</code></pre>
+<h4 id='import-package' class='heading'>Import package</h4>
+<pre class="highlight swift"><code>  <span class="kd">import</span> <span class="kt">KituraWebSocket</span>
+</code></pre>
+<h2 id='api-overview' class='heading'>API Overview</h2>
 
-<p>When using the WebSocket protocol, clients connect to WebSocket Services running on a particular server. WebSocket Services are
-identified on a particular server via a path. This path is sent in the Upgrade request used to upgrade a connection from
-HTTP 1.1 to WebSocket.</p>
+<p>The following is an overview of the Kitura-WebSocket APIs, for more information see the <a href="https://kitura.github.io/Kitura-WebSocket/index.html">API reference</a>.</p>
 
-<p>The Kitura-WebSocket API reflects that interaction using the class <code>WebSocketConnection</code> which represents a WebSocket client&rsquo;s
-connection to a service and the protocol <code>WebSocketService</code> which is implemented by classes that are WebSocket Services.</p>
+<p>When using the WebSocket protocol, clients connect to WebSocket services running on a particular server. WebSocket services are identified on a particular server via a path. This path is sent in the upgrade request used to upgrade a connection from HTTP 1.1 to WebSocket.</p>
 
-<p>A specific <code>WebSocketConnection</code> object is connected to a specific <code>WebSocketService</code> instance. On the other hand a specific
-<code>WebSocketService</code> instance is connected to many <code>WebSocketConnection</code> objects.</p>
-<a href='#websocketconnection' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='websocketconnection'>WebSocketConnection</h3>
+<p>The Kitura-WebSocket API reflects that interaction using the class <code><a href="Classes/WebSocketConnection.html">WebSocketConnection</a></code> which represents a WebSocket client&rsquo;s connection to a service and the protocol <code><a href="Protocols/WebSocketService.html">WebSocketService</a></code> which is implemented by classes that are WebSocket services.</p>
 
-<p>The WebSocketConnection class provides:
-- Functions to send text and binary messages to the client
-  <code>swift
-  WebSocketConnection.send(message: Data)
-  WebSocketConnection.send(message: String)
-</code>
-- Functions to close the connection gracefully and forcefully
-  <code>swift
-  WebSocketConnection.close(reason: WebSocketCloseReasonCode?=nil, description: String?=nil)
-  WebSocketConnection.drop(reason: WebSocketCloseReasonCode?=nil, description: String?=nil)
-</code>
-  In both close() and drop(), the <code>WebSocketCloseReasonCode</code> enum provides the standard WebSocket Close Reason codes, with the ability
-  to specify application specific ones.</p>
+<p>A specific <code><a href="Classes/WebSocketConnection.html">WebSocketConnection</a></code> object is connected to a specific <code><a href="Protocols/WebSocketService.html">WebSocketService</a></code> instance. On the other hand a specific <code><a href="Protocols/WebSocketService.html">WebSocketService</a></code> instance is connected to many <code><a href="Classes/WebSocketConnection.html">WebSocketConnection</a></code> objects.</p>
+<h3 id='websocketconnection' class='heading'>WebSocketConnection</h3>
+
+<p>The WebSocketConnection class provides:</p>
 
 <ul>
-<li>A unique identifier that can be used to help manage the collection of <code>WebSocketConnection</code> objects connected to a <code>WebSocketService</code>.
-<code>swift
-id: String
-</code></li>
+<li>Functions to send text and binary messages to the client.</li>
 </ul>
-<a href='#websocketservice' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='websocketservice'>WebSocketService</h3>
-
-<p>The functions of the WebSocketService protocol enable Kitura-WebSocket to notify a WebSocket service of a set of events that
-occur. These events include:
-- A client has connected to the WebSocketService
-<code>swift
-func connected(connection: WebSocketConnection)
-</code></p>
+<pre class="highlight swift"><code><span class="kt">WebSocketConnection</span><span class="o">.</span><span class="nf">send</span><span class="p">(</span><span class="nv">message</span><span class="p">:</span> <span class="kt">Data</span><span class="p">)</span>
+<span class="kt">WebSocketConnection</span><span class="o">.</span><span class="nf">send</span><span class="p">(</span><span class="nv">message</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span>
+</code></pre>
 
 <ul>
-<li><p>A client has disconnected from the WebSocketService
-<code>swift
-disconnected(connection: WebSocketConnection, reason: WebSocketCloseReasonCode)
-</code>
-The reason parameter contains the reason code associated with the client disconnecting. It may come from either
-a close command sent by the client or determined by Kitura-WebSocket if the connection&rsquo;s socket suddenly was closed.</p></li>
-<li><p>A binary message was received from a client
-<code>swift
-func received(message: Data, from: WebSocketConnection)
-</code>
-The message parameter contains the bytes of the message in the form of a Data struct.</p></li>
-<li><p>A text message was received from a client
-<code>swift
-func received(message: String, from: WebSocketConnection)
-</code>
-The message parameter contains the message in the form of a String.</p></li>
+<li>Functions to close the connection gracefully and forcefully.</li>
 </ul>
-<a href='#websocket' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='websocket'>WebSocket</h3>
+<pre class="highlight swift"><code><span class="kt">WebSocketConnection</span><span class="o">.</span><span class="nf">close</span><span class="p">(</span><span class="nv">reason</span><span class="p">:</span> <span class="kt">WebSocketCloseReasonCode</span><span class="p">?</span><span class="o">=</span><span class="kc">nil</span><span class="p">,</span> <span class="nv">description</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span><span class="o">=</span><span class="kc">nil</span><span class="p">)</span>
+<span class="kt">WebSocketConnection</span><span class="o">.</span><span class="nf">drop</span><span class="p">(</span><span class="nv">reason</span><span class="p">:</span> <span class="kt">WebSocketCloseReasonCode</span><span class="p">?</span><span class="o">=</span><span class="kc">nil</span><span class="p">,</span> <span class="nv">description</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span><span class="o">=</span><span class="kc">nil</span><span class="p">)</span>
+</code></pre>
 
-<p>Classes which implement the <code>WebSocketService</code> protocol are registered with the server using the function:
-<code>swift
-WebSocket.register(service: WebSocketService, onPath: String)
-</code>
-This function is passed the <code>WebSocketService</code> being registered along with the path it is being registered on.</p>
+<p>In both <code>close()</code> and <code>drop()</code>, the <code><a href="Enums/WebSocketCloseReasonCode.html">WebSocketCloseReasonCode</a></code> enum provides the standard WebSocket close reason codes with the ability to specify application specific ones.</p>
 
-<p>A registered <code>WebSocketService</code> can be unregistered from the server by using the function:
-<code>swift
-WebSocket.unregister(path: String)
-</code>
-This function is passed the path on which the <code>WebSocketService</code> being unregistered, was registered on.</p>
-<a href='#an-example' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='an-example'>An example</h2>
+<ul>
+<li>A unique identifier that can be used to help manage the collection of <code><a href="Classes/WebSocketConnection.html">WebSocketConnection</a></code> objects connected to a <code><a href="Protocols/WebSocketService.html">WebSocketService</a></code>.</li>
+</ul>
+<pre class="highlight swift"><code><span class="nv">id</span><span class="p">:</span> <span class="kt">String</span>
+</code></pre>
+<h3 id='websocketservice' class='heading'>WebSocketService</h3>
 
-<p>A simple example to better describe the APIs of Kitura-WebSocket. This example, a very simplistic chat service.
+<p>The WebSocketService protocol enables Kitura-WebSocket to notify a WebSocket service about a set of events that
+occur. These events include:</p>
+
+<ul>
+<li>A client has connected to the WebSocketService.</li>
+</ul>
+<pre class="highlight swift"><code><span class="nf">connected</span><span class="p">(</span><span class="nv">connection</span><span class="p">:</span> <span class="kt">WebSocketConnection</span><span class="p">)</span>
+</code></pre>
+
+<ul>
+<li>A client has disconnected from the WebSocketService.</li>
+</ul>
+<pre class="highlight swift"><code><span class="nf">disconnected</span><span class="p">(</span><span class="nv">connection</span><span class="p">:</span> <span class="kt">WebSocketConnection</span><span class="p">,</span> <span class="nv">reason</span><span class="p">:</span> <span class="kt">WebSocketCloseReasonCode</span><span class="p">)</span>
+</code></pre>
+
+<p>The reason parameter contains the reason code associated with the client disconnecting. It may come from either
+a close command sent by the client, or be determined by Kitura-WebSocket if the connection&rsquo;s socket suddenly was closed.</p>
+
+<ul>
+<li>A binary message was received from a client.</li>
+</ul>
+<pre class="highlight swift"><code><span class="nf">received</span><span class="p">(</span><span class="nv">message</span><span class="p">:</span> <span class="kt">Data</span><span class="p">,</span> <span class="nv">from</span><span class="p">:</span> <span class="kt">WebSocketConnection</span><span class="p">)</span>
+</code></pre>
+
+<p>The message parameter contains the bytes of the message in the form of a Data struct.</p>
+
+<ul>
+<li>A text message was received from a client.</li>
+</ul>
+<pre class="highlight swift"><code><span class="nf">received</span><span class="p">(</span><span class="nv">message</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">from</span><span class="p">:</span> <span class="kt">WebSocketConnection</span><span class="p">)</span>
+</code></pre>
+
+<p>The message parameter contains the message in the form of a String.</p>
+<h4 id='detect-and-close-broken-connections' class='heading'>Detect and close broken connections</h4>
+
+<p>WebSocketService protocol has an optional Int property called <code>connectionTimeout</code>. This is the time in seconds that a connection must be unresponsive to be automatically closed by the server. If the WebSocket server has not received any messages in the first half of the timeout time it will ping the connection. If a pong is not received in the remaining half of the timeout, the connection will be closed with a 1006 (connection closed abnormally) status code. The <code>connectionTimeout</code> defaults to <code>nil</code>, meaning no connection cleanup will take place.  </p>
+
+<p>You can set the <code>connectionTimeout</code> by assigning a value to the property within your WebSocketService class:</p>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">connectionTimeout</span><span class="p">:</span> <span class="kt">Int</span><span class="p">?</span> <span class="o">=</span> <span class="mi">60</span>
+</code></pre>
+<h3 id='websocket' class='heading'>WebSocket</h3>
+
+<p>Classes which implement the <code><a href="Protocols/WebSocketService.html">WebSocketService</a></code> protocol are registered with the server as follows:</p>
+<pre class="highlight swift"><code><span class="kt">WebSocket</span><span class="o">.</span><span class="nf">register</span><span class="p">(</span><span class="nv">service</span><span class="p">:</span> <span class="kt">WebSocketService</span><span class="p">,</span> <span class="nv">onPath</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span>
+</code></pre>
+
+<p>This function is passed the <code><a href="Protocols/WebSocketService.html">WebSocketService</a></code> being registered along with the path it is being registered on.</p>
+
+<p>A registered <code><a href="Protocols/WebSocketService.html">WebSocketService</a></code> can be unregistered from the server as follows:</p>
+<pre class="highlight swift"><code><span class="kt">WebSocket</span><span class="o">.</span><span class="nf">unregister</span><span class="p">(</span><span class="nv">path</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span>
+</code></pre>
+
+<p>This function is passed the path which the <code><a href="Protocols/WebSocketService.html">WebSocketService</a></code> being unregistered was registered on.</p>
+<h2 id='autobahn-testsuite' class='heading'>Autobahn TestSuite</h2>
+
+<p>Kitura-WebSocket complies to the <a href="https://github.com/crossbario/autobahn-testsuite">Autobahn Testsuite</a> for web sockets. To create an echo server and run this test suite against it, follow the instructions <a href="https://github.com/Kitura/Kitura-WebSocket/blob/master/AutobahnTests.md">here</a>.</p>
+<h2 id='example-simple' class='heading'>Example - Simple</h2>
+
+<p>This example is a simplistic chat service to demonstrate how to use the Kitura-WebSocket APIs.
 The server side is written in Swift using Kitura-WebSocket and the client side is written in JavaScript using
-Node.js and the websocket NPM package.</p>
-<a href='#pre-requisites' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='pre-requisites'>Pre-requisites</h3>
+Node.js and the websocket NPM package. The instructions below show you how to create the files for both the server and client and then how to compile and run the application.</p>
+<h3 id='pre-requisites' class='heading'>Pre-requisites</h3>
 
 <p>In order to run the client one must have Node.js installed.</p>
-<a href='#the-server' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='the-server'>The server</h3>
+<h3 id='the-server' class='heading'>The server</h3>
 
 <p>The server keeps track of the clients that have connected to it and echoes all text messages sent to it to all
 of the clients that have connected to it, with the exception of the client that sent the message.</p>
 
-<p>The server&rsquo;s directory setup is something like this:
+<p>You will need to create the server&rsquo;s directory structure to be something like this:</p>
+
 <pre>
 ServerDirectory
 ├── Package.swift
@@ -223,60 +264,68 @@ ServerDirectory
     └── ChatServer
         ├── ChatService.swift
         └── main.swift
-</pre></p>
+</pre>
 
-<p>The Package.swift file contains:
-&ldquo;`swift
-import PackageDescription</p>
+<p>Create a <code>Package.swift</code> file with the following content, substituting <code>&quot;x.x.x&quot;</code> with the latest releases of Kitura, HeliumLogger and Kitura-WebSocket:</p>
+<pre class="highlight swift"><code><span class="c1">// swift-tools-version:4.0</span>
+<span class="kd">import</span> <span class="kt">PackageDescription</span>
 
-<p>let package = Package(
-    name: <q>ChatServer</q>,
-    dependencies: [
-        .Package(url: <q>https://github.com/IBM-Swift/HeliumLogger.git</q>, majorVersion: 1, minor: 7),
-        .Package(url: <q>https://github.com/IBM-Swift/Kitura-WebSocket</q>, majorVersion: 0, minor: 9)
-    ]
-)
-&rdquo;`
-The HeliumLogger package, while strictly not required, was added to enable logging.</p>
-
-<p>The ChatService.swift file contains:
-&ldquo;`swift
-// ChatServer is a very simple chat server</p>
-
-<p>import Foundation</p>
-
-<p>import KituraWebSocket</p>
-
-<p>class ChatService: WebSocketService {</p>
-<pre class="highlight plaintext"><code>private var connections = [String: WebSocketConnection]()
-
-public func connected(connection: WebSocketConnection) {
-    connections[connection.id] = connection
-}
-
-public func disconnected(connection: WebSocketConnection, reason: WebSocketCloseReasonCode) {
-    connections.removeValue(forKey: connection.id)
-}
-
-public func received(message: Data, from: WebSocketConnection) {
-    from.close(reason: .invalidDataType, description: "Chat-Server only accepts text messages")
-
-    connections.removeValue(forKey: from.id)
-}
-
-public func received(message: String, from: WebSocketConnection) {
-    for (connectionId, connection) in connections {
-        if connectionId != from.id {
-            connection.send(message: message)
-        }
-    }
-}
+<span class="k">let</span> <span class="nv">package</span> <span class="o">=</span> <span class="kt">Package</span><span class="p">(</span>
+    <span class="nv">name</span><span class="p">:</span> <span class="s">"ChatServer"</span><span class="p">,</span>
+    <span class="nv">dependencies</span><span class="p">:</span> <span class="p">[</span>
+         <span class="o">.</span><span class="nf">package</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="s">"https://github.com/Kitura/Kitura.git"</span><span class="p">,</span> <span class="o">.</span><span class="nf">upToNextMinor</span><span class="p">(</span><span class="nv">from</span><span class="p">:</span> <span class="s">"x.x.x"</span><span class="p">)),</span>
+         <span class="o">.</span><span class="nf">package</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="s">"https://github.com/Kitura/HeliumLogger.git"</span><span class="p">,</span> <span class="nv">from</span><span class="p">:</span> <span class="s">"x.x.x"</span><span class="p">),</span>
+         <span class="o">.</span><span class="nf">package</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="s">"https://github.com/Kitura/Kitura-WebSocket.git"</span><span class="p">,</span> <span class="nv">from</span><span class="p">:</span> <span class="s">"x.x.x"</span><span class="p">)</span>
+    <span class="p">],</span>
+    <span class="nv">targets</span><span class="p">:</span> <span class="p">[</span>
+        <span class="o">.</span><span class="nf">target</span><span class="p">(</span>
+            <span class="nv">name</span><span class="p">:</span> <span class="s">"ChatServer"</span><span class="p">,</span>
+            <span class="nv">dependencies</span><span class="p">:</span> <span class="p">[</span><span class="s">"Kitura"</span><span class="p">,</span> <span class="s">"HeliumLogger"</span><span class="p">,</span> <span class="s">"Kitura-WebSocket"</span><span class="p">]),</span>
+    <span class="p">]</span>
+<span class="p">)</span>
 </code></pre>
 
-<p>}
-&rdquo;<code>
-The class has a Dictionary, connections, which is used to keep track of the connections of all of the connected clients. The Dictionary is
-maintained by the</code>connected<code>and</code>disconnected` functions, which are, respectively, adding and removing connections from the dictionary.</p>
+<p>The HeliumLogger package, while strictly not required, was added to enable logging.</p>
+
+<p>Create a <code>ChatService.swift</code> file which contains:</p>
+<pre class="highlight swift"><code><span class="c1">// ChatServer is a very simple chat server</span>
+
+<span class="kd">import</span> <span class="kt">Foundation</span>
+
+<span class="kd">import</span> <span class="kt">KituraWebSocket</span>
+
+<span class="kd">class</span> <span class="kt">ChatService</span><span class="p">:</span> <span class="kt">WebSocketService</span> <span class="p">{</span>
+
+    <span class="kd">private</span> <span class="k">var</span> <span class="nv">connections</span> <span class="o">=</span> <span class="p">[</span><span class="kt">String</span><span class="p">:</span> <span class="kt">WebSocketConnection</span><span class="p">]()</span>
+
+    <span class="k">let</span> <span class="nv">connectionTimeout</span><span class="p">:</span> <span class="kt">Int</span><span class="p">?</span> <span class="o">=</span> <span class="mi">60</span>
+
+    <span class="kd">public</span> <span class="kd">func</span> <span class="nf">connected</span><span class="p">(</span><span class="nv">connection</span><span class="p">:</span> <span class="kt">WebSocketConnection</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">connections</span><span class="p">[</span><span class="n">connection</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">connection</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kd">func</span> <span class="nf">disconnected</span><span class="p">(</span><span class="nv">connection</span><span class="p">:</span> <span class="kt">WebSocketConnection</span><span class="p">,</span> <span class="nv">reason</span><span class="p">:</span> <span class="kt">WebSocketCloseReasonCode</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">connections</span><span class="o">.</span><span class="nf">removeValue</span><span class="p">(</span><span class="nv">forKey</span><span class="p">:</span> <span class="n">connection</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kd">func</span> <span class="nf">received</span><span class="p">(</span><span class="nv">message</span><span class="p">:</span> <span class="kt">Data</span><span class="p">,</span> <span class="nv">from</span><span class="p">:</span> <span class="kt">WebSocketConnection</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">from</span><span class="o">.</span><span class="nf">close</span><span class="p">(</span><span class="nv">reason</span><span class="p">:</span> <span class="o">.</span><span class="n">invalidDataType</span><span class="p">,</span> <span class="nv">description</span><span class="p">:</span> <span class="s">"Chat-Server only accepts text messages"</span><span class="p">)</span>
+
+        <span class="n">connections</span><span class="o">.</span><span class="nf">removeValue</span><span class="p">(</span><span class="nv">forKey</span><span class="p">:</span> <span class="n">from</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="kd">public</span> <span class="kd">func</span> <span class="nf">received</span><span class="p">(</span><span class="nv">message</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">from</span><span class="p">:</span> <span class="kt">WebSocketConnection</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">connectionId</span><span class="p">,</span> <span class="n">connection</span><span class="p">)</span> <span class="k">in</span> <span class="n">connections</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="n">connectionId</span> <span class="o">!=</span> <span class="n">from</span><span class="o">.</span><span class="n">id</span> <span class="p">{</span>
+                <span class="n">connection</span><span class="o">.</span><span class="nf">send</span><span class="p">(</span><span class="nv">message</span><span class="p">:</span> <span class="n">message</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>The class has a Dictionary, connections, which is used to keep track of the connections of all of the connected clients. The Dictionary is
+maintained by the <code>connected</code> and <code>disconnected</code> functions, which are, respectively, adding and removing connections from the dictionary.</p>
 
 <p>The <code>received</code> function, which receives binary messages, is rejecting the message, closing the client connection and removing the connection
 from the set of known connections.</p>
@@ -287,154 +336,170 @@ from the set of known connections.</p>
 one should add locking around the access of non-thread safe artifacts of the application such as the
 connections Dictionary in this very simplistic example.</p>
 
-<p>The main.swift file contains:
-&ldquo;`swift
-// ChatServer is a very simple chat server</p>
+<p>Create a <code>main.swift</code> file which contains:</p>
+<pre class="highlight swift"><code><span class="c1">// ChatServer is a very simple chat server</span>
 
-<p>import Foundation</p>
+<span class="kd">import</span> <span class="kt">Foundation</span>
 
-<p>import KituraNet
-import KituraWebSocket</p>
+<span class="kd">import</span> <span class="kt">KituraNet</span>
+<span class="kd">import</span> <span class="kt">KituraWebSocket</span>
 
-<p>import HeliumLogger
-import LoggerAPI</p>
+<span class="kd">import</span> <span class="kt">HeliumLogger</span>
+<span class="kd">import</span> <span class="kt">LoggerAPI</span>
 
-<p>// Using an implementation for a Logger
-HeliumLogger.use(.info)</p>
+<span class="c1">// Using an implementation for a Logger</span>
+<span class="kt">HeliumLogger</span><span class="o">.</span><span class="nf">use</span><span class="p">(</span><span class="o">.</span><span class="n">info</span><span class="p">)</span>
 
-<p>WebSocket.register(service: ChatService(), onPath: <q>chat</q>)</p>
+<span class="kt">WebSocket</span><span class="o">.</span><span class="nf">register</span><span class="p">(</span><span class="nv">service</span><span class="p">:</span> <span class="kt">ChatService</span><span class="p">(),</span> <span class="nv">onPath</span><span class="p">:</span> <span class="s">"chat"</span><span class="p">)</span>
 
-<p>class ChatServerDelegate: ServerDelegate {
-    public func handle(request: ServerRequest, response: ServerResponse) {}
-}</p>
+<span class="kd">class</span> <span class="kt">ChatServerDelegate</span><span class="p">:</span> <span class="kt">ServerDelegate</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="kd">func</span> <span class="nf">handle</span><span class="p">(</span><span class="nv">request</span><span class="p">:</span> <span class="kt">ServerRequest</span><span class="p">,</span> <span class="nv">response</span><span class="p">:</span> <span class="kt">ServerResponse</span><span class="p">)</span> <span class="p">{}</span>
+<span class="p">}</span>
 
-<p>// Add HTTP Server to listen on port 8080
-let server = HTTP.createServer()
-server.delegate = ChatServerDelegate()</p>
+<span class="c1">// Add HTTP Server to listen on port 8080</span>
+<span class="k">let</span> <span class="nv">server</span> <span class="o">=</span> <span class="kt">HTTP</span><span class="o">.</span><span class="nf">createServer</span><span class="p">()</span>
+<span class="n">server</span><span class="o">.</span><span class="n">delegate</span> <span class="o">=</span> <span class="kt">ChatServerDelegate</span><span class="p">()</span>
 
-<p>do {
-    try server.listen(on: 8080)
-    ListenerGroup.waitForListeners()
-} catch {
-    Log.error(<q>Error listening on port 8080: \(error).</q>)
-}
-&rdquo;`
-In the main.swift file:
-- The HeliumLogger is set up to log info, warning, and error type messages.
-- The ChatService defined in the ChatService.swift file is registered on the path <em>chat</em>.
-- An HTTP server is created and setup to listen on port 8080.</p>
+<span class="k">do</span> <span class="p">{</span>
+    <span class="k">try</span> <span class="n">server</span><span class="o">.</span><span class="nf">listen</span><span class="p">(</span><span class="nv">on</span><span class="p">:</span> <span class="mi">8080</span><span class="p">)</span>
+    <span class="kt">ListenerGroup</span><span class="o">.</span><span class="nf">waitForListeners</span><span class="p">()</span>
+<span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+    <span class="kt">Log</span><span class="o">.</span><span class="nf">error</span><span class="p">(</span><span class="s">"Error listening on port 8080: </span><span class="se">\(</span><span class="n">error</span><span class="se">)</span><span class="s">."</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre>
+
+<p>In the main.swift file:</p>
+
+<ul>
+<li>The HeliumLogger is set up to log info, warning, and error type messages.</li>
+<li>The ChatService defined in the ChatService.swift file is registered on the path <em>chat</em>.</li>
+<li>An HTTP server is created and setup to listen on port 8080.</li>
+</ul>
 
 <p>With this server set up clients should connect to the chat service as <em>ws://<strong>host</strong>:8080/chat</em>, where <strong>host</strong> is the host running the server.</p>
-<a href='#the-client' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='the-client'>The client</h3>
+<h3 id='the-client' class='heading'>The client</h3>
 
 <p>The client has a simple command line interface. At startup one passes the host and port number. The client simply reads
 messages to be sent from the terminal and displays messages received on the terminal as well.</p>
 
-<p>The server&rsquo;s directory setup is something like this:
+<p>You will need to create the client&rsquo;s directory structure to be something like this:</p>
+
 <pre>
 ClientDirectory
 ├── package.json
 └── chat.js
-</pre></p>
+</pre>
 
-<p>The package.json at a minimum contains:</p>
+<p>Create a <code>package.json</code> file which, at a minimum, contains:</p>
 <pre class="highlight javascript"><code><span class="p">{</span>
-  <span class="s2">"name"</span><span class="err">:</span> <span class="s2">"chat"</span><span class="p">,</span>
-  <span class="s2">"description"</span><span class="err">:</span> <span class="s2">"Simple chat server client"</span><span class="p">,</span>
-  <span class="s2">"version"</span><span class="err">:</span> <span class="s2">"0.0.1"</span><span class="p">,</span>
-  <span class="s2">"engines"</span><span class="err">:</span> <span class="p">{</span>
-    <span class="s2">"node"</span><span class="err">:</span> <span class="s2">"&gt;=0.8.0"</span>
+  <span class="dl">"</span><span class="s2">name</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">chat</span><span class="dl">"</span><span class="p">,</span>
+  <span class="dl">"</span><span class="s2">description</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Simple chat server client</span><span class="dl">"</span><span class="p">,</span>
+  <span class="dl">"</span><span class="s2">version</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">0.0.1</span><span class="dl">"</span><span class="p">,</span>
+  <span class="dl">"</span><span class="s2">engines</span><span class="dl">"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="dl">"</span><span class="s2">node</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">&gt;=0.8.0</span><span class="dl">"</span>
   <span class="p">},</span>
-  <span class="s2">"dependencies"</span><span class="err">:</span> <span class="p">{</span>
-    <span class="s2">"websocket"</span><span class="err">:</span> <span class="s2">"^1.0.23"</span>
+  <span class="dl">"</span><span class="s2">dependencies</span><span class="dl">"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="dl">"</span><span class="s2">websocket</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">^1.0.23</span><span class="dl">"</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </code></pre>
 
-<p>The chat.js file contains:</p>
+<p>Create a <code>chat.js</code> file which contains:</p>
 <pre class="highlight javascript"><code><span class="cm">/* main file of Simple Chat Server Client */</span>
 
-<span class="kd">var</span> <span class="nx">readline</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'readline'</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">WebSocketClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'websocket'</span><span class="p">).</span><span class="nx">client</span>
+<span class="kd">var</span> <span class="nx">readline</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">readline</span><span class="dl">'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">WebSocketClient</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">websocket</span><span class="dl">'</span><span class="p">).</span><span class="nx">client</span>
 
 <span class="kd">var</span> <span class="nx">host</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
 
 <span class="nx">rl</span> <span class="o">=</span> <span class="nx">readline</span><span class="p">.</span><span class="nx">createInterface</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">stdin</span><span class="p">,</span> <span class="nx">process</span><span class="p">.</span><span class="nx">stdout</span><span class="p">);</span>
 
-<span class="nx">rl</span><span class="p">.</span><span class="nx">setPrompt</span><span class="p">(</span><span class="s1">'&gt; '</span><span class="p">);</span>
+<span class="nx">rl</span><span class="p">.</span><span class="nx">setPrompt</span><span class="p">(</span><span class="dl">'</span><span class="s1">&gt; </span><span class="dl">'</span><span class="p">);</span>
 <span class="nx">rl</span><span class="p">.</span><span class="nx">prompt</span><span class="p">();</span>
 <span class="kd">var</span> <span class="nx">client</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">WebSocketClient</span><span class="p">();</span>
 
-<span class="nx">client</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'connectFailed'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'Connect Error: '</span> <span class="o">+</span> <span class="nx">error</span><span class="p">.</span><span class="nx">toString</span><span class="p">());</span>
+<span class="nx">client</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">connectFailed</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Connect Error: </span><span class="dl">'</span> <span class="o">+</span> <span class="nx">error</span><span class="p">.</span><span class="nx">toString</span><span class="p">());</span>
     <span class="nx">process</span><span class="p">.</span><span class="nx">exit</span><span class="p">();</span>
 <span class="p">});</span>
 
-<span class="nx">client</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'connect'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">connection</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">connection</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'error'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"Connection Error: "</span> <span class="o">+</span> <span class="nx">error</span><span class="p">.</span><span class="nx">toString</span><span class="p">());</span>
+<span class="nx">client</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">connect</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">connection</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">connection</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">error</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">Connection Error: </span><span class="dl">"</span> <span class="o">+</span> <span class="nx">error</span><span class="p">.</span><span class="nx">toString</span><span class="p">());</span>
         <span class="nx">process</span><span class="p">.</span><span class="nx">exit</span><span class="p">();</span>
     <span class="p">});</span>
 
-    <span class="nx">connection</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'close'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">reasonCode</span><span class="p">,</span> <span class="nx">description</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'chat Connection Closed. Code='</span> <span class="o">+</span> <span class="nx">reasonCode</span> <span class="o">+</span> <span class="s1">' ('</span> <span class="o">+</span> <span class="nx">description</span> <span class="o">+</span><span class="s1">')'</span><span class="p">);</span>
+    <span class="nx">connection</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">close</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">reasonCode</span><span class="p">,</span> <span class="nx">description</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">chat Connection Closed. Code=</span><span class="dl">'</span> <span class="o">+</span> <span class="nx">reasonCode</span> <span class="o">+</span> <span class="dl">'</span><span class="s1"> (</span><span class="dl">'</span> <span class="o">+</span> <span class="nx">description</span> <span class="o">+</span><span class="dl">'</span><span class="s1">)</span><span class="dl">'</span><span class="p">);</span>
     <span class="p">});</span>
 
-    <span class="nx">connection</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'message'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nx">type</span> <span class="o">===</span> <span class="s1">'utf8'</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'\r=&gt; '</span> <span class="o">+</span> <span class="nx">message</span><span class="p">.</span><span class="nx">utf8Data</span><span class="p">);</span>
+    <span class="nx">connection</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">message</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">message</span><span class="p">.</span><span class="nx">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">utf8</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="se">\r</span><span class="s1">=&gt; </span><span class="dl">'</span> <span class="o">+</span> <span class="nx">message</span><span class="p">.</span><span class="nx">utf8Data</span><span class="p">);</span>
             <span class="nx">rl</span><span class="p">.</span><span class="nx">prompt</span><span class="p">();</span>
         <span class="p">}</span>   
     <span class="p">});</span>
 
-    <span class="nx">rl</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'line'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">line</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">rl</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">line</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">line</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">connection</span><span class="p">.</span><span class="nx">sendUTF</span><span class="p">(</span><span class="nx">line</span><span class="p">);</span>
         <span class="nx">rl</span><span class="p">.</span><span class="nx">prompt</span><span class="p">();</span>
     <span class="p">});</span>
 
-    <span class="nx">rl</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'close'</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">rl</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">close</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
         <span class="nx">connection</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
-        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'Have a great day!'</span><span class="p">);</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Have a great day!</span><span class="dl">'</span><span class="p">);</span>
         <span class="nx">process</span><span class="p">.</span><span class="nx">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
     <span class="p">});</span>
 
     <span class="nx">rl</span><span class="p">.</span><span class="nx">prompt</span><span class="p">();</span>
 <span class="p">});</span>
 
-<span class="nx">client</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="s2">"ws://"</span> <span class="o">+</span> <span class="nx">host</span> <span class="o">+</span><span class="s2">"/chat"</span><span class="p">,</span> <span class="s2">"chat"</span><span class="p">);</span>
+<span class="nx">client</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="dl">"</span><span class="s2">ws://</span><span class="dl">"</span> <span class="o">+</span> <span class="nx">host</span> <span class="o">+</span><span class="dl">"</span><span class="s2">/chat</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">chat</span><span class="dl">"</span><span class="p">);</span>
 </code></pre>
-<a href='#building-and-running-the-example' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='building-and-running-the-example'>Building and running the example</h3>
+<h3 id='building-and-running-the-example' class='heading'>Building and running the example</h3>
 
-<p>To build and run the server, in the server directory, simply:
-<code>
-swift build
-.build/debug/ChatServer
-</code>
-The server is now up and running.</p>
-<a href='#setting-up-and-running-the-client' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h3 id='setting-up-and-running-the-client'>Setting up and running the client</h3>
+<p>To build the server, in the server directory, type:</p>
+<pre class="highlight plaintext"><code>swift build
+</code></pre>
 
-<p>To setup the client, in the client directory, simply:
-<code>
-npm installed
-</code>
-That will install the websocket package.</p>
+<p>To run the server, in the same directory, type:</p>
+<pre class="highlight plaintext"><code>.build/debug/ChatServer
+</code></pre>
 
-<p>To run the client, again in the client directory, run:
-<code>
-node chat.js host:8080
-</code>
-Where <strong>host</strong> is the hostname of the host on which the server is running.</p>
+<p>The server will now be up and running. The informational log message below will be displayed:</p>
 
-<p>The client can be run in several terminal windows on the same computer.</p>
-<a href='#a-more-complete-example' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='a-more-complete-example'>A more complete example</h2>
+<p><code>
+[INFO] [HTTPServer.swift:124 listen(on:)] Listening on port 8080
+</code></p>
+<h3 id='setting-up-and-running-the-client' class='heading'>Setting up and running the client</h3>
 
-<p>For a more complete example please see <a href="https://github.com/IBM-Swift/Kitura-Chat-Server">Kitura-Chat-Server</a></p>
-<a href='#community' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='community'>Community</h2>
+<p>To setup the client, in the client directory, simply:</p>
+<pre class="highlight plaintext"><code>npm install
+</code></pre>
+
+<p>That will install the websocket package.</p>
+
+<p>To run the client, again in the client directory, run:</p>
+<pre class="highlight plaintext"><code>node chat.js host:8080
+</code></pre>
+
+<p>Where <strong>host</strong> is the hostname of the host on which the server is running, e.g. if your server is running on the localhost run:</p>
+<pre class="highlight plaintext"><code>node chat.js localhost:8080
+</code></pre>
+
+<p>As described above, the server echoes all text messages sent to it to all of the clients that have connected to it, with the exception of the client that sent the message. Therefore, in order to see the example in action you will need to connect more than one client to the server. The client can be run in several terminal windows on the same computer. You can then enter a message on one client and see it appear on another client and vice versa.</p>
+<h2 id='example-advanced' class='heading'>Example - Advanced</h2>
+
+<p>For a more complete example please see <a href="https://github.com/Kitura/Kitura-Sample">Kitura-Sample</a>.</p>
+<h2 id='api-documentation' class='heading'>API Documentation</h2>
+
+<p>For more information visit our <a href="https://kitura.github.io/Kitura-WebSocket/index.html">API reference</a>.</p>
+<h2 id='community' class='heading'>Community</h2>
 
 <p>We love to talk server-side Swift, and Kitura. Join our <a href="http://swift-at-ibm-slack.mybluemix.net/">Slack</a> to meet the team!</p>
-<a href='#license' class='anchor' aria-hidden=true><span class="header-anchor"></span></a><h2 id='license'>License</h2>
+<h2 id='license' class='heading'>License</h2>
 
-<p>This library is licensed under Apache 2.0. Full license text is available in <a href="LICENSE.txt">LICENSE</a>.</p>
+<p>This library is licensed under Apache 2.0. Full license text is available in <a href="https://github.com/Kitura/Kitura-WebSocket/blob/master/LICENSE.txt">LICENSE</a>.</p>
 
           </div>
         </section>
@@ -443,8 +508,8 @@ Where <strong>host</strong> is the hostname of the host on which the server is r
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2017 <a class="link" href="" target="_blank" rel="external">IBM</a>. All rights reserved. (Last updated: 2017-07-25)</p>
-      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.7.5</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+      <p>&copy; 2020 <a class="link" href="" target="_blank" rel="external">IBM &amp; Kitura project authors</a>. All rights reserved. (Last updated: 2020-11-25)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
 </div>
