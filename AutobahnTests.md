@@ -2,6 +2,12 @@
 
 This document will take you through the steps to test Kitura-Websockets using [autobahn-testsuite](https://github.com/crossbario/autobahn-testsuite).
 
+### Convenience (ready-to-run) Docker implementation
+
+For convenience, a project is provided in `Autobahn/` that implements the code below.
+
+A script `Autobahn/run.sh` is included that will build this within a Docker container, run the container, and then run the autobahn test suite (in client mode) against this server.
+
 ### Creating a EchoServer
 These tests are run against a WebSocket EchoServer so we must first set one up.
 
